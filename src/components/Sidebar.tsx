@@ -21,22 +21,22 @@ interface NavItem {
 
 const recruiterNav: NavItem[] = [
   { label: 'Dashboard', href: '/recruiter-dashboard', icon: LayoutDashboard, group: 'Main' },
-  { label: 'Job Listings', href: '/recruiter-dashboard', icon: Briefcase, badge: 2, group: 'Main' },
-  { label: 'Applicants', href: '/recruiter-dashboard', icon: Users, badge: 47, group: 'Main' },
-  { label: 'AI Screening', href: '/recruiter-dashboard', icon: Sparkles, badge: 3, group: 'AI Tools' },
-  { label: 'Shortlists', href: '/recruiter-dashboard', icon: CheckCircle, group: 'AI Tools' },
-  { label: 'Reports', href: '/recruiter-dashboard', icon: BarChart3, group: 'Analytics' },
-  { label: 'Settings', href: '/recruiter-dashboard', icon: Settings, group: 'System' },
+//   { label: 'Job Listings', href: '/recruiter-dashboard', icon: Briefcase, badge: 2, group: 'Main' },
+//   { label: 'Applicants', href: '/recruiter-dashboard', icon: Users, badge: 47, group: 'Main' },
+//   { label: 'AI Screening', href: '/recruiter-dashboard', icon: Sparkles, badge: 3, group: 'AI Tools' },
+//   { label: 'Shortlists', href: '/recruiter-dashboard', icon: CheckCircle, group: 'AI Tools' },
+//   { label: 'Reports', href: '/recruiter-dashboard', icon: BarChart3, group: 'Analytics' },
+//   { label: 'Settings', href: '/recruiter-dashboard', icon: Settings, group: 'System' },
 ];
 
 const applicantNav: NavItem[] = [
   { label: 'My Dashboard', href: '/applicant-portal', icon: LayoutDashboard, group: 'Main' },
-  { label: 'Browse Jobs', href: '/applicant-portal', icon: Search, group: 'Main' },
-  { label: 'My Applications', href: '/applicant-portal', icon: FileText, badge: 3, group: 'Main' },
-  { label: 'My Profile', href: '/applicant-portal', icon: User, group: 'Profile' },
-  { label: 'AI Feedback', href: '/applicant-portal', icon: Sparkles, badge: 1, group: 'AI Tools' },
-  { label: 'Achievements', href: '/applicant-portal', icon: Trophy, group: 'Profile' },
-  { label: 'Settings', href: '/applicant-portal', icon: Settings, group: 'System' },
+//   { label: 'Browse Jobs', href: '/applicant-portal', icon: Search, group: 'Main' },
+//   { label: 'My Applications', href: '/applicant-portal', icon: FileText, badge: 3, group: 'Main' },
+//   { label: 'My Profile', href: '/applicant-portal', icon: User, group: 'Profile' },
+//   { label: 'AI Feedback', href: '/applicant-portal', icon: Sparkles, badge: 1, group: 'AI Tools' },
+//   { label: 'Achievements', href: '/applicant-portal', icon: Trophy, group: 'Profile' },
+//   { label: 'Settings', href: '/applicant-portal', icon: Settings, group: 'System' },
 ];
 
 interface SidebarProps {

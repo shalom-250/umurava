@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react'; // Bump to fix chun
 import { mockJobs as staticMockJobs, mockTalentProfiles, mockScreeningResults, jobStatusColors } from '@/lib/mockData';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud } from 'lucide-react';
 import KpiCards from './KpiCards';
 import ShortlistTable from './ShortlistTable';
 import SkillMatchChart from './SkillMatchChart';
@@ -12,6 +12,7 @@ import ApplicationsTrendChart from './ApplicationsTrendChart';
 import AppLogo from '@/components/ui/AppLogo';
 import CandidateReasoningDrawer from './CandidateReasoningDrawer';
 import CreateJobModal from './CreateJobModal';
+import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile, mockTalentProfiles as staticMockProfiles } from '@/lib/mockData';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
@@ -24,6 +25,7 @@ export default function RecruiterDashboardClient() {
   const [screeningDone, setScreeningDone] = useState(true);
   const [selectedCandidate, setSelectedCandidate] = useState<{ profile: TalentProfile; result: ScreeningResult } | null>(null);
   const [showCreateJob, setShowCreateJob] = useState(false);
+  const [showUploadResume, setShowUploadResume] = useState(false);
   const [jobSearch, setJobSearch] = useState('');
   const [shortlistFilter, setShortlistFilter] = useState<'all' | 'recommended' | 'consider' | 'not-recommended'>('all');
   const [mounted, setMounted] = useState(false);
@@ -245,8 +247,8 @@ export default function RecruiterDashboardClient() {
                       {job.title}
                     </h4>
                     <span className={`px-1.5 py-0.5 whitespace-nowrap rounded-[4px] text-[9px] font-bold uppercase tracking-wider ${job.status === 'Active' ? 'bg-green-100 text-green-700' :
-                        job.status === 'Closed' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-200 text-gray-700'
+                      job.status === 'Closed' ? 'bg-red-100 text-red-700' :
+                        'bg-gray-200 text-gray-700'
                       }`}>
                       {job.status || 'Draft'}
                     </span>
@@ -280,6 +282,14 @@ export default function RecruiterDashboardClient() {
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowUploadResume(true)}
+                disabled={selectedJob.status === 'Closed'}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+              >
+                <UploadCloud size={16} />
+                Upload CVs
+              </button>
               {screeningResults.length > 0 && (
                 <button
                   onClick={() => handleTriggerScreening(true)}
@@ -349,14 +359,46 @@ export default function RecruiterDashboardClient() {
               </div>
             </div>
 
-            <ShortlistTable
-              results={filteredResults}
-              profiles={talentProfiles}
-              onViewCandidate={(res) => {
-                const profile = talentProfiles.find(p => p.id === res.candidateId) || staticMockProfiles[0];
-                setSelectedCandidate({ profile, result: res });
-              }}
-            />
+            {isScreening ? (
+              <div className="p-8">
+                <div className="animate-pulse space-y-6">
+                  {/* Header Skeleton */}
+                  <div className="flex gap-4 border-b border-gray-100 pb-4">
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    <div className="h-4 bg-gray-200 rounded w-48"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                    <div className="h-4 bg-gray-200 rounded flex-1"></div>
+                  </div>
+                  {/* Row Skeletons */}
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4 py-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-100/50 shrink-0"></div>
+                      <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0"></div>
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-3 bg-gray-100 rounded w-1/3"></div>
+                      </div>
+                      <div className="h-4 bg-green-100 rounded w-24 shrink-0"></div>
+                      <div className="h-4 bg-amber-100 rounded w-24 shrink-0"></div>
+                      <div className="h-6 bg-gray-200 rounded-full w-20 shrink-0"></div>
+                    </div>
+                  ))}
+                  <div className="flex flex-col items-center justify-center pt-4">
+                    <Loader2 size={24} className="text-[#00A1FF] animate-spin mb-2" />
+                    <p className="text-sm font-bold text-gray-500">Unifying and evaluating talent pool...</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <ShortlistTable
+                results={filteredResults}
+                profiles={talentProfiles}
+                onViewCandidate={(res) => {
+                  const profile = talentProfiles.find(p => p.id === res.candidateId) || staticMockProfiles[0];
+                  setSelectedCandidate({ profile, result: res });
+                }}
+              />
+            )}
 
             {screeningResults.length === 0 && (
               <div className="p-20 text-center">
@@ -395,6 +437,16 @@ export default function RecruiterDashboardClient() {
           onSuccess={() => {
             setShowCreateJob(false);
             fetchJobs();
+          }}
+        />
+      )}
+
+      {showUploadResume && (
+        <UploadResumeModal
+          onClose={() => setShowUploadResume(false)}
+          onSuccess={() => {
+            setShowUploadResume(false);
+            fetchCandidates();
           }}
         />
       )}

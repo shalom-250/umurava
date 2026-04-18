@@ -19,7 +19,7 @@
  */
 
 import express from 'express';
-import { uploadCandidate, getCandidates } from '../controllers/candidate.controller';
+import { saveCandidates, parseCandidateFile, getCandidates } from '../controllers/candidate.controller';
 import { protect } from '../middleware/auth.middleware';
 
 const router = express.Router();
@@ -61,7 +61,9 @@ const router = express.Router();
  *         description: List of candidates
  */
 router.route('/')
-    .post(protect, uploadCandidate)
+    .post(protect, saveCandidates)
     .get(protect, getCandidates);
+
+router.post('/parse', protect, parseCandidateFile);
 
 export default router;

@@ -22,6 +22,25 @@ export const api = {
         return result;
     },
 
+    async postForm(endpoint: string, formData: FormData) {
+        const token = this.getToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            const errorMsg = result.error || result.message || 'Something went wrong';
+            throw new Error(errorMsg);
+        }
+        return result;
+    },
+
     async get(endpoint: string) {
         const token = this.getToken();
         const headers: Record<string, string> = {

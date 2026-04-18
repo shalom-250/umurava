@@ -81,15 +81,20 @@ export const runTestScreening = async (req: Request, res: Response): Promise<voi
             jobDescription = `${job.title}\n${job.description}\nRequirements: ${job.requirements.join(', ')}\nSkills: ${job.skills.join(', ')}`;
         }
 
-        // Fetch ONLY candidates who have applied to this specific job
+        // UNIFIED RANKING POOL
+        // We fetch ALL candidates from the database. This inherently merges formal 
+        // job applicants with generically uploaded CSVs and unstructured PDFs into a 
+        // single holistic talent pool evaluating everyone against the Job Requirements.
         let candidates: any[] = [];
 
+        const allCandidates = await Candidate.find({});
+
         if (typeof jobId === 'string' && jobId.startsWith('job-')) {
-            // Mock job fallback
-            candidates = await Candidate.find({}).limit(5);
+            // Mock job fallback: For speed, limit to 10 latest candidates
+            candidates = allCandidates.reverse().slice(0, 10);
         } else {
-            const applications = await Application.find({ jobId }).populate('candidateId');
-            candidates = applications.map(app => app.candidateId).filter(Boolean);
+            // Real Job: Evaluate the entire unified pool 
+            candidates = allCandidates;
         }
 
         if (candidates.length === 0) {

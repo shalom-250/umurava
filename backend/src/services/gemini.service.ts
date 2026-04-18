@@ -158,9 +158,34 @@ export const extractCandidateInfo = async (text: string): Promise<any> => {
         const response = await result.response;
         const cleanJson = response.text().replace(/```json|```/g, "").trim();
         return JSON.parse(cleanJson);
-    } catch (error) {
-        console.error("Gemini Extraction Error:", error);
-        return null; // Fallback to manual entry if AI fails
+    } catch (error: any) {
+        console.warn("⚠️ Gemini Extraction Error / Quota Hit. Using RegExp fallback engine.", error.message);
+
+        // --- FALLBACK REGEX PARSING ---
+        // Basic extraction fallback to avoid failing the upload completely when AI quota is exhausted.
+        const fallbackText = text.substring(0, 5000);
+
+        const emailMatch = fallbackText.match(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/);
+        const phoneMatch = fallbackText.match(/(?:\+?\d{1,3}[\s-]?)?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4}/);
+
+        // Find potential name (first 2-3 words on first non-empty lines)
+        const lines = fallbackText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const nameFallback = lines.length > 0 ? lines[0].substring(0, 50) : 'Unknown Candidate';
+
+        // Find potential skills
+        const commonSkills = ['JavaScript', 'React', 'Node.js', 'Python', 'Java', 'C++', 'SQL', 'MongoDB', 'AWS', 'Docker', 'TypeScript'];
+        const matchedSkills = commonSkills.filter(skill =>
+            fallbackText.toLowerCase().includes(skill.toLowerCase())
+        );
+
+        return {
+            name: nameFallback,
+            email: emailMatch ? emailMatch[0] : 'unknown@example.com',
+            phone: phoneMatch ? phoneMatch[0] : '',
+            skills: matchedSkills,
+            experience: 'Simulated experience summary due to AI quota exhaustion.',
+            education: 'Simulated education summary.'
+        };
     }
 };
 

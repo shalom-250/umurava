@@ -65,13 +65,20 @@ const seedData = async () => {
             { name: 'Umurava', website: 'https://umurava.africa', industry: 'EdTech/Recruitment', location: 'Kigali, Rwanda' },
         ]);
 
-        // 2. Seed Admin/Recruiter
+        // 2. Seed Admin/Recruiter and Applicant
         const salt = await bcrypt.genSalt(10);
         const admin = await User.create({
             name: 'Aline Uwimana',
             email: 'aline.uwimana@umurava.africa',
             password: await bcrypt.hash('Recruiter2026!', salt),
             role: 'recruiter',
+        });
+
+        const applicantUser = await User.create({
+            name: 'Nzinga Mwamba',
+            email: 'nzinga.mwamba@outlook.com',
+            password: await bcrypt.hash('Applicant2026!', salt),
+            role: 'applicant',
         });
 
         // 3. Seed Jobs

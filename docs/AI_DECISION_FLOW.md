@@ -4,12 +4,15 @@ This diagram illustrates the logical flow of the Umurava AI Screening engine.
 
 ```mermaid
 graph TD
-    A[Job Created/Posted] --> B[Candidates Apply/Imported]
-    B --> C{Trigger Screening}
-    C --> D[Fetch Job Description]
-    C --> E[Fetch Candidate Profiles]
-    D --> F[Build Gemini Prompt]
-    E --> F
+    A[Job Created/Requirements Defined] --> Trigger{Recruiter Triggers AI}
+    
+    B1[Formal Job Applicants] --> Pool[Unified Candidate Pool]
+    B2[Raw CSV Imports] --> Pool
+    B3[Unstructured Resumes / Uploads] --> Pool
+    
+    Pool --> Trigger
+    
+    Trigger --> F[Build Gemini Context Window]
     F --> G[Gemini 1.5 Flash Analysis]
     
     subgraph "Scoring Engine (P0)"

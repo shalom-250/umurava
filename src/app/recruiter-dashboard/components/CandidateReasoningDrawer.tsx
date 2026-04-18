@@ -64,10 +64,9 @@ export default function CandidateReasoningDrawer({ profile, result, onClose }: C
           {/* Meta */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin size={11} /> {profile.location}</span>
-            <span className={`px-2 py-0.5 rounded-full font-medium ${
-              profile.availability.status === 'Available' ? 'bg-green-50 text-green-700' :
-              profile.availability.status === 'Open to Opportunities'? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
-            }`}>{profile.availability.status} · {profile.availability.type}</span>
+            <span className={`px-2 py-0.5 rounded-full font-medium ${profile.availability.status === 'Available' ? 'bg-green-50 text-green-700' :
+                profile.availability.status === 'Open to Opportunities' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
+              }`}>{profile.availability.status} · {profile.availability.type}</span>
             {profile.availability.startDate && <span>From {profile.availability.startDate}</span>}
           </div>
 
@@ -110,6 +109,43 @@ export default function CandidateReasoningDrawer({ profile, result, onClose }: C
             </div>
           </div>
 
+          {/* Document Checklist */}
+          {result.documentStatus && result.documentStatus.length > 0 && (
+            <div className="bg-gray-50 border border-border rounded-lg p-4">
+              <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-2">
+                Document Checklist
+                {result.documentStatus.filter(d => d.status === 'missing').length > 0 && (
+                  <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">
+                    {result.documentStatus.filter(d => d.status === 'missing').length} Missing
+                  </span>
+                )}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {result.documentStatus.map((doc, idx) => (
+                  <div
+                    key={`doc-${idx}`}
+                    className={`flex items-center justify-between p-2 rounded-md border text-xs gap-3 ${doc.status === 'completed' ? 'bg-white border-green-100' : 'bg-amber-50/50 border-amber-100'
+                      }`}
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      {doc.status === 'completed' ? (
+                        <CheckCircle size={12} className="text-green-600 shrink-0" />
+                      ) : (
+                        <AlertTriangle size={12} className="text-amber-600 shrink-0" />
+                      )}
+                      <span className={`truncate ${doc.status === 'missing' ? 'font-medium text-amber-800' : 'text-foreground'}`}>
+                        {doc.name}
+                      </span>
+                    </div>
+                    <span className={`text-[9px] font-bold uppercase ${doc.status === 'completed' ? 'text-green-600' : 'text-amber-600'}`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Skill Breakdown */}
           <div>
             <p className="text-xs font-semibold text-foreground mb-3">Skill-by-Skill Score</p>
@@ -122,9 +158,8 @@ export default function CandidateReasoningDrawer({ profile, result, onClose }: C
                   </div>
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        sb.score >= 80 ? 'bg-green-500' : sb.score >= 60 ? 'bg-blue-500' : sb.score >= 40 ? 'bg-amber-500' : 'bg-red-400'
-                      }`}
+                      className={`h-full rounded-full transition-all duration-700 ${sb.score >= 80 ? 'bg-green-500' : sb.score >= 60 ? 'bg-blue-500' : sb.score >= 40 ? 'bg-amber-500' : 'bg-red-400'
+                        }`}
                       style={{ width: `${sb.score}%` }}
                     />
                   </div>

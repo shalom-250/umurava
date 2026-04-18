@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import AppLogo from '@/components/ui/AppLogo';
 import { Eye, EyeOff, Loader2, Copy, CheckCheck, Briefcase, User, Sparkles, Trophy, Users, ArrowRight } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
+import { api } from '@/lib/api';
 
 
 type AuthMode = 'login' | 'signup';
@@ -87,30 +88,59 @@ export default function AuthClient() {
 
   const onLogin = async (data: LoginForm) => {
     setIsSubmitting(true);
-    // Backend integration point: POST /api/auth/login { email, password, role }
-    const validCred = DEMO_CREDENTIALS.find(c => c.email === data.email && c.password === data.password);
-    await new Promise(r => setTimeout(r, 1200));
-    if (!validCred) {
+    try {
+      const result = await api.post('/auth/login', {
+        email: data.email,
+        password: data.password,
+      });
+
+      api.setToken(result.token);
+      api.setUser({
+        _id: result._id,
+        name: result.name,
+        email: result.email,
+        role: result.role,
+      });
+
+      toast.success(`Welcome back! Redirecting to your ${result.role} portal...`);
+      setTimeout(() => {
+        router.push(result.role === 'recruiter' ? '/recruiter-dashboard' : '/applicant-portal');
+      }, 800);
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed');
+      loginForm.setError('email', { message: error.message || 'Invalid credentials' });
+    } finally {
       setIsSubmitting(false);
-      loginForm.setError('email', { message: 'Invalid credentials — use the demo accounts below to sign in' });
-      return;
     }
-    setIsSubmitting(false);
-    toast.success(`Welcome back! Redirecting to your ${validCred.role} portal...`);
-    setTimeout(() => {
-      router.push(validCred.role === 'recruiter' ? '/recruiter-dashboard' : '/applicant-portal');
-    }, 800);
   };
 
   const onSignup = async (data: SignupForm) => {
     setIsSubmitting(true);
-    // Backend integration point: POST /api/auth/register { ...data, role }
-    await new Promise(r => setTimeout(r, 1400));
-    setIsSubmitting(false);
-    toast.success('Account created! Redirecting to your portal...');
-    setTimeout(() => {
-      router.push(role === 'recruiter' ? '/recruiter-dashboard' : '/applicant-portal');
-    }, 800);
+    try {
+      const result = await api.post('/auth/register', {
+        name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        password: data.password,
+        role: role,
+      });
+
+      api.setToken(result.token);
+      api.setUser({
+        _id: result._id,
+        name: result.name,
+        email: result.email,
+        role: result.role,
+      });
+
+      toast.success('Account created! Redirecting to your portal...');
+      setTimeout(() => {
+        router.push(result.role === 'recruiter' ? '/recruiter-dashboard' : '/applicant-portal');
+      }, 800);
+    } catch (error: any) {
+      toast.error(error.message || 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -193,18 +223,16 @@ export default function AuthClient() {
           <div className="flex items-center gap-2 bg-muted p-1 rounded-lg mb-6">
             <button
               onClick={() => setRole('recruiter')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-                role === 'recruiter' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${role === 'recruiter' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               <Briefcase size={14} />
               I'm a Recruiter
             </button>
             <button
               onClick={() => setRole('applicant')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-                role === 'applicant' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${role === 'applicant' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
               <User size={14} />
               I'm a Candidate

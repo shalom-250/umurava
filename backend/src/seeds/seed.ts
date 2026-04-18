@@ -53,6 +53,15 @@ const seedData = async () => {
             role: 'admin',
         });
 
+        // Seed Specific Recruiter for demo
+        const recruiterPassword = await bcrypt.hash('Recruiter2026!', salt);
+        await User.create({
+            name: 'Aline Uwimana',
+            email: 'aline.uwimana@umurava.africa',
+            password: recruiterPassword,
+            role: 'recruiter',
+        });
+
         // 4. Seed Jobs
         const jobs = await Job.insertMany([
             {

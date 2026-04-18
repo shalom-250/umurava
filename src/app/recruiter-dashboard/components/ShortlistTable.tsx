@@ -74,24 +74,37 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
         <thead>
           <tr className="border-b border-border bg-gray-50/60">
             <th className="px-4 py-3 text-left">
-              <button onClick={() => handleSort('rank')} className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => handleSort('rank')}
+                suppressHydrationWarning
+                className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+              >
                 Rank <SortIcon col="rank" />
               </button>
             </th>
             <th className="px-4 py-3 text-left">
-              <button onClick={() => handleSort('name')} className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => handleSort('name')}
+                suppressHydrationWarning
+                className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+              >
                 Candidate <SortIcon col="name" />
               </button>
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Location</th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Current Role</th>
             <th className="px-4 py-3 text-left">
-              <button onClick={() => handleSort('matchScore')} className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => handleSort('matchScore')}
+                suppressHydrationWarning
+                className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+              >
                 Match Score <SortIcon col="matchScore" />
               </button>
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recommendation</th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Availability</th>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Docs</th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Top Strength</th>
             <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
           </tr>
@@ -104,6 +117,10 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
             const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
             const currentRole = profile.experience.find(e => e.isCurrent);
             const rankColors = ['bg-yellow-400', 'bg-gray-300', 'bg-amber-600'];
+
+            const docStats = result.documentStatus || [];
+            const missingCount = docStats.filter(d => d.status === 'missing').length;
+            const totalDocs = docStats.length;
 
             return (
               <tr
@@ -153,12 +170,22 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                    profile.availability.status === 'Available' ? 'bg-green-50 text-green-700' :
-                    profile.availability.status === 'Open to Opportunities'? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
-                  }`}>
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${profile.availability.status === 'Available' ? 'bg-green-50 text-green-700' :
+                    profile.availability.status === 'Open to Opportunities' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
+                    }`}>
                     {profile.availability.status}
                   </span>
+                </td>
+                <td className="px-4 py-3">
+                  {totalDocs > 0 ? (
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${missingCount === 0 ? 'bg-green-50 text-green-700 border-green-200' :
+                      missingCount < totalDocs ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-red-50 text-red-700 border-red-200'
+                      }`}>
+                      {missingCount === 0 ? 'All Documents' : `${missingCount} Missing`}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">No docs required</span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <p className="text-xs text-foreground truncate max-w-[160px]">{result.strengths[0]}</p>
@@ -167,6 +194,7 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                   <div className={`flex items-center justify-end gap-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                     <button
                       onClick={e => { e.stopPropagation(); onViewCandidate(result); }}
+                      suppressHydrationWarning
                       className="p-1.5 rounded-md hover:bg-primary-100 text-primary-700 transition-colors"
                       title="View AI reasoning"
                     >

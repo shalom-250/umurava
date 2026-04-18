@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { X, Plus, Loader2, Briefcase } from 'lucide-react';
+import { api } from '@/lib/api';
 
 const schema = z.object({
   title: z.string().min(3, 'Job title is required'),
@@ -23,9 +24,10 @@ type FormData = z.infer<typeof schema>;
 
 interface CreateJobModalProps {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function CreateJobModal({ onClose }: CreateJobModalProps) {
+export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -33,11 +35,26 @@ export default function CreateJobModal({ onClose }: CreateJobModalProps) {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    // Backend integration point: POST /api/jobs { ...data }
-    await new Promise(r => setTimeout(r, 1200));
-    setIsSubmitting(false);
-    toast.success(`Job "${data.title}" created successfully`);
-    onClose();
+    try {
+      // Process strings into arrays
+      const requirementsArray = data.requirements.split('\n').filter(r => r.trim().length > 0);
+      const skillsArray = data.requiredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      await api.post('/jobs', {
+        ...data,
+        requirements: requirementsArray,
+        skills: skillsArray,
+        mustHaveSkills: skillsArray, // Defaulting for now
+      });
+
+      toast.success(`Job "${data.title}" created successfully`);
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create job');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

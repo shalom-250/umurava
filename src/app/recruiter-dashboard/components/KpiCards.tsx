@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, CheckCircle, Clock, Award } from 'lucide-react';
 import { Job, ScreeningResult } from '@/lib/mockData';
 import Icon from '@/components/ui/AppIcon';
@@ -15,14 +15,20 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
     ? Math.round(screeningResults.reduce((s, r) => s + r.matchScore, 0) / screeningResults.length)
     : 0;
 
+  const [daysToDeadline, setDaysToDeadline] = useState<number | null>(null);
+
+  useEffect(() => {
+    const days = Math.max(0, Math.ceil((new Date(job.deadline).getTime() - Date.now()) / 86400000));
+    setDaysToDeadline(days);
+  }, [job.deadline]);
+
   const stronglyRec = screeningResults.filter(r => r.recommendation === 'Strongly Recommend').length;
-  const daysToDeadline = Math.max(0, Math.ceil((new Date(job.deadline).getTime() - Date.now()) / 86400000));
 
   const cards = [
     {
       id: 'kpi-total',
       label: 'Total Applicants',
-      value: job.applicantCount.toString(),
+      value: (job.applicantCount || 0).toString(),
       sub: `+8 since yesterday`,
       icon: Users,
       trend: 'up' as const,
@@ -34,7 +40,7 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
     {
       id: 'kpi-shortlisted',
       label: 'Shortlisted',
-      value: job.shortlistedCount > 0 ? job.shortlistedCount.toString() : screeningResults.filter(r => r.matchScore >= 70).length.toString(),
+      value: (job.shortlistedCount || 0) > 0 ? job.shortlistedCount.toString() : screeningResults.filter(r => r.matchScore >= 70).length.toString(),
       sub: `${stronglyRec} strongly recommended`,
       icon: CheckCircle,
       trend: 'up' as const,
@@ -58,14 +64,14 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
     {
       id: 'kpi-deadline',
       label: 'Days to Deadline',
-      value: daysToDeadline.toString(),
+      value: daysToDeadline?.toString() || '--',
       sub: `Closes ${job.deadline}`,
       icon: Clock,
-      trend: daysToDeadline < 5 ? 'down' as const : 'neutral' as const,
-      color: daysToDeadline < 5 ? 'amber' : 'gray',
-      bgClass: daysToDeadline < 5 ? 'bg-amber-50' : 'bg-gray-50',
-      iconClass: daysToDeadline < 5 ? 'text-amber-600' : 'text-gray-500',
-      valueClass: daysToDeadline < 5 ? 'text-amber-800' : 'text-gray-700',
+      trend: (daysToDeadline ?? 10) < 5 ? 'down' as const : 'neutral' as const,
+      color: (daysToDeadline ?? 10) < 5 ? 'amber' : 'gray',
+      bgClass: (daysToDeadline ?? 10) < 5 ? 'bg-amber-50' : 'bg-gray-50',
+      iconClass: (daysToDeadline ?? 10) < 5 ? 'text-amber-600' : 'text-gray-500',
+      valueClass: (daysToDeadline ?? 10) < 5 ? 'text-amber-800' : 'text-gray-700',
     },
   ];
 
@@ -76,6 +82,7 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
         return (
           <div
             key={card.id}
+            suppressHydrationWarning
             className={`${card.bgClass} rounded-xl p-5 border border-transparent hover:shadow-elevated transition-shadow`}
           >
             <div className="flex items-start justify-between mb-3">

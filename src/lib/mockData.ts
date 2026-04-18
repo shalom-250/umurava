@@ -86,6 +86,7 @@ export interface ScreeningResult {
   recommendation: 'Strongly Recommend' | 'Recommend' | 'Consider' | 'Not Recommended';
   skillBreakdown: { skill: string; score: number; required: boolean }[];
   aiReasoning: string;
+  documentStatus?: { name: string; status: 'completed' | 'missing' }[];
 }
 
 export interface Job {
@@ -106,6 +107,7 @@ export interface Job {
   shortlistedCount: number;
   avgMatchScore: number;
   department: string;
+  requiredDocuments?: string[];
 }
 
 export interface Application {
@@ -139,6 +141,7 @@ export const mockJobs: Job[] = [
     shortlistedCount: 10,
     avgMatchScore: 71,
     department: 'Engineering',
+    requiredDocuments: ['Resume', 'Identity Document', 'Degree Certificate', 'Portfolio'],
   },
   {
     id: 'job-002',
@@ -729,6 +732,12 @@ export const mockScreeningResults: ScreeningResult[] = [
       { skill: 'MongoDB', score: 80, required: true },
     ],
     aiReasoning: 'Kwame Asante is the strongest candidate for this role. His 6 years of Python expertise and production ML deployment at Flutterwave directly maps to the job requirements. His TalentLens AI project demonstrates hands-on Gemini API experience with the exact use case (AI screening). The only notable gap is Node.js at Intermediate level, but his overall AI/ML depth more than compensates. Highly recommended for immediate interview.',
+    documentStatus: [
+      { name: 'Resume', status: 'completed' },
+      { name: 'Identity Document', status: 'completed' },
+      { name: 'Degree Certificate', status: 'completed' },
+      { name: 'Portfolio', status: 'completed' },
+    ],
   },
   {
     candidateId: 'talent-005',
@@ -746,6 +755,12 @@ export const mockScreeningResults: ScreeningResult[] = [
       { skill: 'MongoDB', score: 72, required: true },
     ],
     aiReasoning: 'Nzinga Mwamba stands out for her Expert-level Gemini API proficiency — the highest in the entire applicant pool. Her production deployment at Irembo (50K+ monthly queries) proves real-world LLM reliability. Being Kigali-based is a practical advantage. Her TensorFlow score is lower than ideal for a Senior AI role, but her prompt engineering specialization aligns perfectly with the Gemini-centric stack. Strong interview recommendation.',
+    documentStatus: [
+      { name: 'Resume', status: 'completed' },
+      { name: 'Identity Document', status: 'missing' },
+      { name: 'Degree Certificate', status: 'completed' },
+      { name: 'Portfolio', status: 'missing' },
+    ],
   },
   {
     candidateId: 'talent-009',

@@ -21,22 +21,22 @@ interface NavItem {
 
 const recruiterNav: NavItem[] = [
   { label: 'Dashboard', href: '/recruiter-dashboard', icon: LayoutDashboard, group: 'Main' },
-//   { label: 'Job Listings', href: '/recruiter-dashboard', icon: Briefcase, badge: 2, group: 'Main' },
-//   { label: 'Applicants', href: '/recruiter-dashboard', icon: Users, badge: 47, group: 'Main' },
-//   { label: 'AI Screening', href: '/recruiter-dashboard', icon: Sparkles, badge: 3, group: 'AI Tools' },
-//   { label: 'Shortlists', href: '/recruiter-dashboard', icon: CheckCircle, group: 'AI Tools' },
-//   { label: 'Reports', href: '/recruiter-dashboard', icon: BarChart3, group: 'Analytics' },
-//   { label: 'Settings', href: '/recruiter-dashboard', icon: Settings, group: 'System' },
+  //   { label: 'Job Listings', href: '/recruiter-dashboard', icon: Briefcase, badge: 2, group: 'Main' },
+  //   { label: 'Applicants', href: '/recruiter-dashboard', icon: Users, badge: 47, group: 'Main' },
+  //   { label: 'AI Screening', href: '/recruiter-dashboard', icon: Sparkles, badge: 3, group: 'AI Tools' },
+  //   { label: 'Shortlists', href: '/recruiter-dashboard', icon: CheckCircle, group: 'AI Tools' },
+  //   { label: 'Reports', href: '/recruiter-dashboard', icon: BarChart3, group: 'Analytics' },
+  //   { label: 'Settings', href: '/recruiter-dashboard', icon: Settings, group: 'System' },
 ];
 
 const applicantNav: NavItem[] = [
   { label: 'My Dashboard', href: '/applicant-portal', icon: LayoutDashboard, group: 'Main' },
-//   { label: 'Browse Jobs', href: '/applicant-portal', icon: Search, group: 'Main' },
-//   { label: 'My Applications', href: '/applicant-portal', icon: FileText, badge: 3, group: 'Main' },
-//   { label: 'My Profile', href: '/applicant-portal', icon: User, group: 'Profile' },
-//   { label: 'AI Feedback', href: '/applicant-portal', icon: Sparkles, badge: 1, group: 'AI Tools' },
-//   { label: 'Achievements', href: '/applicant-portal', icon: Trophy, group: 'Profile' },
-//   { label: 'Settings', href: '/applicant-portal', icon: Settings, group: 'System' },
+  //   { label: 'Browse Jobs', href: '/applicant-portal', icon: Search, group: 'Main' },
+  //   { label: 'My Applications', href: '/applicant-portal', icon: FileText, badge: 3, group: 'Main' },
+  //   { label: 'My Profile', href: '/applicant-portal', icon: User, group: 'Profile' },
+  //   { label: 'AI Feedback', href: '/applicant-portal', icon: Sparkles, badge: 1, group: 'AI Tools' },
+  //   { label: 'Achievements', href: '/applicant-portal', icon: Trophy, group: 'Profile' },
+  //   { label: 'Settings', href: '/applicant-portal', icon: Settings, group: 'System' },
 ];
 
 interface SidebarProps {
@@ -52,9 +52,8 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
 
   return (
     <aside
-      className={`relative flex flex-col bg-white border-r border-border transition-all duration-300 ease-in-out shrink-0 ${
-        collapsed ? 'w-16' : 'w-60'
-      }`}
+      className={`relative flex flex-col bg-white border-r border-border transition-all duration-300 ease-in-out shrink-0 ${collapsed ? 'w-16' : 'w-60'
+        }`}
       style={{ zIndex: 10 }}
     >
       {/* Logo */}
@@ -86,10 +85,9 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
                     key={`nav-${item.label}`}
                     href={item.href}
                     title={collapsed ? item.label : undefined}
-                    className={`group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
-                      isActive
-                        ? 'bg-primary-50 text-primary-700' :'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    } ${collapsed ? 'justify-center' : ''}`}
+                    className={`group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${isActive
+                        ? 'bg-primary-50 text-primary-700' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      } ${collapsed ? 'justify-center' : ''}`}
                   >
                     <Icon size={18} className={isActive ? 'text-primary-700' : ''} />
                     {!collapsed && <span className="flex-1">{item.label}</span>}
@@ -143,6 +141,7 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
           </Link>
           <button
             onClick={() => setCollapsed(!collapsed)}
+            suppressHydrationWarning
             className="ml-auto p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >

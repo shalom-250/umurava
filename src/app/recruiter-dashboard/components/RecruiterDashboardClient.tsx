@@ -1,6 +1,7 @@
 'use client';
-import React, { useState } from 'react';
-import { mockJobs, mockTalentProfiles, mockScreeningResults, jobStatusColors } from '@/lib/mockData';
+import React, { useState, useEffect } from 'react';
+import { mockJobs as staticMockJobs, mockTalentProfiles, mockScreeningResults, jobStatusColors } from '@/lib/mockData';
+import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2 } from 'lucide-react';
 import KpiCards from './KpiCards';
@@ -20,14 +21,62 @@ export default function RecruiterDashboardClient() {
   const [showCreateJob, setShowCreateJob] = useState(false);
   const [jobSearch, setJobSearch] = useState('');
   const [shortlistFilter, setShortlistFilter] = useState<'all' | 'recommended' | 'consider' | 'not-recommended'>('all');
+  const [mounted, setMounted] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [screeningResults, setScreeningResults] = useState<ScreeningResult[]>([]);
 
-  const selectedJob = mockJobs.find(j => j.id === selectedJobId) || mockJobs[0];
-  const filteredJobs = mockJobs.filter(j =>
-    j.title.toLowerCase().includes(jobSearch.toLowerCase()) ||
-    j.department.toLowerCase().includes(jobSearch.toLowerCase())
-  );
+  const fetchJobs = async () => {
+    try {
+      const data = await api.get('/jobs');
+      const finalJobs = data.length > 0 ? data : staticMockJobs;
+      setJobs(finalJobs);
 
-  const filteredResults = mockScreeningResults.filter(r => {
+      // Select first job if none selected or current selection missing
+      if (finalJobs.length > 0) {
+        const firstId = (finalJobs[0] as any).id || (finalJobs[0] as any)._id;
+        setSelectedJobId(prev => prev === 'job-001' ? firstId : prev);
+      }
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+      setJobs(staticMockJobs);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setMounted(true);
+    fetchJobs();
+  }, []);
+
+  const selectedJob = jobs.find(j => (j as any).id === selectedJobId || (j as any)._id === selectedJobId) || jobs[0] || staticMockJobs[0];
+  const filteredJobs = jobs.filter(j => {
+    const searchLower = jobSearch.toLowerCase();
+    return (
+      (j.title && j.title.toLowerCase().includes(searchLower)) ||
+      (j.department && j.department.toLowerCase().includes(searchLower)) ||
+      (j.location && j.location.toLowerCase().includes(searchLower)) ||
+      (j.type && j.type.toLowerCase().includes(searchLower))
+    );
+  });
+
+  useEffect(() => {
+    // In a real system, we would fetch screening results for this job:
+    // api.get(`/jobs/${selectedJobId}/screening-results`)
+
+    // For now, if it's a mock job, use mock results. 
+    // If it's a real job from backend, simulate some results or show empty.
+    if (selectedJobId.startsWith('job-')) {
+      setScreeningResults(mockScreeningResults);
+    } else {
+      // It's likely a MongoDB ID (real job)
+      // Since we don't have real candidates for those yet, we'll keep it empty or show a subset
+      setScreeningResults([]);
+    }
+  }, [selectedJobId]);
+
+  const filteredResults = screeningResults.filter(r => {
     if (shortlistFilter === 'all') return true;
     if (shortlistFilter === 'recommended') return r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend';
     if (shortlistFilter === 'consider') return r.recommendation === 'Consider';
@@ -46,7 +95,17 @@ export default function RecruiterDashboardClient() {
     await new Promise(r => setTimeout(r, 3200));
     setIsScreening(false);
     setScreeningDone(true);
-    toast.success(`AI screening complete — ${mockScreeningResults.length} candidates ranked for ${selectedJob.title}`);
+
+    // If it's a real job, "fill" it with some mock data after screening
+    if (!selectedJobId.startsWith('job-')) {
+      setScreeningResults(mockScreeningResults.slice(0, 5).map((r, i) => ({
+        ...r,
+        rank: i + 1,
+        candidateId: `candidate-backend-${i}`
+      })));
+    }
+
+    toast.success(`AI screening complete — ${screeningResults.length || 5} candidates ranked for ${selectedJob.title}`);
   };
 
   const handleViewCandidate = (result: ScreeningResult) => {
@@ -67,6 +126,7 @@ export default function RecruiterDashboardClient() {
             <h2 className="text-sm font-semibold font-display text-foreground">Active Jobs</h2>
             <button
               onClick={() => setShowCreateJob(true)}
+              suppressHydrationWarning
               className="p-1.5 rounded-md bg-primary-700 text-white hover:bg-primary-800 transition-colors active:scale-95"
               title="Create new job"
             >
@@ -80,37 +140,47 @@ export default function RecruiterDashboardClient() {
               placeholder="Search jobs..."
               value={jobSearch}
               onChange={e => setJobSearch(e.target.value)}
+              suppressHydrationWarning
               className="w-full pl-8 pr-3 py-1.5 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary-700"
             />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto scrollbar-thin py-2">
-          {filteredJobs.map(job => (
-            <button
-              key={`jobsel-${job.id}`}
-              onClick={() => setSelectedJobId(job.id)}
-              className={`w-full text-left px-4 py-3 transition-colors border-l-2 ${
-                selectedJobId === job.id
-                  ? 'bg-primary-50 border-l-primary-700' :'border-l-transparent hover:bg-muted'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-1 mb-1">
-                <p className={`text-xs font-semibold leading-tight ${selectedJobId === job.id ? 'text-primary-700' : 'text-foreground'}`}>
-                  {job.title}
-                </p>
-                <span className={`shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${jobStatusColors[job.status]}`}>
-                  {job.status}
-                </span>
-              </div>
-              <p className="text-[10px] text-muted-foreground">{job.department} · {job.type}</p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="text-[10px] text-muted-foreground">{job.applicantCount} applicants</span>
-                {job.shortlistedCount > 0 && (
-                  <span className="text-[10px] text-green-600 font-medium">{job.shortlistedCount} shortlisted</span>
-                )}
-              </div>
-            </button>
-          ))}
+          {filteredJobs.length > 0 ? (
+            filteredJobs.map(job => {
+              const jobId = (job as any).id || (job as any)._id;
+              const isSelected = selectedJobId === jobId;
+              return (
+                <button
+                  key={`jobsel-${jobId}`}
+                  onClick={() => setSelectedJobId(jobId)}
+                  className={`w-full text-left px-4 py-3 transition-colors border-l-2 ${isSelected ? 'bg-primary-50 border-l-primary-700' : 'border-l-transparent hover:bg-muted'}`}
+                >
+                  <div className="flex items-start justify-between gap-1 mb-1">
+                    <p className={`text-xs font-semibold leading-tight ${isSelected ? 'text-primary-700' : 'text-foreground'}`}>
+                      {job.title}
+                    </p>
+                    <span className={`shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${jobStatusColors[job.status]}`}>
+                      {job.status}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">{job.department} · {job.type}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[10px] text-muted-foreground">{(job.applicantCount || 0)} applicants</span>
+                    {(job.shortlistedCount || 0) > 0 && (
+                      <span className="text-[10px] text-green-600 font-medium">{job.shortlistedCount} shortlisted</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })
+          ) : (
+            <div className="px-4 py-8 text-center">
+              <Search size={20} className="mx-auto text-muted-foreground mb-2 opacity-20" />
+              <p className="text-xs font-medium text-foreground">No jobs found</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Try another search term</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -133,6 +203,7 @@ export default function RecruiterDashboardClient() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportShortlist}
+                suppressHydrationWarning
                 className="flex items-center gap-1.5 px-3 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors"
               >
                 <Download size={14} />
@@ -141,9 +212,9 @@ export default function RecruiterDashboardClient() {
               <button
                 onClick={handleTriggerScreening}
                 disabled={isScreening || selectedJob.status === 'Draft' || selectedJob.status === 'Closed'}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all duration-150 active:scale-95 ${
-                  isScreening || selectedJob.status === 'Draft' || selectedJob.status === 'Closed' ?'bg-muted text-muted-foreground cursor-not-allowed' :'bg-primary-700 text-white hover:bg-primary-800 shadow-card'
-                }`}
+                suppressHydrationWarning
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all duration-150 active:scale-95 ${isScreening || selectedJob.status === 'Draft' || selectedJob.status === 'Closed' ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary-700 text-white hover:bg-primary-800 shadow-card'
+                  }`}
               >
                 {isScreening ? (
                   <>
@@ -181,7 +252,7 @@ export default function RecruiterDashboardClient() {
           )}
 
           {/* KPI Cards */}
-          <KpiCards job={selectedJob} screeningResults={mockScreeningResults} />
+          <KpiCards job={selectedJob} screeningResults={screeningResults} />
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
@@ -189,7 +260,7 @@ export default function RecruiterDashboardClient() {
               <ApplicationsTrendChart />
             </div>
             <div>
-              <ApplicantBreakdownChart results={mockScreeningResults} />
+              <ApplicantBreakdownChart results={screeningResults} />
             </div>
           </div>
 
@@ -199,7 +270,10 @@ export default function RecruiterDashboardClient() {
               <div>
                 <h2 className="text-base font-display font-600 text-foreground">AI Shortlist — Top {mockScreeningResults.length} Candidates</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {screeningDone ? `Screened ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Not screened yet'}
+                  {screeningDone && mounted ?
+                    `Screened ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                    : !screeningDone ? 'Not screened yet' : '...'
+                  }
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -208,9 +282,9 @@ export default function RecruiterDashboardClient() {
                     <button
                       key={`filter-${f}`}
                       onClick={() => setShortlistFilter(f)}
-                      className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
-                        shortlistFilter === f ? 'bg-white text-foreground shadow-card' : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                      suppressHydrationWarning
+                      className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${shortlistFilter === f ? 'bg-white text-foreground shadow-card' : 'text-muted-foreground hover:text-foreground'
+                        }`}
                     >
                       {f === 'all' ? 'All' : f === 'recommended' ? 'Recommended' : f === 'consider' ? 'Consider' : 'Not Rec.'}
                     </button>
@@ -241,7 +315,10 @@ export default function RecruiterDashboardClient() {
 
       {/* Create Job Modal */}
       {showCreateJob && (
-        <CreateJobModal onClose={() => setShowCreateJob(false)} />
+        <CreateJobModal
+          onClose={() => setShowCreateJob(false)}
+          onSuccess={() => fetchJobs()}
+        />
       )}
     </div>
   );

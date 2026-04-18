@@ -2,7 +2,20 @@ import { Request, Response } from 'express';
 import Job from '../models/Job';
 
 export const createJob = async (req: any, res: Response): Promise<void> => {
-    const { title, description, requirements, skills, mustHaveSkills } = req.body;
+    const {
+        title,
+        description,
+        requirements,
+        skills,
+        mustHaveSkills,
+        department,
+        location,
+        type,
+        experienceLevel,
+        salaryRange,
+        deadline,
+        status
+    } = req.body;
 
     try {
         const job = await Job.create({
@@ -12,6 +25,13 @@ export const createJob = async (req: any, res: Response): Promise<void> => {
             skills,
             mustHaveSkills: mustHaveSkills || [],
             recruiterId: req.user._id,
+            department,
+            location,
+            type: type || 'Full-time',
+            experienceLevel: experienceLevel || 'Junior',
+            salaryRange,
+            deadline,
+            status: status || 'Active'
         });
 
         res.status(201).json(job);

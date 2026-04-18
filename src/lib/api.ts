@@ -16,7 +16,8 @@ export const api = {
 
         const result = await response.json();
         if (!response.ok) {
-            throw new Error(result.message || 'Something went wrong');
+            const errorMsg = result.error || result.message || 'Something went wrong';
+            throw new Error(errorMsg);
         }
         return result;
     },
@@ -35,7 +36,8 @@ export const api = {
 
         const result = await response.json();
         if (!response.ok) {
-            throw new Error(result.message || 'Something went wrong');
+            const errorMsg = result.error || result.message || 'Something went wrong';
+            throw new Error(errorMsg);
         }
         return result;
     },

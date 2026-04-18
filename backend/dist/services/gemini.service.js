@@ -7,8 +7,12 @@ exports.compareCandidates = exports.extractCandidateInfo = exports.rankCandidate
 const generative_ai_1 = require("@google/generative-ai");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const genAI = new generative_ai_1.GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const apiKey = process.env.GEMINI_API_KEY || "";
+if (!apiKey || apiKey === "GEMINI_API_KEY") {
+    console.warn("⚠️ GEMINI_API_KEY is missing or using default placeholder in .env");
+}
+const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 const rankCandidates = async (jobDescription, candidates) => {
     // Optimization: Batch candidates if there are more than 5 to ensure accuracy and avoid token limits
     const BATCH_SIZE = 5;
@@ -24,7 +28,8 @@ const rankCandidates = async (jobDescription, candidates) => {
 exports.rankCandidates = rankCandidates;
 const rankBatch = async (jobDescription, candidates) => {
     const prompt = `
-    You are an expert HR Recruitment AI. Your task is to rank the following candidates against a specific job description.
+    You are an expert HR Recruitment AI for Umurava, specialized in the Rwandan and African tech markets. 
+    Your task is to rank the following candidates against a specific job description with high objectivity and "Explainability."
     
     Job Description:
     ${jobDescription}
@@ -33,15 +38,22 @@ const rankBatch = async (jobDescription, candidates) => {
     ${JSON.stringify(candidates)}
     
     Instructions:
-    1. Evaluate each candidate based on their skills, experience, and educational background.
-    2. Provide a "weightedScore" breakdown (0-100 for each: skills, experience, education).
-    3. Assign an overall "score" (0-100) and a "relevance" score (0-100).
-    4. CRITICAL: If a job has "mustHaveSkills" (provided in job details), penalize candidates heavily if they lack these.
-    5. Rank the candidates from best to worst.
-    6. Categorize each candidate into a "recommendation": "Shortlist", "Waitlist", or "Reject".
-    7. Generate 3 specific "interviewQuestions" for each candidate based on their identified "gaps".
-    8. Provide concise "strengths", "gaps", and professional "aiReasoning".
-    9. Return ONLY a valid JSON array of objects.
+    1. Evaluate each candidate based on three weighted dimensions:
+       - Skills (50%): Technical match with required skills.
+       - Experience (30%): Relevance of past roles and years of experience.
+       - Education (20%): Academic background and certifications.
+    2. Provide a "weightedScore" breakdown (0-100 for each).
+    3. If a job has "mustHaveSkills", subtract 20 points from the total score for each missing must-have skill.
+    4. Categorize each candidate into a "recommendation": "Shortlist" (Score >80), "Waitlist" (60-80), or "Reject" (<60).
+    5. Rank candidates numerically starting from 1.
+    
+    6. EXPLAINABILITY (Recruiter-Friendly):
+       - "strengths": 1-2 sentences highlighting why they are a good fit. Focus on unique value.
+       - "gaps": 1-2 sentences identifying exactly what they are missing relative to this job.
+       - "aiReasoning": A professional, objective summary (max 3 sentences) justifying the final rank.
+       - "interviewQuestions": Generate 3 custom questions that probe the identified "gaps."
+
+    Return ONLY a valid JSON array of objects. Do not include any markdown formatting.
     
     Expected JSON Format:
     [
@@ -63,13 +75,21 @@ const rankBatch = async (jobDescription, candidates) => {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
+        console.log("Gemini Raw Response Received");
         // Clean text in case Gemini wraps it in markdown blocks
         const cleanJson = text.replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
+        try {
+            return JSON.parse(cleanJson);
+        }
+        catch (parseError) {
+            console.error("JSON Parse Error in Gemini Service:", parseError);
+            console.error("Raw Text was:", text);
+            throw new Error("AI returned invalid JSON format. Check console for details.");
+        }
     }
     catch (error) {
-        console.error("Gemini API Error:", error);
-        throw new Error("Failed to rank candidates via AI");
+        console.error("Gemini API Error details:", error);
+        throw new Error(`Gemini API Error: ${error.message || "Unknown error"}`);
     }
 };
 const extractCandidateInfo = async (text) => {

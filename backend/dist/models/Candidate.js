@@ -43,6 +43,7 @@ const CandidateSchema = new mongoose_1.Schema({
     education: { type: String },
     extractedText: { type: String },
     resumeUrl: { type: String },
+    missingDocuments: [{ type: String }],
     source: { type: String, enum: ['structured', 'unstructured'], required: true },
     createdAt: { type: Date, default: Date.now },
 });

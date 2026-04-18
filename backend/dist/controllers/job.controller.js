@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getJobById = exports.getJobs = exports.createJob = void 0;
 const Job_1 = __importDefault(require("../models/Job"));
 const createJob = async (req, res) => {
-    const { title, description, requirements, skills, mustHaveSkills } = req.body;
+    const { title, description, requirements, skills, mustHaveSkills, department, location, type, experienceLevel, salaryRange, deadline, status } = req.body;
     try {
         const job = await Job_1.default.create({
             title,
@@ -15,6 +15,13 @@ const createJob = async (req, res) => {
             skills,
             mustHaveSkills: mustHaveSkills || [],
             recruiterId: req.user._id,
+            department,
+            location,
+            type: type || 'Full-time',
+            experienceLevel: experienceLevel || 'Junior',
+            salaryRange,
+            deadline,
+            status: status || 'Active'
         });
         res.status(201).json(job);
     }

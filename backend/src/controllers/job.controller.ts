@@ -40,11 +40,25 @@ export const createJob = async (req: any, res: Response): Promise<void> => {
     }
 };
 
+import Application from '../models/Application';
+
 export const getJobs = async (req: Request, res: Response): Promise<void> => {
     try {
-        const jobs = await Job.find({}).populate('recruiterId', 'name email');
-        res.json(jobs);
+        const jobs = await Job.find({}).populate('recruiterId', 'name email').lean();
+
+        // Enhance jobs with actual application counts
+        const jobsWithCounts = await Promise.all(jobs.map(async (job) => {
+            const count = await Application.countDocuments({ jobId: job._id });
+            return {
+                ...job,
+                applicantCount: count,
+                id: job._id // ensure 'id' alias is present for frontend
+            };
+        }));
+
+        res.json(jobsWithCounts);
     } catch (error) {
+        console.error("Error fetching jobs:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };

@@ -13,6 +13,7 @@ const nextConfig = {
   images: {
     remotePatterns: imageHosts,
     minimumCacheTTL: 60,
+    qualities: [25, 50, 75, 85, 90, 100],
   },
   async redirects() {
     return [

@@ -4,10 +4,11 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { ScreeningResult } from '@/lib/mockData';
 
 interface ApplicantBreakdownChartProps {
+  jobTitle: string;
   results: ScreeningResult[];
 }
 
-export default function ApplicantBreakdownChart({ results }: ApplicantBreakdownChartProps) {
+export default function ApplicantBreakdownChart({ jobTitle, results }: ApplicantBreakdownChartProps) {
   const breakdown = [
     { name: 'Strongly Rec.', value: results.filter(r => r.recommendation === 'Strongly Recommend').length, color: '#16A34A' },
     { name: 'Recommend', value: results.filter(r => r.recommendation === 'Recommend').length, color: '#0F4C81' },
@@ -30,7 +31,7 @@ export default function ApplicantBreakdownChart({ results }: ApplicantBreakdownC
     <div className="bg-white rounded-xl border border-border shadow-card p-5 h-full">
       <div className="mb-3">
         <h2 className="text-base font-display font-600 text-foreground">Applicant Breakdown</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">By AI recommendation tier</p>
+        <p className="text-xs text-muted-foreground mt-0.5">By AI recommendation tier for {jobTitle}</p>
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>

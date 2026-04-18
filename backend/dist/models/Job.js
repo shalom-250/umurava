@@ -39,8 +39,15 @@ const JobSchema = new mongoose_1.Schema({
     description: { type: String, required: true },
     requirements: [{ type: String }],
     skills: [{ type: String }],
+    mustHaveSkills: [{ type: String }],
     recruiterId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['open', 'closed'], default: 'open' },
+    department: { type: String },
+    location: { type: String },
+    type: { type: String, enum: ['Full-time', 'Part-time', 'Contract'], default: 'Full-time' },
+    experienceLevel: { type: String, enum: ['Junior', 'Mid-level', 'Senior', 'Lead'], default: 'Junior' },
+    salaryRange: { type: String },
+    deadline: { type: String },
+    status: { type: String, enum: ['Active', 'Draft', 'Screening', 'Closed'], default: 'Active' },
     createdAt: { type: Date, default: Date.now },
 });
 exports.default = mongoose_1.default.model('Job', JobSchema);

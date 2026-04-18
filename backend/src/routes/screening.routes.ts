@@ -19,7 +19,7 @@
  */
 
 import express from 'express';
-import { runScreening, getScreeningResults } from '../controllers/screening.controller';
+import { runScreening, getScreeningResults, runTestScreening } from '../controllers/screening.controller';
 import { protect } from '../middleware/auth.middleware';
 
 const router = express.Router();
@@ -61,6 +61,7 @@ const router = express.Router();
  *         description: List of ranked candidates
  */
 router.post('/:jobId', protect, runScreening);
+router.post('/test-gemini/:jobId', protect, runTestScreening);
 router.get('/:jobId', protect, getScreeningResults);
 
 export default router;

@@ -88,11 +88,9 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                 suppressHydrationWarning
                 className="flex items-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
               >
-                Candidate <SortIcon col="name" />
+                Candidate Name <SortIcon col="name" />
               </button>
             </th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Location</th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Current Role</th>
             <th className="px-4 py-3 text-left">
               <button
                 onClick={() => handleSort('matchScore')}
@@ -102,10 +100,9 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                 Match Score <SortIcon col="matchScore" />
               </button>
             </th>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">AI Strengths</th>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">AI Gaps / Risks</th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recommendation</th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Availability</th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Docs</th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Top Strength</th>
             <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
           </tr>
         </thead>
@@ -151,44 +148,23 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin size={11} />
-                    <span>{profile.location}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <p className="text-xs text-foreground truncate max-w-[140px]">{currentRole?.role || '—'}</p>
-                  <p className="text-[10px] text-muted-foreground truncate max-w-[140px]">{currentRole?.company || '—'}</p>
-                </td>
                 <td className="px-4 py-3 min-w-[130px]">
                   <ScoreBar score={result.matchScore} />
+                </td>
+                <td className="px-4 py-3">
+                  <p className="text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 truncate max-w-[200px]" title={Array.isArray(result.strengths) ? result.strengths.join(', ') : result.strengths}>
+                    {Array.isArray(result.strengths) ? result.strengths[0] : result.strengths}
+                  </p>
+                </td>
+                <td className="px-4 py-3">
+                  <p className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-100 truncate max-w-[200px]" title={Array.isArray(result.gaps) ? result.gaps.join(', ') : result.gaps}>
+                    {Array.isArray(result.gaps) ? result.gaps[0] : result.gaps}
+                  </p>
                 </td>
                 <td className="px-4 py-3">
                   <span className={`text-[10px] font-semibold px-2 py-1 rounded-full border ${recommendationColors[result.recommendation]}`}>
                     {result.recommendation}
                   </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${profile.availability.status === 'Available' ? 'bg-green-50 text-green-700' :
-                    profile.availability.status === 'Open to Opportunities' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
-                    }`}>
-                    {profile.availability.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {totalDocs > 0 ? (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${missingCount === 0 ? 'bg-green-50 text-green-700 border-green-200' :
-                      missingCount < totalDocs ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-red-50 text-red-700 border-red-200'
-                      }`}>
-                      {missingCount === 0 ? 'All Documents' : `${missingCount} Missing`}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-muted-foreground">No docs required</span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <p className="text-xs text-foreground truncate max-w-[160px]">{result.strengths[0]}</p>
                 </td>
                 <td className="px-4 py-3">
                   <div className={`flex items-center justify-end gap-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>

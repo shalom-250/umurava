@@ -16,13 +16,17 @@ export const metadata: Metadata = {
   },
 };
 
+import { StoreProvider } from '@/store/provider';
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <StoreProvider>
+          {children}
+        </StoreProvider>
         <Toaster position="bottom-right" richColors closeButton />
 
         <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fumuravaai8595back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.18" />

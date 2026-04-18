@@ -9,6 +9,7 @@ export interface ICandidate extends Document {
     education?: string;
     extractedText?: string;
     resumeUrl?: string; // If stored in cloud
+    missingDocuments?: string[];
     source: 'structured' | 'unstructured'; // Umurava schema vs PDF/CSV
     createdAt: Date;
 }
@@ -22,6 +23,7 @@ const CandidateSchema: Schema = new Schema({
     education: { type: String },
     extractedText: { type: String },
     resumeUrl: { type: String },
+    missingDocuments: [{ type: String }],
     source: { type: String, enum: ['structured', 'unstructured'], required: true },
     createdAt: { type: Date, default: Date.now },
 });

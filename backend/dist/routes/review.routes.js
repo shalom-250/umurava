@@ -1,0 +1,34 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const Review_1 = __importDefault(require("../models/Review"));
+const generic_controller_1 = require("../controllers/generic.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = express_1.default.Router();
+/**
+ * @swagger
+ * tags:
+ *   name: Reviews
+ *   description: Human recruiter reviews and scores
+ */
+/**
+ * @swagger
+ * /api/reviews:
+ *   get:
+ *     summary: List all reviews
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *   post:
+ *     summary: Add a candidate review
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.route('/')
+    .get(auth_middleware_1.protect, (0, generic_controller_1.getAll)(Review_1.default))
+    .post(auth_middleware_1.protect, (0, generic_controller_1.create)(Review_1.default));
+exports.default = router;

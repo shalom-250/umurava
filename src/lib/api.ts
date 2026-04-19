@@ -14,6 +14,39 @@ export const api = {
             body: JSON.stringify(data),
         });
 
+        if (response.status === 401) {
+            this.logout();
+            window.location.href = '/sign-up-login-screen';
+            return;
+        }
+
+        const result = await response.json();
+        if (!response.ok) {
+            const errorMsg = result.error || result.message || 'Something went wrong';
+            throw new Error(errorMsg);
+        }
+        return result;
+    },
+
+    async put(endpoint: string, data: any) {
+        const token = this.getToken();
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(data),
+        });
+
+        if (response.status === 401) {
+            this.logout();
+            window.location.href = '/sign-up-login-screen';
+            return;
+        }
+
         const result = await response.json();
         if (!response.ok) {
             const errorMsg = result.error || result.message || 'Something went wrong';
@@ -32,6 +65,12 @@ export const api = {
             headers,
             body: formData,
         });
+
+        if (response.status === 401) {
+            this.logout();
+            window.location.href = '/sign-up-login-screen';
+            return;
+        }
 
         const result = await response.json();
         if (!response.ok) {
@@ -52,6 +91,12 @@ export const api = {
             method: 'GET',
             headers,
         });
+
+        if (response.status === 401) {
+            this.logout();
+            window.location.href = '/sign-up-login-screen';
+            return;
+        }
 
         const result = await response.json();
         if (!response.ok) {

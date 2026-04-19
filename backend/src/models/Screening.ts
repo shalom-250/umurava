@@ -16,6 +16,11 @@ export interface IScreening extends Document {
     aiReasoning: string;
     recommendation: 'Shortlist' | 'Waitlist' | 'Reject';
     interviewQuestions: string[];
+    skillBreakdown: {
+        skill: string;
+        score: number;
+        required: boolean;
+    }[];
     createdAt: Date;
 }
 
@@ -35,6 +40,11 @@ const ScreeningSchema: Schema = new Schema({
     aiReasoning: { type: String },
     recommendation: { type: String, enum: ['Shortlist', 'Waitlist', 'Reject'] },
     interviewQuestions: [{ type: String }],
+    skillBreakdown: [{
+        skill: { type: String },
+        score: { type: Number },
+        required: { type: Boolean }
+    }],
     createdAt: { type: Date, default: Date.now },
 });
 

@@ -6,6 +6,7 @@ import { Sparkles, Clock, CheckCircle, XCircle, FileText, ChevronDown, ChevronUp
 interface MyApplicationsTabProps {
   applications: Application[];
   jobs: Job[];
+  profile: any;
 }
 
 const STATUS_STEPS = ['Submitted', 'Under Review', 'Screened', 'Shortlisted'];
@@ -23,19 +24,17 @@ function StatusTimeline({ status }: { status: string }) {
         return (
           <React.Fragment key={`step-${step}`}>
             <div className="flex flex-col items-center">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
-                isPast ? 'bg-green-500 border-green-500' : isCurrent ?'bg-primary-700 border-primary-700' :
-                isRejected && step === 'Shortlisted'? 'bg-red-100 border-red-300' : 'bg-white border-border'
-              }`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${isPast ? 'bg-green-500 border-green-500' : isCurrent ? 'bg-primary-700 border-primary-700' :
+                  isRejected && step === 'Shortlisted' ? 'bg-red-100 border-red-300' : 'bg-white border-border'
+                }`}>
                 {isPast ? (
                   <CheckCircle size={12} className="text-white" />
                 ) : isCurrent ? (
                   <div className="w-2 h-2 bg-white rounded-full" />
                 ) : null}
               </div>
-              <p className={`text-[9px] mt-1 font-medium whitespace-nowrap ${
-                isPast ? 'text-green-600' : isCurrent ? 'text-primary-700' : 'text-muted-foreground'
-              }`}>{step}</p>
+              <p className={`text-[9px] mt-1 font-medium whitespace-nowrap ${isPast ? 'text-green-600' : isCurrent ? 'text-primary-700' : 'text-muted-foreground'
+                }`}>{step}</p>
             </div>
             {i < STATUS_STEPS.length - 1 && (
               <div className={`flex-1 h-0.5 mb-4 ${isPast ? 'bg-green-400' : 'bg-border'}`} />
@@ -106,9 +105,8 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
                 {hasAI && (
                   <div className="text-right">
                     <p className="text-[10px] text-muted-foreground">Match Score</p>
-                    <p className={`text-lg font-display font-700 tabular-nums ${
-                      (app.matchScore ?? 0) >= 80 ? 'text-green-600' : (app.matchScore ?? 0) >= 60 ? 'text-blue-600' : 'text-amber-600'
-                    }`}>{app.matchScore}/100</p>
+                    <p className={`text-lg font-display font-700 tabular-nums ${(app.matchScore ?? 0) >= 80 ? 'text-green-600' : (app.matchScore ?? 0) >= 60 ? 'text-blue-600' : 'text-amber-600'
+                      }`}>{app.matchScore}/100</p>
                   </div>
                 )}
                 {isExpanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
@@ -205,7 +203,7 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
                     <div>
                       <p className="text-sm font-medium text-foreground">Awaiting AI Screening</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {app.status === 'Rejected' ?'Your application was reviewed but not selected for this role.' :'The recruiter hasn\'t triggered AI screening yet. You\'ll be notified when results are available.'}
+                        {app.status === 'Rejected' ? 'Your application was reviewed but not selected for this role.' : 'The recruiter hasn\'t triggered AI screening yet. You\'ll be notified when results are available.'}
                       </p>
                     </div>
                   </div>

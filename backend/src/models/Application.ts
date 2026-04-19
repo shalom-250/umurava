@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IApplication extends Document {
     jobId: mongoose.Types.ObjectId;
     candidateId: mongoose.Types.ObjectId;
-    status: 'Applied' | 'Screened' | 'Interview' | 'Offered' | 'Hired' | 'Rejected';
+    status: 'Applied' | 'Screened' | 'Interview' | 'Offered' | 'Hired' | 'Rejected' | 'Under Review';
     appliedAt: Date;
     updatedAt: Date;
 }
@@ -13,7 +13,7 @@ const ApplicationSchema: Schema = new Schema({
     candidateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Candidate', required: true },
     status: {
         type: String,
-        enum: ['Applied', 'Screened', 'Interview', 'Offered', 'Hired', 'Rejected'],
+        enum: ['Applied', 'Screened', 'Interview', 'Offered', 'Hired', 'Rejected', 'Under Review'],
         default: 'Applied'
     },
     appliedAt: { type: Date, default: Date.now },

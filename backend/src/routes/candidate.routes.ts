@@ -19,7 +19,7 @@
  */
 
 import express from 'express';
-import { saveCandidates, parseCandidateFile, getCandidates } from '../controllers/candidate.controller';
+import { saveCandidates, parseCandidateFile, getCandidates, getApplicantDashboardStats, updateMyProfile } from '../controllers/candidate.controller';
 import { protect } from '../middleware/auth.middleware';
 
 const router = express.Router();
@@ -65,5 +65,8 @@ router.route('/')
     .get(protect, getCandidates);
 
 router.post('/parse', protect, parseCandidateFile);
+
+router.get('/me/dashboard', protect, getApplicantDashboardStats);
+router.put('/me', protect, updateMyProfile);
 
 export default router;

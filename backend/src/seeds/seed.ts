@@ -6,6 +6,7 @@ import Candidate from '../models/Candidate';
 import Company from '../models/Company';
 import Skill from '../models/Skill';
 import Application from '../models/Application';
+import Screening from '../models/Screening';
 import bcrypt from 'bcryptjs';
 
 dotenv.config();
@@ -139,6 +140,18 @@ const seedData = async () => {
             createdCandidates.push(candidate);
         }
 
+        // Explicitly Inject Nzinga Mwamba Candidate Profile Tracker
+        const nzingaCandidate = await Candidate.create({
+            name: 'Nzinga Mwamba',
+            email: 'nzinga.mwamba@outlook.com',
+            phone: '+250788123456',
+            skills: ['Python', 'TensorFlow', 'React', 'TypeScript', 'Docker'],
+            experience: '4 years of Fullstack and AI Engineering at top tech firms in Kigali. Spearheaded multiple scaling projects heavily mapping machine learning insights into React frontend dashboards.',
+            education: 'BSc in Software Engineering, University of Kigali',
+            source: 'structured'
+        });
+        createdCandidates.push(nzingaCandidate);
+
         // 5. Seed Applications (Skill-Based)
         // Candidates apply to jobs where they have at least one matching skill or relevant background
         for (let j = 0; j < createdJobs.length; j++) {
@@ -187,7 +200,36 @@ const seedData = async () => {
             }
         }
 
-        console.log(`Seeding complete: Skill-matched applications for 12 Jobs and 35 Candidates!`);
+        // Inject active explicitly applied states for Nzinga
+        const activeJobs = createdJobs.filter(j => j.status === 'Active');
+        for (let j = 0; j < Math.min(3, activeJobs.length); j++) {
+            await Application.create({
+                jobId: activeJobs[j]._id,
+                candidateId: nzingaCandidate._id,
+                status: j === 0 ? 'Screened' : j === 1 ? 'Under Review' : 'Applied',
+                appliedAt: new Date(Date.now() - Math.random() * 864000000)
+            });
+
+            if (j === 0) {
+                await Screening.create({
+                    jobId: activeJobs[j]._id,
+                    candidateId: nzingaCandidate._id,
+                    score: 91,
+                    rank: 1,
+                    recommendation: 'Shortlist',
+                    aiReasoning: 'Nzinga fits all the technical criteria required out of the box with proven structural system design skills.',
+                    strengths: 'Python, React, Architecture',
+                    gaps: 'Requires high compensation',
+                    skillBreakdown: [
+                        { skill: 'Python', score: 95, required: true },
+                        { skill: 'React', score: 88, required: true },
+                        { skill: 'Architecture', score: 92, required: true }
+                    ]
+                });
+            }
+        }
+
+        console.log(`Seeding complete: Skill-matched applications for 12 Jobs and 36 Candidates (Nzinga Attached)!`);
         process.exit(0);
     } catch (error) {
         console.error('Seeding Error:', error);

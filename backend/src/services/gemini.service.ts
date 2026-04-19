@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -128,6 +129,10 @@ const rankBatch = async (jobDescription: string, candidates: any[]): Promise<IRa
 };
 
 export const extractCandidateInfo = async (text: string): Promise<any> => {
+    return extractCandidateInfoFromText(text);
+};
+
+export const extractCandidateInfoFromText = async (text: string): Promise<any> => {
     const prompt = `
     Extract the following information from the candidate's resume text:
     - Name
@@ -138,7 +143,7 @@ export const extractCandidateInfo = async (text: string): Promise<any> => {
     - Brief summary of education
     
     Resume Text:
-    ${text.substring(0, 5000)}
+    ${text.substring(0, 8000)}
     
     Return ONLY a valid JSON object. Do not include markdown formatting.
     
@@ -157,36 +162,137 @@ export const extractCandidateInfo = async (text: string): Promise<any> => {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
+        const parsed = JSON.parse(cleanJson);
+        return normalizeParsedData(parsed, text);
     } catch (error: any) {
-        console.warn("⚠️ Gemini Extraction Error / Quota Hit. Using RegExp fallback engine.", error.message);
-
-        // --- FALLBACK REGEX PARSING ---
-        // Basic extraction fallback to avoid failing the upload completely when AI quota is exhausted.
-        const fallbackText = text.substring(0, 5000);
-
-        const emailMatch = fallbackText.match(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/);
-        const phoneMatch = fallbackText.match(/(?:\+?\d{1,3}[\s-]?)?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4}/);
-
-        // Find potential name (first 2-3 words on first non-empty lines)
-        const lines = fallbackText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        const nameFallback = lines.length > 0 ? lines[0].substring(0, 50) : 'Unknown Candidate';
-
-        // Find potential skills
-        const commonSkills = ['JavaScript', 'React', 'Node.js', 'Python', 'Java', 'C++', 'SQL', 'MongoDB', 'AWS', 'Docker', 'TypeScript'];
-        const matchedSkills = commonSkills.filter(skill =>
-            fallbackText.toLowerCase().includes(skill.toLowerCase())
-        );
-
-        return {
-            name: nameFallback,
-            email: emailMatch ? emailMatch[0] : 'unknown@example.com',
-            phone: phoneMatch ? phoneMatch[0] : '',
-            skills: matchedSkills,
-            experience: 'Simulated experience summary due to AI quota exhaustion.',
-            education: 'Simulated education summary.'
-        };
+        console.warn("⚠️ Gemini Text Extraction Error. Using fallback.", error.message);
+        return getFallbackInfo(text);
     }
+};
+
+export const extractCandidateInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+    // Only use direct file processing for PDFs. For others, we rely on text extraction first.
+    if (mimeType !== 'application/pdf') {
+        throw new Error("Direct file processing only supported for PDF in this helper.");
+    }
+
+    try {
+        const fileBuffer = fs.readFileSync(filePath);
+        const base64Data = fileBuffer.toString('base64');
+
+        const prompt = `
+            Extract candidate information from this resume PDF.
+            Return a JSON object with: 
+            - name (Full name)
+            - email (Email address)
+            - phone (Full International Phone Number - look for labels like T:, P:, Tel:, Phone:, or just numbers at the top)
+            - skills (array of technical and soft skills)
+            - experience (brief summary)
+            - education (brief summary)
+            
+            Be as accurate as possible. If a field is missing, use null.
+        `;
+
+        const result = await model.generateContent([
+            {
+                inlineData: {
+                    data: base64Data,
+                    mimeType: "application/pdf",
+                },
+            },
+            prompt,
+        ]);
+
+        const response = await result.response;
+        const cleanJson = response.text().replace(/```json|```/g, "").trim();
+        const parsed = JSON.parse(cleanJson);
+
+        // PDF binary mode doesn't give us the text easily, so we pass empty string for secondary regex 
+        // unless we also try to extract text locally as a backup.
+        return normalizeParsedData(parsed, "");
+    } catch (error: any) {
+        console.warn("⚠️ Gemini Direct PDF Error:", error.message);
+        throw error; // Let the caller decide how to handle (e.g. try text extraction fallback)
+    }
+};
+
+/**
+ * Normalizes keys (phone vs phoneNumber) and performs aggressive regex fallback if AI missed it.
+ */
+/**
+ * Normalizes keys and performs aggressive regex fallback for missing/placeholder fields.
+ */
+const normalizeParsedData = (data: any, originalText: string): any => {
+    let name = data.name || data.fullName || "";
+    let email = data.email || data.emailAddress || "";
+    let phone = data.phone || data.phoneNumber || data.contact || data.mobile || "";
+    let skills = Array.isArray(data.skills) ? data.skills : (typeof data.skills === 'string' ? data.skills.split(',').map((s: any) => s.trim()) : []);
+
+    const isPlaceholder = (val: string, placeholders: string[]) =>
+        !val || placeholders.some(p => val.toLowerCase().includes(p.toLowerCase()));
+
+    const namePlaceholders = ['unknown', 'candidate', 'resume', 'cv'];
+    const emailPlaceholders = ['unknown', 'example.com', 'no-email'];
+
+    // 1. Aggressive Email Discovery
+    if (isPlaceholder(email, emailPlaceholders) && originalText) {
+        const emailMatch = originalText.match(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/);
+        if (emailMatch) email = emailMatch[0];
+    }
+
+    // 2. Aggressive Phone Discovery
+    if (!phone && originalText) {
+        // Broadened Regex for international formats: allows +, dots, spaces, parens, and varying lengths
+        const phoneMatch = originalText.match(/(?:\+?\d{1,4}[\s.-]?)?\(?\d{2,5}\)?[\s.-]?\d{2,4}[\s.-]?\d{2,4}[\s.-]?\d{2,6}/);
+        if (phoneMatch) phone = phoneMatch[0];
+    }
+
+    // 3. Aggressive Name Discovery (Skip headers, find first 2-5 word line)
+    if (isPlaceholder(name, namePlaceholders) && originalText) {
+        const headerKeywords = ['resume', 'cv', 'curriculum', 'vitae', 'contact', 'info', 'profile', 'personal', 'information'];
+        const lines = originalText.split('\n')
+            .map(l => l.trim())
+            .filter(l => l.length > 0 && !headerKeywords.some(hk => l.toLowerCase().startsWith(hk)));
+
+        if (lines.length > 0) {
+            for (const line of lines) {
+                const words = line.split(/\s+/);
+                if (words.length >= 2 && words.length <= 5) {
+                    name = line.substring(0, 50);
+                    break;
+                }
+            }
+            if (isPlaceholder(name, namePlaceholders)) {
+                name = lines[0].substring(0, 50);
+            }
+        }
+    }
+
+    // 4. Aggressive Skills Discovery (Keyword matching)
+    if (skills.length === 0 && originalText) {
+        const commonTech = [
+            'JavaScript', 'TypeScript', 'React', 'Node.js', 'Express', 'Python', 'Django', 'Flask',
+            'Java', 'Spring', 'Spring Boot', 'PHP', 'Laravel', 'C++', 'C#', '.NET', 'SQL', 'PostgreSQL',
+            'MongoDB', 'AWS', 'Azure', 'Docker', 'Kubernetes', 'HTML', 'CSS', 'Tailwind', 'Next.js',
+            'Vue.js', 'Angular', 'Flutter', 'React Native', 'Swift', 'Kotlin', 'Go', 'Rust', 'Ruby', 'Rails'
+        ];
+        const lowerText = originalText.toLowerCase();
+        skills = commonTech.filter(s => lowerText.includes(s.toLowerCase()));
+    }
+
+    return {
+        name: name || 'Unknown Candidate',
+        email: email || 'unknown@example.com',
+        phone: phone || '',
+        skills: skills,
+        experience: data.experience || data.workExperience || "Experience details not extracted.",
+        education: data.education || data.academic || "Education details not extracted."
+    };
+};
+
+const getFallbackInfo = (text: string): any => {
+    // Pass empty object to trigger full regex discovery in normalizeParsedData
+    return normalizeParsedData({}, text);
 };
 
 export const compareCandidates = async (jobDescription: string, candidateA: any, candidateB: any): Promise<any> => {

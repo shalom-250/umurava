@@ -62,6 +62,7 @@ export interface TalentProfile {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string;
   headline: string;
   bio?: string;
   location: string;
@@ -98,6 +99,7 @@ export interface Job {
   description: string;
   requirements: string[];
   requiredSkills: string[];
+  mustHaveSkills?: string[];
   experienceLevel: 'Junior' | 'Mid-level' | 'Senior' | 'Lead';
   salaryRange: string;
   status: 'Draft' | 'Active' | 'Screening' | 'Closed';

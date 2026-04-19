@@ -26,8 +26,8 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
         // Prepare candidate data for Gemini
         const candidatesForAI = candidates.map(c => ({
             id: c._id,
-            name: c.name,
-            skills: c.skills,
+            name: `${c.firstName} ${c.lastName}`.trim(),
+            skills: (c.skills || []).map((s: any) => typeof s === 'string' ? s : s.name),
             experience: c.experience,
             text: c.extractedText?.substring(0, 2000) // Truncate text to avoid token limits
         }));

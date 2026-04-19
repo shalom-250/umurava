@@ -67,7 +67,12 @@ export default function AuthClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -78,6 +83,8 @@ export default function AuthClient() {
     resolver: zodResolver(signupSchema),
     defaultValues: { acceptTerms: false },
   });
+
+  if (!mounted) return null;
 
   const handleDemoLogin = (cred: DemoCredential) => {
     setRole(cred.role);

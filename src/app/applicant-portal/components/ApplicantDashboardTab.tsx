@@ -1,21 +1,22 @@
 'use client';
 import React from 'react';
-import { TalentProfile, Application, mockJobs, applicantStatusColors, jobStatusColors } from '@/lib/mockData';
+import { TalentProfile, Application, applicantStatusColors, jobStatusColors } from '@/lib/mockData';
 import { Sparkles, ArrowRight, AlertCircle, Star } from 'lucide-react';
 
 interface ApplicantDashboardTabProps {
   profile: TalentProfile;
   applications: Application[];
+  recommendedJobs: any[];
   onNavigate: (tab: 'dashboard' | 'profile' | 'jobs' | 'applications') => void;
 }
 
-export default function ApplicantDashboardTab({ profile, applications, onNavigate }: ApplicantDashboardTabProps) {
+export default function ApplicantDashboardTab({ profile, applications, recommendedJobs, onNavigate }: ApplicantDashboardTabProps) {
   const shortlisted = applications.filter(a => a.status === 'Shortlisted').length;
   const underReview = applications.filter(a => a.status === 'Under Review' || a.status === 'Screened').length;
   const rejected = applications.filter(a => a.status === 'Rejected').length;
 
-  const activeJobs = mockJobs.filter(j => j.status === 'Active').slice(0, 3);
-  const aiFeedbackApp = applications.find(a => a.matchScore !== undefined && a.status === 'Shortlisted');
+  const activeJobs = recommendedJobs.slice(0, 3);
+  const aiFeedbackApp = applications.find(a => a.screeningResult !== null);
 
   return (
     <div className="space-y-6">
@@ -153,7 +154,7 @@ export default function ApplicantDashboardTab({ profile, applications, onNavigat
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-border">
-          {activeJobs.map(job => (
+          {activeJobs.map((job: any) => (
             <div key={`recjob-${job.id}`} className="p-5 hover:bg-muted/30 transition-colors">
               <div className="flex items-start justify-between mb-2">
                 <p className="text-sm font-semibold text-foreground leading-tight">{job.title}</p>
@@ -164,7 +165,7 @@ export default function ApplicantDashboardTab({ profile, applications, onNavigat
               <p className="text-xs text-muted-foreground mb-2">{job.location} · {job.type}</p>
               <p className="text-xs text-foreground/80 line-clamp-2 mb-3">{job.description}</p>
               <div className="flex flex-wrap gap-1 mb-3">
-                {job.requiredSkills.slice(0, 3).map(skill => (
+                {job.requiredSkills.slice(0, 3).map((skill: string) => (
                   <span key={`rskill-${skill}`} className="text-[9px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded">{skill}</span>
                 ))}
               </div>

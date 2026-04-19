@@ -1,0 +1,684 @@
+[
+  {
+    "_id": "69e3f10157b5d8e0e5dec254",
+    "name": "Jean Luc Mugisha",
+    "email": "jean.luc.mugisha@example.rw",
+    "phone": "+250784333149",
+    "skills": [
+      "TypeScript",
+      "React",
+      "Node.js"
+    ],
+    "experience": "3 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [
+      "Identity Card (ID)"
+    ],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.108Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec255",
+    "name": "Clarisse Mutoni",
+    "email": "clarisse.mutoni@example.rw",
+    "phone": "+250781650536",
+    "skills": [
+      "React",
+      "Node.js",
+      "Python"
+    ],
+    "experience": "4 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.110Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec256",
+    "name": "Emile Nshimyumuremyi",
+    "email": "emile.nshimyumuremyi@example.rw",
+    "phone": "+250781055125",
+    "skills": [
+      "Node.js",
+      "Python",
+      "TensorFlow"
+    ],
+    "experience": "5 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.112Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec257",
+    "name": "Grace Keza",
+    "email": "grace.keza@example.rw",
+    "phone": "+250789950807",
+    "skills": [
+      "Python",
+      "TensorFlow",
+      "Docker"
+    ],
+    "experience": "6 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.113Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec258",
+    "name": "Patrick Uwimana",
+    "email": "patrick.uwimana@example.rw",
+    "phone": "+250784833541",
+    "skills": [
+      "TensorFlow",
+      "Docker",
+      "AWS"
+    ],
+    "experience": "7 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.115Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec259",
+    "name": "Diane Ishimwe",
+    "email": "diane.ishimwe@example.rw",
+    "phone": "+250782513597",
+    "skills": [
+      "TypeScript",
+      "React",
+      "Node.js"
+    ],
+    "experience": "3 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.116Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec25a",
+    "name": "Olivier Niyomugabo",
+    "email": "olivier.niyomugabo@example.rw",
+    "phone": "+250785171800",
+    "skills": [
+      "React",
+      "Node.js",
+      "Python"
+    ],
+    "experience": "4 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.118Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec25b",
+    "name": "Sandrine Umutoni",
+    "email": "sandrine.umutoni@example.rw",
+    "phone": "+250788025698",
+    "skills": [
+      "Node.js",
+      "Python",
+      "TensorFlow"
+    ],
+    "experience": "5 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.119Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec25c",
+    "name": "Thierry Habimana",
+    "email": "thierry.habimana@example.rw",
+    "phone": "+250788445099",
+    "skills": [
+      "Python",
+      "TensorFlow",
+      "Docker"
+    ],
+    "experience": "6 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.121Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec25d",
+    "name": "Aline Uwamahoro",
+    "email": "aline.uwamahoro@example.rw",
+    "phone": "+250784715405",
+    "skills": [
+      "TensorFlow",
+      "Docker",
+      "AWS"
+    ],
+    "experience": "7 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.123Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec25e",
+    "name": "Fabrice Murenzi",
+    "email": "fabrice.murenzi@example.rw",
+    "phone": "+250781709509",
+    "skills": [
+      "TypeScript",
+      "React",
+      "Node.js"
+    ],
+    "experience": "3 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [
+      "Identity Card (ID)"
+    ],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.125Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec25f",
+    "name": "Divine Uwera",
+    "email": "divine.uwera@example.rw",
+    "phone": "+250789543816",
+    "skills": [
+      "React",
+      "Node.js",
+      "Python"
+    ],
+    "experience": "4 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.127Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec260",
+    "name": "Benoit Karemera",
+    "email": "benoit.karemera@example.rw",
+    "phone": "+250789499862",
+    "skills": [
+      "Node.js",
+      "Python",
+      "TensorFlow"
+    ],
+    "experience": "5 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.129Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec261",
+    "name": "Solange Mukamana",
+    "email": "solange.mukamana@example.rw",
+    "phone": "+250787637420",
+    "skills": [
+      "Python",
+      "TensorFlow",
+      "Docker"
+    ],
+    "experience": "6 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.130Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec262",
+    "name": "Cedric Tuyisenge",
+    "email": "cedric.tuyisenge@example.rw",
+    "phone": "+250782826827",
+    "skills": [
+      "TensorFlow",
+      "Docker",
+      "AWS"
+    ],
+    "experience": "7 years of software engineering in Kigali.",
+    "education": "BSc in Computer Science/Engineering",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.132Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec263",
+    "name": "Marie Louise Nirere",
+    "email": "marie.louise.nirere@example.rw",
+    "phone": "+250783784605",
+    "skills": [
+      "Recruitment",
+      "Employee Relations",
+      "Payroll"
+    ],
+    "experience": "4 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.134Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec264",
+    "name": "Gaspard Nsabimana",
+    "email": "gaspard.nsabimana@example.rw",
+    "phone": "+250783541215",
+    "skills": [
+      "Employee Relations",
+      "Payroll",
+      "HR Policies"
+    ],
+    "experience": "5 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.135Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec265",
+    "name": "Pacifique Ngabonziza",
+    "email": "pacifique.ngabonziza@example.rw",
+    "phone": "+250789863547",
+    "skills": [
+      "Payroll",
+      "HR Policies",
+      "Strategic Planning"
+    ],
+    "experience": "6 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.137Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec266",
+    "name": "Florence Mukeshimana",
+    "email": "florence.mukeshimana@example.rw",
+    "phone": "+250785095405",
+    "skills": [
+      "Recruitment",
+      "Employee Relations",
+      "Payroll"
+    ],
+    "experience": "4 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.139Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec267",
+    "name": "Oscar Tuyishime",
+    "email": "oscar.tuyishime@example.rw",
+    "phone": "+250784936119",
+    "skills": [
+      "Employee Relations",
+      "Payroll",
+      "HR Policies"
+    ],
+    "experience": "5 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.140Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec268",
+    "name": "Jeanne d'Arc Mukanyandwi",
+    "email": "jeanne.d'arc.mukanyandwi@example.rw",
+    "phone": "+250781636698",
+    "skills": [
+      "Payroll",
+      "HR Policies",
+      "Strategic Planning"
+    ],
+    "experience": "6 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [
+      "Identity Card (ID)"
+    ],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.142Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec269",
+    "name": "Eric Gakwaya",
+    "email": "eric.gakwaya@example.rw",
+    "phone": "+250786968136",
+    "skills": [
+      "Recruitment",
+      "Employee Relations",
+      "Payroll"
+    ],
+    "experience": "4 years in HR Operations.",
+    "education": "BSc in Human Resources / Business",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.143Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec26a",
+    "name": "Lydia Umulisa",
+    "email": "lydia.umulisa@example.rw",
+    "phone": "+250786313569",
+    "skills": [
+      "Lead Generation",
+      "Sales Pitch",
+      "Market Research"
+    ],
+    "experience": "4 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.145Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec26b",
+    "name": "Vincent de Paul Nkurunziza",
+    "email": "vincent.de.paul.nkurunziza@example.rw",
+    "phone": "+250781987639",
+    "skills": [
+      "Sales Pitch",
+      "Market Research",
+      "Negotiation"
+    ],
+    "experience": "5 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.147Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec26c",
+    "name": "Yvonne Giramata",
+    "email": "yvonne.giramata@example.rw",
+    "phone": "+250781739679",
+    "skills": [
+      "CRM",
+      "Lead Generation",
+      "Sales Pitch"
+    ],
+    "experience": "2 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.148Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec26d",
+    "name": "Albertine Uwamariya",
+    "email": "albertine.uwamariya@example.rw",
+    "phone": "+250784701399",
+    "skills": [
+      "Lead Generation",
+      "Sales Pitch",
+      "Market Research"
+    ],
+    "experience": "3 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.150Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec26e",
+    "name": "Didier Kwizera",
+    "email": "didier.kwizera@example.rw",
+    "phone": "+250789211733",
+    "skills": [
+      "Sales Pitch",
+      "Market Research",
+      "Negotiation"
+    ],
+    "experience": "4 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.151Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec26f",
+    "name": "Felicien Mugwaneza",
+    "email": "felicien.mugwaneza@example.rw",
+    "phone": "+250781239926",
+    "skills": [
+      "CRM",
+      "Lead Generation",
+      "Sales Pitch"
+    ],
+    "experience": "5 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.153Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec270",
+    "name": "Isabelle Umurerwa",
+    "email": "isabelle.umurerwa@example.rw",
+    "phone": "+250787906709",
+    "skills": [
+      "Lead Generation",
+      "Sales Pitch",
+      "Market Research"
+    ],
+    "experience": "2 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.154Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec271",
+    "name": "Jean Pierre Ndagijimana",
+    "email": "jean.pierre.ndagijimana@example.rw",
+    "phone": "+250784451654",
+    "skills": [
+      "Sales Pitch",
+      "Market Research",
+      "Negotiation"
+    ],
+    "experience": "3 years in business development.",
+    "education": "BSc in Marketing / Business Administration",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.155Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec272",
+    "name": "Angelique Mukandayisenga",
+    "email": "angelique.mukandayisenga@example.rw",
+    "phone": "+250784237729",
+    "skills": [
+      "Figma",
+      "UI/UX",
+      "Adobe XD"
+    ],
+    "experience": "3 years of UI/UX design.",
+    "education": "Diploma in Graphic Design / Multimedia",
+    "missingDocuments": [
+      "Identity Card (ID)"
+    ],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.157Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec273",
+    "name": "Callixte Ndayisabye",
+    "email": "callixte.ndayisabye@example.rw",
+    "phone": "+250784293524",
+    "skills": [
+      "Figma",
+      "UI/UX",
+      "Adobe XD"
+    ],
+    "experience": "4 years of UI/UX design.",
+    "education": "Diploma in Graphic Design / Multimedia",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.158Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec274",
+    "name": "Sonia Uwizeye",
+    "email": "sonia.uwizeye@example.rw",
+    "phone": "+250782689409",
+    "skills": [
+      "Figma",
+      "UI/UX",
+      "Adobe XD"
+    ],
+    "experience": "3 years of UI/UX design.",
+    "education": "Diploma in Graphic Design / Multimedia",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.160Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec275",
+    "name": "Theophile Mbonigaba",
+    "email": "theophile.mbonigaba@example.rw",
+    "phone": "+250786355639",
+    "skills": [
+      "Figma",
+      "UI/UX",
+      "Adobe XD"
+    ],
+    "experience": "4 years of UI/UX design.",
+    "education": "Diploma in Graphic Design / Multimedia",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.161Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec276",
+    "name": "Regine Nyirahabimana",
+    "email": "regine.nyirahabimana@example.rw",
+    "phone": "+250782827381",
+    "skills": [
+      "Figma",
+      "UI/UX",
+      "Adobe XD"
+    ],
+    "experience": "3 years of UI/UX design.",
+    "education": "Diploma in Graphic Design / Multimedia",
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.163Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec277",
+    "name": "Sample Resume Formats for Testing",
+    "email": "nzinga.mwamba@outlook.com",
+    "phone": "+250 788 123 456",
+    "skills": [
+      {
+        "name": "english",
+        "level": "Advanced",
+        "yearsOfExperience": 1,
+        "_id": "69e4199ab52849b99921c685"
+      },
+      {
+        "name": "Selenium",
+        "level": "Intermediate",
+        "yearsOfExperience": 1,
+        "_id": "69e41b471685e2f1f286bc59"
+      },
+      {
+        "name": "TypeScript",
+        "level": "Advanced",
+        "yearsOfExperience": 1,
+        "_id": "69e41b701685e2f1f286bc63"
+      },
+      {
+        "name": "Automation",
+        "level": "Intermediate",
+        "yearsOfExperience": 1,
+        "_id": "69e41b931685e2f1f286bc70"
+      },
+      {
+        "name": "Education / Degree",
+        "level": "Intermediate",
+        "yearsOfExperience": 1,
+        "_id": "69e41bb11685e2f1f286bc80"
+      }
+    ],
+    "experience": [],
+    "education": [
+      {
+        "institution": "rwanda UR huye",
+        "degree": "Bachelor ",
+        "fieldOfStudy": "agree business",
+        "startYear": 2020,
+        "endYear": null,
+        "_id": "69e41bed1685e2f1f286bc8e"
+      }
+    ],
+    "missingDocuments": [],
+    "source": "structured",
+    "createdAt": "2026-04-18T21:00:49.164Z",
+    "__v": 4,
+    "availability": {
+      "status": "Available",
+      "type": "Full-time",
+      "startDate": "2026-04-07"
+    },
+    "certifications": [],
+    "firstName": "Sample",
+    "languages": [],
+    "lastName": "Resume Formats for Testing",
+    "projects": [
+      {
+        "name": "ai",
+        "description": "roror",
+        "technologies": [
+          "node"
+        ],
+        "role": "backend ",
+        "link": "https//git.cp",
+        "startDate": "12-34",
+        "endDate": "45-76",
+        "_id": "69e414dcb52849b99921c681"
+      }
+    ],
+    "socialLinks": {
+      "linkedin": "https//linkedin.com/umurava"
+    }
+  }
+]

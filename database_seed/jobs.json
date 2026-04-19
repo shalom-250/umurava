@@ -1,0 +1,327 @@
+[
+  {
+    "_id": "69e3f10157b5d8e0e5dec248",
+    "title": "Senior AI/ML Engineer",
+    "description": "Join us in Kigali for this exciting Senior AI/ML Engineer role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "Python",
+      "TensorFlow",
+      "ML"
+    ],
+    "mustHaveSkills": [
+      "Python"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Engineering",
+    "location": "Kigali (Remote)",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.076Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec249",
+    "title": "Fullstack Developer (MERN)",
+    "description": "Join us in Kigali for this exciting Fullstack Developer (MERN) role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "React",
+      "Node.js",
+      "TypeScript",
+      "SQL"
+    ],
+    "mustHaveSkills": [
+      "React"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Engineering",
+    "location": "Nyarutarama, Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.081Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec24a",
+    "title": "Frontend Specialist (React)",
+    "description": "Join us in Kigali for this exciting Frontend Specialist (React) role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "React",
+      "TypeScript",
+      "UI/UX"
+    ],
+    "mustHaveSkills": [
+      "React"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Engineering",
+    "location": "Kigali Heights",
+    "type": "Contract",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.084Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec24b",
+    "title": "DevOps Engineer",
+    "description": "Join us in Kigali for this exciting DevOps Engineer role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "Docker",
+      "AWS",
+      "Automation"
+    ],
+    "mustHaveSkills": [
+      "Docker"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Infrastructure",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.087Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec24c",
+    "title": "Customer Success Manager",
+    "description": "Join us in Kigali for this exciting Customer Success Manager role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "Communication",
+      "Problem Solving",
+      "CRM"
+    ],
+    "mustHaveSkills": [
+      "Communication"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Operations",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.089Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec24d",
+    "title": "HR Business Partner",
+    "description": "Join us in Kigali for this exciting HR Business Partner role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "HR Policies",
+      "Recruitment",
+      "Employee Relations"
+    ],
+    "mustHaveSkills": [
+      "HR Policies"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Human Resources",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.092Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec24e",
+    "title": "Sales Executive",
+    "description": "Join us in Kigali for this exciting Sales Executive role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "Sales Pitch",
+      "Lead Generation",
+      "CRM"
+    ],
+    "mustHaveSkills": [
+      "Sales Pitch"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Sales",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Draft",
+    "createdAt": "2026-04-18T21:00:49.094Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec24f",
+    "title": "Marketing Coordinator",
+    "description": "Join us in Kigali for this exciting Marketing Coordinator role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "SEO",
+      "Content Strategy",
+      "Social Media"
+    ],
+    "mustHaveSkills": [
+      "SEO"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Marketing",
+    "location": "Kigali",
+    "type": "Part-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.096Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec250",
+    "title": "Data Analyst",
+    "description": "Join us in Kigali for this exciting Data Analyst role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "SQL",
+      "Python",
+      "Data Visualization"
+    ],
+    "mustHaveSkills": [
+      "SQL"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Data",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Closed",
+    "createdAt": "2026-04-18T21:00:49.099Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec251",
+    "title": "Product Designer (UI/UX)",
+    "description": "Join us in Kigali for this exciting Product Designer (UI/UX) role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "Figma",
+      "UI/UX",
+      "Prototyping"
+    ],
+    "mustHaveSkills": [
+      "Figma"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Design",
+    "location": "Kigali",
+    "type": "Contract",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.101Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec252",
+    "title": "Mobile App Developer",
+    "description": "Join us in Kigali for this exciting Mobile App Developer role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "React Native",
+      "TypeScript",
+      "Firebase"
+    ],
+    "mustHaveSkills": [
+      "React Native"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Engineering",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.104Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec253",
+    "title": "QA Automation Engineer",
+    "description": "Join us in Kigali for this exciting QA Automation Engineer role. We are looking for talented Rwandans to help us scale.",
+    "requirements": [
+      "Relevant degree",
+      "3+ years experience",
+      "Fluent in English and Kinyarwanda"
+    ],
+    "skills": [
+      "TypeScript",
+      "Selenium",
+      "Automation"
+    ],
+    "mustHaveSkills": [
+      "TypeScript"
+    ],
+    "recruiterId": "69e3f10057b5d8e0e5dec246",
+    "department": "Engineering",
+    "location": "Kigali",
+    "type": "Full-time",
+    "experienceLevel": "Junior",
+    "deadline": "2026-05-30",
+    "status": "Active",
+    "createdAt": "2026-04-18T21:00:49.106Z",
+    "__v": 0
+  }
+]

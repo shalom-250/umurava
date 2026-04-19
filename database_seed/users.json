@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "69e3f10057b5d8e0e5dec246",
+    "name": "Aline Uwimana",
+    "email": "aline.uwimana@umurava.africa",
+    "password": "$2b$10$gyhgxy5a1IcDLZFUzqotE.tWWDNDmnXJtQO5.nOPWHO4ISc0ddW2y",
+    "role": "recruiter",
+    "createdAt": "2026-04-18T21:00:48.962Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec247",
+    "name": "Nzinga Mwamba",
+    "email": "nzinga.mwamba@outlook.com",
+    "password": "$2b$10$gyhgxy5a1IcDLZFUzqotE.WuWtq2GpnoM6VkzFTyeY2lSIBLph0Qe",
+    "role": "applicant",
+    "createdAt": "2026-04-18T21:00:49.070Z",
+    "__v": 0
+  }
+]

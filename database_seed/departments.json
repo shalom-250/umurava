@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "69dcc8b0b82550db6d8a5859",
+    "name": "Engineering",
+    "companyId": "69dcc8b0b82550db6d8a5850",
+    "__v": 0
+  },
+  {
+    "_id": "69dcc8b0b82550db6d8a585a",
+    "name": "Customer Experience",
+    "companyId": "69dcc8b0b82550db6d8a5851",
+    "__v": 0
+  }
+]

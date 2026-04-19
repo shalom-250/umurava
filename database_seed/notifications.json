@@ -1,0 +1,12 @@
+[
+  {
+    "_id": "69dcc8b0b82550db6d8a585f",
+    "userId": "69dcc8b0b82550db6d8a5854",
+    "title": "New Application",
+    "message": "Jean Luc Mugisha applied for Senior Fullstack Developer.",
+    "isRead": false,
+    "type": "Info",
+    "createdAt": "2026-04-13T10:42:56.790Z",
+    "__v": 0
+  }
+]

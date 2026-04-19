@@ -73,6 +73,22 @@ Build the application for production:
   npm run build
   ```
 
+## 🗄️ Restoring the Database
+
+If you have just cloned this repository, you should restore the MongoDB database state from the exported seed files to ensure you start with the exact same data.
+
+1. Ensure your local MongoDB is running (`mongodb://localhost:27017`).
+2. Navigate into the backend directory:
+   ```bash
+   cd backend
+   ```
+3. Run the database import script:
+   ```bash
+   npx ts-node import_db.ts
+   ```
+
+*This will read all the `.json` files from the `database_seed` folder and automatically populate your local MongoDB collections with the baseline mock data.*
+
 ## 📚 Learn More
 
 To learn more about Next.js, take a look at the following resources:

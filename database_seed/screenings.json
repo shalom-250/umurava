@@ -1,0 +1,51 @@
+[
+  {
+    "_id": "69dcc8b0b82550db6d8a5864",
+    "jobId": "69dcc8b0b82550db6d8a5855",
+    "candidateId": "69dcc8b0b82550db6d8a5857",
+    "score": 88,
+    "rank": 1,
+    "weightedScore": {
+      "skills": 90,
+      "experience": 85,
+      "education": 80
+    },
+    "relevance": 95,
+    "aiReasoning": "Top match with strong local experience.",
+    "recommendation": "Shortlist",
+    "interviewQuestions": [
+      "Explain the event loop.",
+      "How do you handle async errors?"
+    ],
+    "createdAt": "2026-04-13T10:42:56.805Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f0e2f9928120be72611c",
+    "jobId": "69e3f0e1f9928120be726091",
+    "candidateId": "69e3f0e2f9928120be7260c0",
+    "score": 91,
+    "rank": 1,
+    "strengths": "Python, React, Architecture",
+    "gaps": "Requires high compensation",
+    "aiReasoning": "Nzinga fits all the technical criteria required out of the box with proven structural system design skills.",
+    "recommendation": "Shortlist",
+    "interviewQuestions": [],
+    "createdAt": "2026-04-18T21:00:18.427Z",
+    "__v": 0
+  },
+  {
+    "_id": "69e3f10157b5d8e0e5dec2d3",
+    "jobId": "69e3f10157b5d8e0e5dec248",
+    "candidateId": "69e3f10157b5d8e0e5dec277",
+    "score": 91,
+    "rank": 1,
+    "strengths": "Python, React, Architecture",
+    "gaps": "Requires high compensation",
+    "aiReasoning": "Nzinga fits all the technical criteria required out of the box with proven structural system design skills.",
+    "recommendation": "Shortlist",
+    "interviewQuestions": [],
+    "createdAt": "2026-04-18T21:00:49.310Z",
+    "__v": 0
+  }
+]

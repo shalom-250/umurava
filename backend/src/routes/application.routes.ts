@@ -26,9 +26,11 @@ const router = express.Router();
  *     security:
  *       - bearerAuth: []
  */
+import { applyForJob } from '../controllers/candidate.controller';
+
 router.route('/')
     .get(protect, getAll(Application))
-    .post(protect, create(Application));
+    .post(protect, applyForJob);
 
 /**
  * @swagger

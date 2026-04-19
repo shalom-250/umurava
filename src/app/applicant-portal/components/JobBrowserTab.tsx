@@ -256,9 +256,7 @@ export default function JobBrowserTab({ jobs, applications, profile }: JobBrowse
       setApplied(prev => new Set([...prev, jobId]));
       toast.success('Application submitted! The recruiter will be notified.');
     } catch (err: any) {
-      // Fallback for demo if no application endpoint
-      setApplied(prev => new Set([...prev, jobId]));
-      toast.success('Application submitted! The recruiter will be notified.');
+      toast.error(err.message || 'Failed to submit application. Please try again later.');
     } finally {
       setApplying(null);
     }
@@ -393,12 +391,12 @@ export default function JobBrowserTab({ jobs, applications, profile }: JobBrowse
                 onClick={() => handleApply(selectedJob.id)}
                 disabled={applied.has(selectedJob.id) || applying === selectedJob.id || selectedJob.status === 'Closed' || selectedJob.status === 'Draft'}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all active:scale-95 min-w-[120px] justify-center shrink-0 ${applied.has(selectedJob.id)
-                    ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
-                    : selectedJob.status === 'Closed' || selectedJob.status === 'Draft'
-                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                      : eligibility && !eligibility.eligible
-                        ? 'bg-red-50 text-red-600 border border-red-200 cursor-not-allowed'
-                        : 'bg-primary-700 text-white hover:bg-primary-800 shadow-card'
+                  ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
+                  : selectedJob.status === 'Closed' || selectedJob.status === 'Draft'
+                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                    : eligibility && !eligibility.eligible
+                      ? 'bg-red-50 text-red-600 border border-red-200 cursor-not-allowed'
+                      : 'bg-primary-700 text-white hover:bg-primary-800 shadow-card'
                   }`}
               >
                 {applying === selectedJob.id ? (

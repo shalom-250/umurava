@@ -57,6 +57,7 @@ const seedData = async () => {
         await Company.deleteMany({});
         await Skill.deleteMany({});
         await Application.deleteMany({});
+        await Screening.deleteMany({});
 
         // 1. Seed Companies
         const companies = await Company.insertMany([
@@ -75,15 +76,8 @@ const seedData = async () => {
             role: 'recruiter',
         });
 
-        const applicantUser = await User.create({
-            name: 'Nzinga Mwamba',
-            email: 'nzinga.mwamba@outlook.com',
-            password: await bcrypt.hash('Applicant2026!', salt),
-            role: 'applicant',
-        });
-
         // 3. Seed Jobs
-        const createdJobs = [];
+        const createdJobs: any[] = [];
         for (let i = 0; i < jobsData.length; i++) {
             const jd = jobsData[i];
             const job = await Job.create({
@@ -95,100 +89,78 @@ const seedData = async () => {
                 recruiterId: admin._id,
                 department: jd.dept,
                 location: jd.loc,
-                type: jd.type,
-                status: jd.status,
-                deadline: "2026-05-30"
+                type: (jd.type as any === 'Full-time' || jd.type as any === 'Part-time' || jd.type as any === 'Contract') ? jd.type : 'Full-time',
+                status: jd.status === 'Active' || jd.status === 'Draft' || jd.status === 'Closed' ? jd.status : 'Active',
+                deadline: "2026-05-30",
+                experienceLevel: 'Mid-level',
+                salaryRange: 'Negotiable'
             });
             createdJobs.push(job);
         }
 
         // 4. Seed Candidates (35) with specialized skills
-        const createdCandidates = [];
+        const createdCandidates: any[] = [];
         for (let i = 0; i < rwandanNames.length; i++) {
+            const nameParts = rwandanNames[i].split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ') || 'N/A';
+
             let skills: string[] = [];
-            let education = "BSc in Computer Science/Engineering";
-            let experience = "";
+            let educationStr = "BSc in Computer Science/Engineering";
+            let experienceStr = "";
 
             if (i < 15) { // Tech group
                 skills = techSkills.slice(i % 5, (i % 5) + 3);
-                experience = `${3 + (i % 5)} years of software engineering in Kigali.`;
+                experienceStr = `${3 + (i % 5)} years of software engineering in Kigali.`;
             } else if (i < 22) { // HR group
                 skills = hrSkills.slice(i % 3, (i % 3) + 3);
-                education = "BSc in Human Resources / Business";
-                experience = `${4 + (i % 3)} years in HR Operations.`;
+                educationStr = "BSc in Human Resources / Business";
+                experienceStr = `${4 + (i % 3)} years in HR Operations.`;
             } else if (i < 30) { // Sales group
                 skills = salesSkills.slice(i % 3, (i % 3) + 3);
-                education = "BSc in Marketing / Business Administration";
-                experience = `${2 + (i % 4)} years in business development.`;
+                educationStr = "BSc in Marketing / Business Administration";
+                experienceStr = `${2 + (i % 4)} years in business development.`;
             } else { // Design group
                 skills = designSkills.slice(0, 3);
-                education = "Diploma in Graphic Design / Multimedia";
-                experience = `${3 + (i % 2)} years of UI/UX design.`;
+                educationStr = "Diploma in Graphic Design / Multimedia";
+                experienceStr = `${3 + (i % 2)} years of UI/UX design.`;
             }
 
             const hasMissingDocs = i % 10 === 0;
             const candidate = await Candidate.create({
-                name: rwandanNames[i],
-                email: `${rwandanNames[i].toLowerCase().replace(/ /g, '.')}@example.rw`,
+                firstName,
+                lastName,
+                email: `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/ /g, '.')}@example.rw`,
                 phone: `+25078${Math.floor(1000000 + Math.random() * 9000000)}`,
-                skills,
-                experience,
-                education,
-                source: 'structured',
-                missingDocuments: hasMissingDocs ? ["Identity Card (ID)"] : []
+                skills: skills.map(s => ({ name: s, level: 'Intermediate', yearsOfExperience: 2 })),
+                experience: [{
+                    company: 'Kigali Tech Hub',
+                    role: 'Specialist',
+                    startDate: '2022-01-01',
+                    endDate: 'Present',
+                    description: experienceStr,
+                    technologies: skills,
+                    isCurrent: true
+                }],
+                education: [{
+                    institution: 'University of Rwanda',
+                    degree: 'Bachelor',
+                    fieldOfStudy: educationStr,
+                    startYear: 2018,
+                    endYear: 2022
+                }],
+                source: 'structured'
             });
             createdCandidates.push(candidate);
         }
 
-        // Explicitly Inject Nzinga Mwamba Candidate Profile Tracker
-        const nzingaCandidate = await Candidate.create({
-            name: 'Nzinga Mwamba',
-            email: 'nzinga.mwamba@outlook.com',
-            phone: '+250788123456',
-            skills: ['Python', 'TensorFlow', 'React', 'TypeScript', 'Docker'],
-            experience: '4 years of Fullstack and AI Engineering at top tech firms in Kigali. Spearheaded multiple scaling projects heavily mapping machine learning insights into React frontend dashboards.',
-            education: 'BSc in Software Engineering, University of Kigali',
-            source: 'structured'
-        });
-        createdCandidates.push(nzingaCandidate);
-
         // 5. Seed Applications (Skill-Based)
-        // Candidates apply to jobs where they have at least one matching skill or relevant background
         for (let j = 0; j < createdJobs.length; j++) {
             const job = createdJobs[j];
             if (job.status === 'Draft') continue;
 
             const targetApplicantCount = (j % 2 === 0) ? 12 : 5;
-
-            // Filter candidates based on skill overlap or department match
-            const eligibleCandidates = createdCandidates.filter(c => {
-                // Check skill overlap
-                const hasSkillOverlap = c.skills.some(cs => job.skills.some(js => js.toLowerCase().includes(cs.toLowerCase()) || cs.toLowerCase().includes(js.toLowerCase())));
-
-                // Dept match logic
-                const isTechJob = job.department === 'Engineering' || job.department === 'Infrastructure' || job.department === 'Data';
-                const isTechCand = c.education?.includes('Computer Science');
-
-                const isHRJob = job.department === 'Human Resources' || job.department === 'Operations';
-                const isHRCand = c.education?.includes('Human Resources') || c.education?.includes('Business');
-
-                const isSalesJob = job.department === 'Sales' || job.department === 'Marketing';
-                const isSalesCand = c.education?.includes('Marketing');
-
-                const isDesignJob = job.department === 'Design';
-                const isDesignCand = c.skills?.includes('Figma');
-
-                return hasSkillOverlap || (isTechJob && isTechCand) || (isHRJob && isHRCand) || (isSalesJob && isSalesCand) || (isDesignJob && isDesignCand);
-            });
-
-            // If we don't have enough eligible ones, just take some from the general pool to meet the requirement
-            let finalApplicants = eligibleCandidates.sort(() => 0.5 - Math.random()).slice(0, targetApplicantCount);
-
-            if (finalApplicants.length < targetApplicantCount) {
-                const remainingNeeded = targetApplicantCount - finalApplicants.length;
-                const otherCandidates = createdCandidates.filter(c => !finalApplicants.find(a => a._id.equals(c._id)));
-                finalApplicants = [...finalApplicants, ...otherCandidates.sort(() => 0.5 - Math.random()).slice(0, remainingNeeded)];
-            }
+            const finalApplicants = createdCandidates.sort(() => 0.5 - Math.random()).slice(0, targetApplicantCount);
 
             for (const cand of finalApplicants) {
                 await Application.create({
@@ -200,36 +172,7 @@ const seedData = async () => {
             }
         }
 
-        // Inject active explicitly applied states for Nzinga
-        const activeJobs = createdJobs.filter(j => j.status === 'Active');
-        for (let j = 0; j < Math.min(3, activeJobs.length); j++) {
-            await Application.create({
-                jobId: activeJobs[j]._id,
-                candidateId: nzingaCandidate._id,
-                status: j === 0 ? 'Screened' : j === 1 ? 'Under Review' : 'Applied',
-                appliedAt: new Date(Date.now() - Math.random() * 864000000)
-            });
-
-            if (j === 0) {
-                await Screening.create({
-                    jobId: activeJobs[j]._id,
-                    candidateId: nzingaCandidate._id,
-                    score: 91,
-                    rank: 1,
-                    recommendation: 'Shortlist',
-                    aiReasoning: 'Nzinga fits all the technical criteria required out of the box with proven structural system design skills.',
-                    strengths: 'Python, React, Architecture',
-                    gaps: 'Requires high compensation',
-                    skillBreakdown: [
-                        { skill: 'Python', score: 95, required: true },
-                        { skill: 'React', score: 88, required: true },
-                        { skill: 'Architecture', score: 92, required: true }
-                    ]
-                });
-            }
-        }
-
-        console.log(`Seeding complete: Skill-matched applications for 12 Jobs and 36 Candidates (Nzinga Attached)!`);
+        console.log(`Seeding complete: 12 Jobs and 36 Candidates on Atlas!`);
         process.exit(0);
     } catch (error) {
         console.error('Seeding Error:', error);

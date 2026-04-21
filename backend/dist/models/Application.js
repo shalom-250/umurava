@@ -39,7 +39,7 @@ const ApplicationSchema = new mongoose_1.Schema({
     candidateId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Candidate', required: true },
     status: {
         type: String,
-        enum: ['Applied', 'Screened', 'Interview', 'Offered', 'Hired', 'Rejected'],
+        enum: ['Applied', 'Screened', 'Interview', 'Offered', 'Hired', 'Rejected', 'Under Review'],
         default: 'Applied'
     },
     appliedAt: { type: Date, default: Date.now },

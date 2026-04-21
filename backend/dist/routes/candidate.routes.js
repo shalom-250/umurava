@@ -63,6 +63,9 @@ const router = express_1.default.Router();
  *         description: List of candidates
  */
 router.route('/')
-    .post(auth_middleware_1.protect, candidate_controller_1.uploadCandidate)
+    .post(auth_middleware_1.protect, candidate_controller_1.saveCandidates)
     .get(auth_middleware_1.protect, candidate_controller_1.getCandidates);
+router.post('/parse', auth_middleware_1.protect, candidate_controller_1.parseCandidateFile);
+router.get('/me/dashboard', auth_middleware_1.protect, candidate_controller_1.getApplicantDashboardStats);
+router.put('/me', auth_middleware_1.protect, candidate_controller_1.updateMyProfile);
 exports.default = router;

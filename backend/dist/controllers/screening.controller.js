@@ -25,8 +25,8 @@ const runScreening = async (req, res) => {
         // Prepare candidate data for Gemini
         const candidatesForAI = candidates.map(c => ({
             id: c._id,
-            name: c.name,
-            skills: c.skills,
+            name: `${c.firstName} ${c.lastName}`.trim(),
+            skills: (c.skills || []).map((s) => typeof s === 'string' ? s : s.name),
             experience: c.experience,
             text: c.extractedText?.substring(0, 2000) // Truncate text to avoid token limits
         }));
@@ -71,10 +71,22 @@ const runTestScreening = async (req, res) => {
             }
             jobDescription = `${job.title}\n${job.description}\nRequirements: ${job.requirements.join(', ')}\nSkills: ${job.skills.join(', ')}`;
         }
-        // Fetch "Umurava Dummy Data" (real candidates from database)
-        const candidates = await Candidate_1.default.find({});
+        // UNIFIED RANKING POOL
+        // We fetch ALL candidates from the database. This inherently merges formal 
+        // job applicants with generically uploaded CSVs and unstructured PDFs into a 
+        // single holistic talent pool evaluating everyone against the Job Requirements.
+        let candidates = [];
+        const allCandidates = await Candidate_1.default.find({});
+        if (typeof jobId === 'string' && jobId.startsWith('job-')) {
+            // Mock job fallback: For speed, limit to 10 latest candidates
+            candidates = allCandidates.reverse().slice(0, 10);
+        }
+        else {
+            // Real Job: Evaluate the entire unified pool 
+            candidates = allCandidates;
+        }
         if (candidates.length === 0) {
-            res.status(400).json({ message: 'No candidates found in database to screen' });
+            res.status(400).json({ message: 'No candidates have applied to this job yet.' });
             return;
         }
         // Prepare candidate data for Gemini

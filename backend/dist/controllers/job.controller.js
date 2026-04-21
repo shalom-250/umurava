@@ -30,12 +30,23 @@ const createJob = async (req, res) => {
     }
 };
 exports.createJob = createJob;
+const Application_1 = __importDefault(require("../models/Application"));
 const getJobs = async (req, res) => {
     try {
-        const jobs = await Job_1.default.find({}).populate('recruiterId', 'name email');
-        res.json(jobs);
+        const jobs = await Job_1.default.find({}).populate('recruiterId', 'name email').lean();
+        // Enhance jobs with actual application counts
+        const jobsWithCounts = await Promise.all(jobs.map(async (job) => {
+            const count = await Application_1.default.countDocuments({ jobId: job._id });
+            return {
+                ...job,
+                applicantCount: count,
+                id: job._id // ensure 'id' alias is present for frontend
+            };
+        }));
+        res.json(jobsWithCounts);
     }
     catch (error) {
+        console.error("Error fetching jobs:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };

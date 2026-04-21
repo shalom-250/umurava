@@ -28,9 +28,10 @@ const router = express_1.default.Router();
  *     security:
  *       - bearerAuth: []
  */
+const candidate_controller_1 = require("../controllers/candidate.controller");
 router.route('/')
     .get(auth_middleware_1.protect, (0, generic_controller_1.getAll)(Application_1.default))
-    .post(auth_middleware_1.protect, (0, generic_controller_1.create)(Application_1.default));
+    .post(auth_middleware_1.protect, candidate_controller_1.applyForJob);
 /**
  * @swagger
  * /api/applications/{id}:

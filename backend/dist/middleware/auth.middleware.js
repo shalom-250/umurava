@@ -12,7 +12,12 @@ const protect = async (req, res, next) => {
         try {
             token = req.headers.authorization.split(' ')[1];
             const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-            req.user = await User_1.default.findById(decoded.id).select('-password');
+            const user = await User_1.default.findById(decoded.id).select('-password');
+            if (!user) {
+                res.status(401).json({ message: 'User not found, please login again' });
+                return;
+            }
+            req.user = user;
             next();
         }
         catch (error) {

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { User, Briefcase, FileText, LayoutDashboard, Loader2, ChevronRight, X } from 'lucide-react';
+import { User, Briefcase, FileText, LayoutDashboard, Loader2, ChevronRight, X, Menu } from 'lucide-react';
 import ApplicantDashboardTab from './ApplicantDashboardTab';
 import ProfileBuilderTab from './ProfileBuilderTab';
 import JobBrowserTab from './JobBrowserTab';
@@ -93,13 +93,24 @@ export default function ApplicantPortalClient() {
   return (
     <div className="flex h-full overflow-hidden">
 
-      {/* ── Left Sidebar (desktop/tablet — hidden on mobile) ─────── */}
+      {/* ── Sidebar (desktop rail / mobile drawer) ─────── */}
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="sm:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <aside
         ref={sidebarRef}
         className={`
-          hidden sm:flex flex-col shrink-0 bg-white border-r border-border
-          transition-all duration-300 ease-in-out overflow-hidden z-40
-          ${sidebarOpen ? 'w-56' : 'w-[60px]'}
+          fixed inset-y-0 left-0 z-50 sm:relative sm:flex flex-col shrink-0 bg-white border-r border-border
+          transition-all duration-300 ease-in-out overflow-hidden
+          ${sidebarOpen
+            ? 'w-64 sm:w-56 translate-x-0'
+            : 'w-64 -translate-x-full sm:translate-x-0 sm:w-[60px]'
+          }
         `}
       >
         {/* Header toggle button */}
@@ -195,11 +206,19 @@ export default function ApplicantPortalClient() {
         {/* Top header — name + profile chip */}
         <div className="bg-white border-b border-border px-4 sm:px-6 py-3 shrink-0">
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-display font-700 text-foreground truncate">
-                Welcome back, {enrichedProfile.firstName} 👋
-              </h1>
-              <p className="text-xs text-muted-foreground hidden sm:block truncate">{enrichedProfile.headline}</p>
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="sm:hidden p-1.5 -ml-1 hover:bg-muted rounded-lg transition-colors text-muted-foreground"
+              >
+                <Menu size={20} />
+              </button>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-lg font-display font-700 text-foreground truncate">
+                  Welcome back, {enrichedProfile.firstName} 👋
+                </h1>
+                <p className="text-xs text-muted-foreground hidden sm:block truncate">{enrichedProfile.headline}</p>
+              </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="hidden sm:block text-right">

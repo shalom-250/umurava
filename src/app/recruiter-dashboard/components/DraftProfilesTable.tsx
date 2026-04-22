@@ -36,6 +36,7 @@ interface DraftProfile {
     volunteerExperience?: any[] | null;
     extracurricularActivities?: any[] | null;
     publications?: any[] | null;
+    additionalInformation?: string | null;
 }
 
 interface DraftProfilesTableProps {
@@ -327,6 +328,19 @@ export default function DraftProfilesTable({
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {/* Additional Captured Information (Dynamic Extraction) */}
+                                            {profile.additionalInformation && (
+                                                <div className="mt-6 p-4 bg-orange-50/50 rounded-xl border border-orange-100 animate-in fade-in zoom-in-95 duration-300">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Sparkles size={14} className="text-orange-500" />
+                                                        <h4 className="text-xs font-bold text-orange-900 uppercase tracking-tight">Extra Details Extracted (Dynamic)</h4>
+                                                    </div>
+                                                    <p className="text-xs text-orange-800 whitespace-pre-wrap leading-relaxed font-medium">
+                                                        {profile.additionalInformation}
+                                                    </p>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 )}

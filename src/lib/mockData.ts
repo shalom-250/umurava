@@ -75,6 +75,7 @@ export interface TalentProfile {
   availability: Availability;
   socialLinks?: SocialLinks;
   resumeUrl?: string;
+  additionalInformation?: string;
   profileCompleteness: number;
 }
 

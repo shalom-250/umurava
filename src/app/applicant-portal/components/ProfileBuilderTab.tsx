@@ -59,6 +59,7 @@ export default function ProfileBuilderTab({ profile }: ProfileBuilderTabProps) {
         experience: Array.isArray(data.experience) && data.experience.length > 0 ? data.experience : localProfile.experience,
         education: Array.isArray(data.education) && data.education.length > 0 ? data.education : localProfile.education,
         projects: Array.isArray(data.projects) && data.projects.length > 0 ? data.projects : localProfile.projects,
+        additionalInformation: data.additionalInformation || localProfile.additionalInformation,
         socialLinks: {
           ...localProfile.socialLinks,
           linkedin: data.onlinePresence?.linkedin || localProfile.socialLinks?.linkedin,
@@ -328,9 +329,20 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
           value={profile.bio}
           onChange={(e) => handleFieldChange('bio', e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 resize-none"
+          className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 resize-none transition-all"
         />
       </FieldGroup>
+
+      {profile.additionalInformation && (
+        <FieldGroup label="Additional Extracted Details" hint="Extra information captured by AI from your document">
+          <textarea
+            value={profile.additionalInformation}
+            onChange={(e) => handleFieldChange('additionalInformation', e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 text-sm border border-primary-200 bg-primary-50/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 resize-none transition-all"
+          />
+        </FieldGroup>
+      )}
     </SectionCard>
   );
 }

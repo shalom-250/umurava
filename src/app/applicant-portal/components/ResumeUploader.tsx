@@ -30,6 +30,7 @@ interface ParsedData {
     extracurricularActivities: any[] | null;
     publications: any[] | null;
     onlinePresence: any | null;
+    additionalInformation: string | null;
 }
 
 interface ResumeUploaderProps {
@@ -92,6 +93,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                 skillsRaw: data.skillsRaw || (Array.isArray(data.skills) ? data.skills.join(', ') : ''),
                 experience: Array.isArray(data.experience) ? data.experience : [],
                 education: Array.isArray(data.education) ? data.education : [],
+                additionalInformation: data.additionalInformation || null,
             });
             setStatus('REVIEW');
         } catch (err: any) {
@@ -352,6 +354,20 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                             </div>
                         </div>
                     </div>
+
+                    {/* Additional Dynamic Information */}
+                    {parsedData.additionalInformation && (
+                        <div className="p-4 bg-primary-50 rounded-xl border border-primary-100">
+                            <SectionHeader title="9. Additional Dynamic Details" />
+                            <textarea
+                                rows={4}
+                                value={parsedData.additionalInformation}
+                                onChange={e => setParsedData({ ...parsedData, additionalInformation: e.target.value })}
+                                className="w-full bg-transparent text-sm text-primary-900 leading-relaxed outline-none border-none resize-none"
+                                placeholder="Any other details extracted from the doc..."
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-border flex items-center justify-between shrink-0">

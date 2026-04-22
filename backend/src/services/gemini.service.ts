@@ -157,6 +157,7 @@ export const extractCandidateInfoFromText = async (text: string): Promise<any> =
     14. volunteerExperience: Array of { organization, role, impact, duration }.
     15. extracurricularActivities: Array of { activity, role, description }.
     16. publications: Array of { title, platform, link, year }.
+    17. additionalInformation: ANY other information from the CV that does not fit into the standard categories above (e.g. military service, unusual sections, detailed bio, etc.).
 
     Resume Text:
     ${text.substring(0, 10000)}
@@ -206,6 +207,7 @@ export const extractCandidateInfoFromFile = async (filePath: string, mimeType: s
             - volunteerExperience: [{ organization, role, impact, duration }]
             - extracurricularActivities: [{ activity, role, description }]
             - publications: [{ title, platform, link, year }]
+            - additionalInformation: "Any other details not covered above"
         `;
 
         const result = await model.generateContent([
@@ -296,6 +298,8 @@ const normalizeParsedData = (data: any, originalText: string): any => {
         volunteerExperience: data.volunteerExperience || [],
         extracurricularActivities: data.extracurricularActivities || [],
         publications: data.publications || [],
+        additionalInformation: data.additionalInformation || null,
+        rawAIOutput: data, // Preserve everything for "dynamic" extraction
         source: 'unstructured'
     };
 };

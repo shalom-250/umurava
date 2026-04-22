@@ -94,6 +94,8 @@ export interface ICandidate extends Document {
     };
     resumeUrl?: string;
     extractedText?: string;
+    additionalInformation?: string;
+    rawAIOutput?: any;
     source: 'structured' | 'unstructured';
     createdAt: Date;
 }
@@ -204,6 +206,8 @@ const CandidateSchema: Schema = new Schema({
     },
     resumeUrl: { type: String },
     extractedText: { type: String },
+    additionalInformation: { type: String },
+    rawAIOutput: { type: Schema.Types.Mixed },
     source: { type: String, enum: ['structured', 'unstructured'], default: 'structured' },
     createdAt: { type: Date, default: Date.now },
 });

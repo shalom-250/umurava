@@ -663,6 +663,7 @@ export default function RecruiterDashboardClient() {
               <ShortlistTable
                 results={filteredResults}
                 profiles={talentProfiles}
+                onUpdateStatus={handleUpdateApplicationStatus}
                 onViewCandidate={(res) => {
                   const profile = talentProfiles.find(p => p.id === res.candidateId);
                   if (profile) {

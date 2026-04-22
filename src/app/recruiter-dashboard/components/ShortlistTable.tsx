@@ -7,6 +7,7 @@ interface ShortlistTableProps {
   results: ScreeningResult[];
   profiles: TalentProfile[];
   onViewCandidate: (result: ScreeningResult) => void;
+  onUpdateStatus: (candidateId: string, newStatus: string) => void;
 }
 
 type SortKey = 'rank' | 'matchScore' | 'name';
@@ -26,7 +27,7 @@ function ScoreBar({ score }: { score: number }) {
   );
 }
 
-export default function ShortlistTable({ results, profiles, onViewCandidate }: ShortlistTableProps) {
+export default function ShortlistTable({ results, profiles, onViewCandidate, onUpdateStatus }: ShortlistTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('rank');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
@@ -220,10 +221,35 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
+                    {!isPending && (
+                      <div className="flex items-center gap-1.5 border-r pr-2 mr-1">
+                        <button
+                          onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Interview'); }}
+                          className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                          title="Move to Interview"
+                        >
+                          <Clock size={16} />
+                        </button>
+                        <button
+                          onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Hired'); }}
+                          className="p-1.5 text-green-600 hover:bg-green-100 rounded-lg transition-all"
+                          title="Hire Candidate"
+                        >
+                          <UserCheck size={16} />
+                        </button>
+                        <button
+                          onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Rejected'); }}
+                          className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                          title="Reject Candidate"
+                        >
+                          <UserX size={16} />
+                        </button>
+                      </div>
+                    )}
                     <button
                       onClick={e => { e.stopPropagation(); onViewCandidate(result); }}
                       suppressHydrationWarning
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold hover:bg-blue-100 transition-all border border-blue-100/50 shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-[11px] font-bold hover:bg-gray-100 transition-all border border-gray-200 shadow-sm"
                     >
                       <Eye size={14} />
                       Details

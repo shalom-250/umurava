@@ -228,27 +228,27 @@ export default function DraftProfilesTable({
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-xl">
+                                                <div className="flex items-center justify-end gap-2 p-1">
                                                     <button
                                                         onClick={(e) => startEditing(e, idx)}
-                                                        className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm"
+                                                        className="p-2 text-blue-700 bg-blue-50/50 hover:bg-blue-600 hover:text-white rounded-lg transition-all border border-blue-200 shadow-sm group/btn"
                                                         title="Edit Basic Info"
                                                     >
-                                                        <Edit2 size={14} />
+                                                        <Edit2 size={14} className="group-hover/btn:scale-110 transition-transform" />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); onCreateProfile(idx); }}
-                                                        className="p-2 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-all border border-orange-100 shadow-sm"
+                                                        className="p-2 text-orange-700 bg-orange-50/50 hover:bg-orange-600 hover:text-white rounded-lg transition-all border border-orange-200 shadow-sm group/btn"
                                                         title="Confirm & Create"
                                                     >
-                                                        <UserPlus size={14} />
+                                                        <UserPlus size={14} className="group-hover/btn:scale-110 transition-transform" />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
-                                                        className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all border border-red-100 shadow-sm"
+                                                        className="p-2 text-red-700 bg-red-50/50 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-200 shadow-sm group/btn"
                                                         title="Remove Draft"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Trash2 size={14} className="group-hover/btn:scale-110 transition-transform" />
                                                     </button>
                                                 </div>
                                             </td>

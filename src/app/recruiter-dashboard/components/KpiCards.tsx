@@ -29,7 +29,7 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
       id: 'kpi-total',
       label: 'Total Applicants',
       value: (job.applicantCount || 0).toString(),
-      sub: `+8 since yesterday`,
+      sub: 'Newly applied candidates',
       icon: Users,
       trend: 'up' as const,
       color: 'blue',

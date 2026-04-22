@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react'; // Bump to fix chunk load error
-import { mockJobs as staticMockJobs, mockTalentProfiles, mockScreeningResults, jobStatusColors } from '@/lib/mockData';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud } from 'lucide-react';
@@ -13,7 +12,7 @@ import AppLogo from '@/components/ui/AppLogo';
 import CandidateReasoningDrawer from './CandidateReasoningDrawer';
 import CreateJobModal from './CreateJobModal';
 import UploadResumeModal from './UploadResumeModal';
-import { Job, ScreeningResult, TalentProfile, mockTalentProfiles as staticMockProfiles } from '@/lib/mockData';
+import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -31,12 +30,27 @@ export default function RecruiterDashboardClient() {
   const [mounted, setMounted] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [talentProfiles, setTalentProfiles] = useState<TalentProfile[]>(staticMockProfiles);
+  const [talentProfiles, setTalentProfiles] = useState<TalentProfile[]>([]);
 
-  const selectedJobId = currentJobId || 'job-001';
-  const screeningResults = allResults[selectedJobId] || [];
+  const selectedJobId = currentJobId;
+  const screeningResults = (selectedJobId && allResults[selectedJobId]) || [];
 
   const setSelectedJobId = (id: string) => dispatch(setCurrentJobId(id));
+
+  const fetchJobs = async () => {
+    try {
+      const data = await api.get('/jobs');
+      if (data && data.length > 0) {
+        setJobs(data);
+        const firstId = (data[0] as any).id || (data[0] as any)._id;
+        if (!currentJobId) dispatch(setCurrentJobId(firstId));
+      }
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchCandidates = async () => {
     try {
@@ -80,21 +94,30 @@ export default function RecruiterDashboardClient() {
     }
   };
 
-  const fetchJobs = async () => {
+  const fetchScreeningResults = async (jobId: string) => {
+    if (!jobId) return;
     try {
-      const data = await api.get('/jobs');
-      const finalJobs = data.length > 0 ? data : staticMockJobs;
-      setJobs(finalJobs);
-
-      if (finalJobs.length > 0) {
-        const firstId = (finalJobs[0] as any).id || (finalJobs[0] as any)._id;
-        if (!currentJobId) dispatch(setCurrentJobId(firstId));
+      const data = await api.get(`/screening/${jobId}`);
+      if (data && Array.isArray(data)) {
+        const mappedResults: ScreeningResult[] = data.map((r: any) => ({
+          candidateId: r.candidateId?._id || r.candidateId,
+          rank: r.rank,
+          matchScore: r.score,
+          recommendation: r.recommendation,
+          skillBreakdown: r.weightedScore ? [
+            { skill: 'Skills', score: r.weightedScore.skills || 0, required: true },
+            { skill: 'Experience', score: r.weightedScore.experience || 0, required: true },
+            { skill: 'Education', score: r.weightedScore.education || 0, required: true }
+          ] : [],
+          strengths: r.strengths || [],
+          gaps: r.gaps || [],
+          aiReasoning: r.aiReasoning,
+          interviewQuestions: r.interviewQuestions
+        }));
+        dispatch(setScreeningResults({ jobId, results: mappedResults }));
       }
     } catch (error) {
-      console.error('Failed to fetch jobs:', error);
-      setJobs(staticMockJobs);
-    } finally {
-      setLoading(false);
+      console.error('Failed to fetch screening results:', error);
     }
   };
 
@@ -104,24 +127,22 @@ export default function RecruiterDashboardClient() {
     fetchCandidates();
   }, []);
 
-  const selectedJob = jobs.find(j => (j as any).id === selectedJobId || (j as any)._id === selectedJobId) || jobs[0] || staticMockJobs[0];
+  useEffect(() => {
+    if (selectedJobId) {
+      fetchScreeningResults(selectedJobId);
+    }
+  }, [selectedJobId]);
+
+  const selectedJob = jobs.find(j => (j as any).id === selectedJobId || (j as any)._id === selectedJobId) || jobs[0];
   const filteredJobs = jobs.filter(j => {
     const searchLower = jobSearch.toLowerCase();
     return (
       (j.title && j.title.toLowerCase().includes(searchLower)) ||
       (j.department && j.department.toLowerCase().includes(searchLower)) ||
-      (j.location && j.location.toLowerCase().includes(searchLower)) ||
-      (j.type && j.type.toLowerCase().includes(searchLower))
+      (j.location && j.location.toLowerCase().includes(searchLower))
     );
   });
 
-  const specificResults = allResults[selectedJobId];
-
-  useEffect(() => {
-    if (selectedJobId.startsWith('job-') && !specificResults) {
-      dispatch(setScreeningResults({ jobId: selectedJobId, results: mockScreeningResults }));
-    }
-  }, [selectedJobId, specificResults, dispatch]);
 
   const filteredResults = useMemo(() => screeningResults.filter(r => {
     if (shortlistFilter === 'all') return true;
@@ -132,18 +153,19 @@ export default function RecruiterDashboardClient() {
   }), [screeningResults, shortlistFilter]);
 
   const handleTriggerScreening = async (isReRun = false) => {
-    if (selectedJob.status === 'Closed') {
+    if (selectedJob && selectedJob.status === 'Closed') {
       toast.error('Cannot screen for a Closed job');
       return;
     }
 
     dispatch(setScreeningLoading(true));
     setScreeningDone(false);
-    if (isReRun) {
+    if (selectedJobId && isReRun) {
       dispatch(clearResults(selectedJobId));
     }
 
     try {
+      if (!selectedJobId) throw new Error('No job selected');
       const jobIdToUse = (selectedJob as any)._id || (selectedJob as any).id;
       const response = await api.post(`/screening/test-gemini/${jobIdToUse}`, {});
 
@@ -166,7 +188,9 @@ export default function RecruiterDashboardClient() {
         interviewQuestions: r.interviewQuestions
       }));
 
-      dispatch(setScreeningResults({ jobId: selectedJobId, results: mappedResults }));
+      if (selectedJobId) {
+        dispatch(setScreeningResults({ jobId: selectedJobId, results: mappedResults }));
+      }
       toast.success(isReRun ? 'AI Screening Refreshed!' : 'AI Screening Complete!');
     } catch (error: any) {
       console.error('Screening failed:', error);
@@ -178,17 +202,20 @@ export default function RecruiterDashboardClient() {
   };
 
   // Generate mock trend data for charts
-  const trendData = useMemo(() => Array.from({ length: 15 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (14 - i));
-    const seed = (String(selectedJob.id || (selectedJob as any)._id).length + i) % 10;
-    const base = Math.floor((selectedJob.applicantCount || 45) / 15);
-    return {
-      date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      applications: base + seed,
-      screened: Math.floor((base + seed) * 0.8)
-    };
-  }), [selectedJob.id, (selectedJob as any)._id, selectedJob.applicantCount]);
+  const trendData = useMemo(() => {
+    if (!selectedJob) return [];
+    return Array.from({ length: 15 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (14 - i));
+      const seed = ((selectedJob as any)._id || (selectedJob as any).id || '').length + i;
+      const base = Math.floor((selectedJob.applicantCount || 0) / 15);
+      return {
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        applications: base + seed,
+        screened: Math.floor((base + seed) * (screeningResults.length > 0 ? 0.8 : 0))
+      };
+    });
+  }, [selectedJob, screeningResults.length]);
 
   if (!mounted) return null;
 
@@ -270,16 +297,23 @@ export default function RecruiterDashboardClient() {
         <div className="max-w-7xl mx-auto p-6 space-y-8">
           {/* Header Internal - Compact */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-gray-200">
-            <div>
-              <div className="flex items-center gap-2 mb-1 text-xs font-bold text-blue-600 uppercase tracking-widest">
-                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
-                Dashboard / {selectedJob.department}
+            {selectedJob ? (
+              <div>
+                <div className="flex items-center gap-2 mb-1 text-xs font-bold text-blue-600 uppercase tracking-widest">
+                  <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+                  Dashboard / {selectedJob.department}
+                </div>
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
+                <p className="mt-1 text-sm text-gray-500 font-medium">
+                  {selectedJob.location} • {selectedJob.type} • Posted {new Date(selectedJob.postedDate || Date.now()).toLocaleDateString()}
+                </p>
               </div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
-              <p className="mt-1 text-sm text-gray-500 font-medium">
-                {selectedJob.location} • {selectedJob.type} • Posted {new Date(selectedJob.postedDate).toLocaleDateString()}
-              </p>
-            </div>
+            ) : (
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Select a Job</h2>
+                <p className="mt-1 text-sm text-gray-500 font-medium italic">No active job selected</p>
+              </div>
+            )}
 
             <div className="flex items-center gap-3">
               <button
@@ -321,20 +355,24 @@ export default function RecruiterDashboardClient() {
           </div>
 
           {/* KPI Section */}
-          <KpiCards
-            job={selectedJob}
-            screeningResults={screeningResults}
-          />
+          {selectedJob && (
+            <KpiCards
+              job={selectedJob}
+              screeningResults={screeningResults}
+            />
+          )}
 
           {/* Charts Section */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <div className="xl:col-span-2">
-              <ApplicationsTrendChart jobTitle={selectedJob.title} data={trendData} />
+          {selectedJob && (
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              <div className="xl:col-span-2">
+                <SkillMatchChart results={screeningResults} profiles={talentProfiles} job={selectedJob} />
+              </div>
+              <div>
+                <ApplicantBreakdownChart jobTitle={selectedJob.title} results={screeningResults} />
+              </div>
             </div>
-            <div>
-              <ApplicantBreakdownChart jobTitle={selectedJob.title} results={screeningResults} />
-            </div>
-          </div>
+          )}
 
           {/* Table Section */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -394,8 +432,12 @@ export default function RecruiterDashboardClient() {
                 results={filteredResults}
                 profiles={talentProfiles}
                 onViewCandidate={(res) => {
-                  const profile = talentProfiles.find(p => p.id === res.candidateId) || staticMockProfiles[0];
-                  setSelectedCandidate({ profile, result: res });
+                  const profile = talentProfiles.find(p => p.id === res.candidateId);
+                  if (profile) {
+                    setSelectedCandidate({ profile, result: res });
+                  } else {
+                    toast.error('Candidate profile details not available');
+                  }
                 }}
               />
             )}

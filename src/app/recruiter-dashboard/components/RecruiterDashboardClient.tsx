@@ -117,16 +117,18 @@ export default function RecruiterDashboardClient() {
           candidateId: r.candidateId?._id || r.candidateId,
           rank: r.rank,
           matchScore: r.score,
-          recommendation: r.recommendation,
-          skillBreakdown: r.weightedScore ? [
+          recommendation: r.recommendation === 'Shortlist' ? 'Strongly Recommend' :
+            r.recommendation === 'Waitlist' ? 'Consider' : 'Not Recommended',
+          skillBreakdown: r.skillBreakdown || (r.weightedScore ? [
             { skill: 'Skills', score: r.weightedScore.skills || 0, required: true },
             { skill: 'Experience', score: r.weightedScore.experience || 0, required: true },
             { skill: 'Education', score: r.weightedScore.education || 0, required: true }
-          ] : [],
-          strengths: r.strengths || [],
-          gaps: r.gaps || [],
+          ] : []),
+          strengths: Array.isArray(r.strengths) ? r.strengths : r.strengths ? [r.strengths] : [],
+          gaps: Array.isArray(r.gaps) ? r.gaps : r.gaps ? [r.gaps] : [],
           aiReasoning: r.aiReasoning,
-          interviewQuestions: r.interviewQuestions
+          interviewQuestions: r.interviewQuestions || [],
+          documentStatus: r.documentStatus || []
         }));
         dispatch(setScreeningResults({ jobId, results: mappedResults }));
       }

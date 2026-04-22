@@ -384,5 +384,88 @@ const normalizeParsedData = (data: any, originalText: string): any => {
 };
 
 const getFallbackInfo = (text: string): any => {
-    return normalizeParsedData({}, text);
+    // Smart regex-based extractor — runs when AI is rate-limited
+    const getLine = (label: string) => {
+        const m = text.match(new RegExp(`${label}[:\\s]+([^\\n]+)`, 'i'));
+        return m ? m[1].trim() : null;
+    };
+
+    const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    const phoneMatch = text.match(/(?:\+?[\d\s\-().]{7,20})/);
+
+    const name = getLine('Full Name') || getLine('Name') || null;
+    const email = emailMatch ? emailMatch[0] : null;
+    const phone = phoneMatch ? phoneMatch[0].trim() : null;
+    const location = getLine('Location') || getLine('City') || null;
+    const nationality = getLine('Nationality') || null;
+    const dob = getLine('Date of Birth') || getLine('DOB') || null;
+    const personalStatement = getLine('Personal Statement') || getLine('Profile') || getLine('Summary') || getLine('Objective') || null;
+
+    // Extract skills from a "Skills:" section
+    const skillsMatch = text.match(/(?:Skills|Technical Skills|Core Skills)[:\s]+([^\n]{10,})/i);
+    const skillsRaw = skillsMatch ? skillsMatch[1] : '';
+    const skills = skillsRaw
+        ? skillsRaw.split(/[,;|]+/).map(s => ({ name: s.trim(), level: 'Intermediate', type: 'Technical' })).filter(s => s.name.length > 1)
+        : [];
+
+    // Extract languages
+    const langMatch = text.match(/Languages?[:\s]+([^\n]+)/i);
+    const languages = langMatch
+        ? langMatch[1].split(/[,;|]+/).map(l => ({ name: l.trim(), level: 'Intermediate' })).filter(l => l.name.length > 1)
+        : [];
+
+    // Extract education block
+    const eduMatch = text.match(/Education[\s\S]{0,20}\n([\s\S]{0,600}?)(?:\n[A-Z]|Work Experience|Skills|$)/i);
+    const education = eduMatch ? [{
+        institution: (eduMatch[1].match(/(?:University|College|School|Institute)[^,\n]*/i) || [])[0]?.trim() || null,
+        degree: (eduMatch[1].match(/(?:Bachelor|Master|PhD|B\.Sc|MSc|Diploma|Certificate)[^,\n]*/i) || [])[0]?.trim() || null,
+        fieldOfStudy: null, location: null, startYear: null, endYear: null, achievements: []
+    }] : [];
+
+    // Extract work experience block
+    const expMatch = text.match(/Work Experience[\s\S]{0,20}\n([\s\S]{0,600}?)(?:\n[A-Z]|Skills|Education|$)/i);
+    const experience = expMatch ? [{
+        jobTitle: (expMatch[1].match(/^([^\n,•\-]+)/m) || [])[1]?.trim() || null,
+        company: (expMatch[1].match(/(?:at |@\s*)([A-Z][^\n,]+)/i) || [])[1]?.trim() || null,
+        description: expMatch[1].trim().substring(0, 300),
+        location: null, startDate: null, endDate: null, achievements: [], technologies: [], isCurrent: false
+    }] : [];
+
+    // Extract projects
+    const projMatch = text.match(/Projects?[\s\S]{0,20}\n([\s\S]{0,400}?)(?:\n[A-Z]|Awards|Certifications|$)/i);
+    const projects = projMatch ? [{
+        name: (projMatch[1].match(/^([^\n]+)/m) || [])[1]?.trim() || null,
+        description: projMatch[1].trim().substring(0, 200),
+        technologies: [], role: null
+    }] : [];
+
+    // Extract awards
+    const awardsMatch = text.match(/Awards?[\s\S]{0,20}\n([\s\S]{0,300}?)(?:\n[A-Z]|Social|$)/i);
+    const awards = awardsMatch ? [{
+        title: (awardsMatch[1].match(/^([^\n]+)/m) || [])[1]?.trim() || null,
+        issuer: null, year: null, description: awardsMatch[1].trim().substring(0, 150)
+    }] : [];
+
+    // Extract social links
+    const linkedinMatch = text.match(/(?:linkedin\.com\/in\/|LinkedIn:\s*)([^\s,\n]+)/i);
+    const githubMatch = text.match(/(?:github\.com\/|GitHub:\s*)([^\s,\n]+)/i);
+    const websiteMatch = text.match(/(?:Website|Portfolio):\s*([^\s\n]+)/i);
+
+    const socialLinks = {
+        linkedin: linkedinMatch ? (linkedinMatch[0].startsWith('http') ? linkedinMatch[0] : `https://linkedin.com/in/${linkedinMatch[1]}`) : null,
+        github: githubMatch ? (githubMatch[0].startsWith('http') ? githubMatch[0] : `https://github.com/${githubMatch[1]}`) : null,
+        portfolio: websiteMatch ? websiteMatch[1] : null,
+        website: null
+    };
+
+    return normalizeParsedData({
+        name, email, phone, location, nationality, dob,
+        personalStatement, socialLinks,
+        skills, languages, education, experience,
+        projects, awards,
+        certifications: [], interests: { professional: [], personal: [] },
+        hobbies: [], references: [], backgroundSchool: [],
+        volunteerExperience: [], extracurricularActivities: [],
+        publications: [], additionalInformation: null
+    }, text);
 };

@@ -8,9 +8,10 @@ interface ApplicantDashboardTabProps {
   applications: Application[];
   recommendedJobs: any[];
   onNavigate: (tab: 'dashboard' | 'profile' | 'jobs' | 'applications') => void;
+  onViewJob?: (jobId: string) => void;
 }
 
-export default function ApplicantDashboardTab({ profile, applications, recommendedJobs, onNavigate }: ApplicantDashboardTabProps) {
+export default function ApplicantDashboardTab({ profile, applications, recommendedJobs, onNavigate, onViewJob }: ApplicantDashboardTabProps) {
   const shortlisted = applications.filter(a => a.status === 'Shortlisted').length;
   const underReview = applications.filter(a => a.status === 'Under Review' || a.status === 'Screened').length;
   const rejected = applications.filter(a => a.status === 'Rejected').length;
@@ -72,8 +73,12 @@ export default function ApplicantDashboardTab({ profile, applications, recommend
             </button>
           </div>
           <div className="divide-y divide-border">
-            {applications.map(app => (
-              <div key={`dash-app-${app.id}`} className="px-5 py-3 hover:bg-muted/40 transition-colors">
+            {applications.slice(0, 5).map(app => (
+              <button
+                key={`dash-app-${app.id}`}
+                onClick={() => onViewJob ? onViewJob(app.jobId) : onNavigate('jobs')}
+                className="w-full px-5 py-3 hover:bg-muted/40 transition-colors text-left"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-foreground">{app.jobTitle}</p>
@@ -86,9 +91,10 @@ export default function ApplicantDashboardTab({ profile, applications, recommend
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${applicantStatusColors[app.status]}`}>
                       {app.status}
                     </span>
+                    <ArrowRight size={12} className="text-muted-foreground shrink-0" />
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

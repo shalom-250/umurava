@@ -13,6 +13,7 @@ interface JobBrowserTabProps {
   jobs: Job[];
   applications: Application[];
   profile: any;
+  initialJobId?: string;
 }
 
 // ─── Eligibility Engine ─────────────────────────────────────────────────────
@@ -213,11 +214,18 @@ function CriteriaRow({ label, ok, required }: { label: string; ok: boolean; requ
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function JobBrowserTab({ jobs, applications, profile }: JobBrowserTabProps) {
+export default function JobBrowserTab({ jobs, applications, profile, initialJobId }: JobBrowserTabProps) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [selectedJob, setSelectedJob] = useState<Job | null>(jobs.find(j => j.status === 'Active') || null);
+
+  React.useEffect(() => {
+    if (initialJobId) {
+      const job = jobs.find(j => (j as any)._id === initialJobId || j.id === initialJobId);
+      if (job) setSelectedJob(job);
+    }
+  }, [initialJobId, jobs]);
   const [applying, setApplying] = useState<string | null>(null);
   const [applied, setApplied] = useState<Set<string>>(new Set(applications.map(a => a.jobId)));
 

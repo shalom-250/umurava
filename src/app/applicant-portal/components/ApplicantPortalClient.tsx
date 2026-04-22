@@ -23,6 +23,12 @@ export default function ApplicantPortalClient() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [viewJobId, setViewJobId] = useState<string | null>(null);
+
+  const handleViewJob = (jobId: string) => {
+    setViewJobId(jobId);
+    setActiveTab('jobs');
+  };
 
   React.useEffect(() => {
     const fetchStats = async () => {
@@ -129,13 +135,14 @@ export default function ApplicantPortalClient() {
               applications={applications}
               recommendedJobs={recommendedJobs}
               onNavigate={setActiveTab}
+              onViewJob={handleViewJob}
             />
           )}
           {activeTab === 'profile' && (
             <ProfileBuilderTab profile={enrichedProfile} />
           )}
           {activeTab === 'jobs' && (
-            <JobBrowserTab jobs={browseJobs} applications={applications} profile={enrichedProfile} />
+            <JobBrowserTab jobs={browseJobs} applications={applications} profile={enrichedProfile} initialJobId={viewJobId || undefined} />
           )}
           {activeTab === 'applications' && (
             <MyApplicationsTab applications={applications} jobs={browseJobs} profile={enrichedProfile} />

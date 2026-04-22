@@ -89,10 +89,16 @@ export const parseCandidateFile = (req: Request, res: Response) => {
                             try {
                                 text = await extractTextFromPdf(filePath);
                                 const betterInfo = await extractCandidateInfoFromText(text);
-                                if (betterInfo?.name && !betterInfo.name.toLowerCase().includes('unknown')) aiInfo.name = betterInfo.name;
-                                if (betterInfo?.email && !betterInfo.email.toLowerCase().includes('unknown')) aiInfo.email = betterInfo.email;
-                                if (!aiInfo.phone) aiInfo.phone = betterInfo?.phone || null;
-                                if (aiInfo.skills?.length === 0) aiInfo.skills = betterInfo?.skills || [];
+
+                                // If the fallback extraction found a valid name, overwrite aiInfo with ALL extracted data since text-extraction is demonstrably more reliable here
+                                if (betterInfo && betterInfo.name && !betterInfo.name.toLowerCase().includes('unknown')) {
+                                    aiInfo = { ...aiInfo, ...betterInfo };
+                                } else {
+                                    // At minimum try to save email/phone
+                                    if (betterInfo?.email && !betterInfo.email.toLowerCase().includes('unknown')) aiInfo.email = betterInfo.email;
+                                    if (!aiInfo.phone) aiInfo.phone = betterInfo?.phone || null;
+                                    if (aiInfo.skills?.length === 0) aiInfo.skills = betterInfo?.skills || [];
+                                }
                             } catch (e: any) {
                                 console.warn("Secondary extraction failed:", e.message);
                             }

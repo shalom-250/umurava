@@ -114,17 +114,14 @@ export default function ApplicantPortalClient() {
         `}
       >
         {/* Header toggle button */}
-        <div className="flex items-center justify-between h-14 px-3 border-b border-border shrink-0">
+        <div className="flex items-center justify-end h-14 px-3 border-b border-border shrink-0">
           {sidebarOpen ? (
-            <>
-              <span className="text-xs font-semibold text-foreground whitespace-nowrap">Navigation</span>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground"
-              >
-                <X size={14} />
-              </button>
-            </>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground"
+            >
+              <X size={14} />
+            </button>
           ) : (
             <button
               onClick={() => setSidebarOpen(true)}
@@ -201,7 +198,7 @@ export default function ApplicantPortalClient() {
       </aside>
 
       {/* ── Main Content Area ───────────────────────────────────────── */}
-      <div className="flex flex-col flex-1 min-w-0 pb-[64px] sm:pb-0">
+      <div className="flex flex-col flex-1 min-w-0">
 
         {/* Top header — name + profile chip */}
         <div className="bg-white border-b border-border px-4 sm:px-6 py-3 shrink-0">
@@ -259,39 +256,6 @@ export default function ApplicantPortalClient() {
         </div>
       </div>
 
-      {/* ── Mobile Bottom Navigation (sm and below) ─────────────── */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border shadow-lg">
-        <div className="flex items-stretch h-16">
-          {TABS.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            const count = tab.id === 'applications' ? badgeCount : 0;
-            return (
-              <button
-                key={`mobnav-${tab.id}`}
-                onClick={() => handleNavigate(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-colors
-                  ${isActive ? 'text-primary-700' : 'text-muted-foreground'}`}
-              >
-                {isActive && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary-700 rounded-b-full" />
-                )}
-                <div className="relative">
-                  <Icon size={20} />
-                  {count > 0 && (
-                    <span className="absolute -top-1.5 -right-2 text-[9px] font-bold bg-primary-700 text-white rounded-full px-1 min-w-[14px] text-center leading-tight">
-                      {count}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[10px] font-medium leading-none">
-                  {tab.label === 'My Profile' ? 'Profile' : tab.label === 'Browse Jobs' ? 'Jobs' : tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
     </div>
   );
 }

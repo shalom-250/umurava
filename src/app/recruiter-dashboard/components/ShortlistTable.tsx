@@ -167,14 +167,14 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className={`flex items-center justify-end gap-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={e => { e.stopPropagation(); onViewCandidate(result); }}
                       suppressHydrationWarning
-                      className="p-1.5 rounded-md hover:bg-primary-100 text-primary-700 transition-colors"
-                      title="View AI reasoning"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold hover:bg-blue-100 transition-all border border-blue-100/50 shadow-sm"
                     >
                       <Eye size={14} />
+                      Details
                     </button>
                     {profile.socialLinks?.linkedin && (
                       <a
@@ -182,8 +182,8 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}
-                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors"
-                        title="LinkedIn profile"
+                        className="p-1.5 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 hover:text-blue-600 transition-all border border-gray-100"
+                        title="LinkedIn Profile"
                       >
                         <ExternalLink size={14} />
                       </a>

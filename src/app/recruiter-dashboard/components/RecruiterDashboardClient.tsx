@@ -57,37 +57,50 @@ export default function RecruiterDashboardClient() {
     try {
       const data = await api.get('/candidates');
       if (data && data.length > 0) {
-        const mappedProfiles: TalentProfile[] = data.map((c: any) => ({
-          id: c._id,
-          firstName: c.name.split(' ')[0] || 'Unknown',
-          lastName: c.name.split(' ').slice(1).join(' ') || 'Candidate',
-          email: c.email,
-          headline: c.experience || 'Professional',
-          location: 'Rwanda',
-          skills: (c.skills || []).map((s: string) => ({ name: s, level: 'Advanced', yearsOfExperience: 3 })),
-          languages: [{ name: 'English', proficiency: 'Fluent' }],
-          experience: [{
-            role: 'Professional',
-            company: 'Rwandan Market',
-            location: 'Kigali',
-            startDate: '2020',
-            endDate: 'Present',
-            isCurrent: true,
-            technologies: c.skills || [],
-            description: c.experience || ''
-          }],
-          education: [{
-            degree: 'Degree',
-            institution: c.education || 'University',
-            fieldOfStudy: 'CS',
-            startYear: 2016,
-            endYear: 2020
-          }],
-          certifications: [],
-          projects: [],
-          availability: { status: 'Available', type: 'Full-time' },
-          profileCompleteness: 100
-        }));
+        const mappedProfiles: TalentProfile[] = data.map((c: any) => {
+          const rawSkills = c.skills || [];
+          const normalizedSkills = rawSkills.map((s: any) => {
+            if (typeof s === 'string') return { name: s, level: 'Advanced', yearsOfExperience: 3 };
+            return {
+              name: s.name || 'Skill',
+              level: s.level || 'Advanced',
+              yearsOfExperience: s.yearsOfExperience || 3
+            };
+          });
+
+          return {
+            id: c._id,
+            firstName: c.name?.split(' ')[0] || c.firstName || 'Unknown',
+            lastName: c.name?.split(' ').slice(1).join(' ') || c.lastName || 'Candidate',
+            email: c.email,
+            headline: c.headline || c.experience || 'Professional',
+            location: c.location || 'Rwanda',
+            skills: normalizedSkills,
+            languages: c.languages || [{ name: 'English', proficiency: 'Fluent' }],
+            experience: (c.experience || []).length > 0 && typeof c.experience !== 'string' ? c.experience : [{
+              role: 'Professional',
+              company: 'Rwandan Market',
+              location: 'Kigali',
+              startDate: '2020',
+              endDate: 'Present',
+              isCurrent: true,
+              technologies: rawSkills.map((s: any) => typeof s === 'string' ? s : s.name),
+              description: typeof c.experience === 'string' ? c.experience : 'Professional experience'
+            }],
+            education: c.education || [{
+              degree: 'Degree',
+              institution: 'University',
+              fieldOfStudy: 'CS',
+              startYear: 2016,
+              endYear: 2020
+            }],
+            certifications: c.certifications || [],
+            projects: c.projects || [],
+            availability: c.availability || { status: 'Available', type: 'Full-time' },
+            profileCompleteness: 100,
+            resumeUrl: c.resumeUrl
+          };
+        });
         setTalentProfiles(mappedProfiles);
       }
     } catch (error) {

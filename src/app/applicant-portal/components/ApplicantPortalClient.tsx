@@ -142,7 +142,7 @@ export default function ApplicantPortalClient() {
             <ProfileBuilderTab profile={enrichedProfile} />
           )}
           {activeTab === 'jobs' && (
-            <JobBrowserTab jobs={browseJobs} applications={applications} profile={enrichedProfile} initialJobId={viewJobId || undefined} />
+            <JobBrowserTab key={viewJobId ?? 'browse'} jobs={browseJobs} applications={applications} profile={enrichedProfile} initialJobId={viewJobId || undefined} />
           )}
           {activeTab === 'applications' && (
             <MyApplicationsTab applications={applications} jobs={browseJobs} profile={enrichedProfile} />

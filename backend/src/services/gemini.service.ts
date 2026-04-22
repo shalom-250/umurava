@@ -469,3 +469,45 @@ const getFallbackInfo = (text: string): any => {
         publications: [], additionalInformation: null
     }, text);
 };
+
+export const compareCandidates = async (jobDescription: string, candidateA: any, candidateB: any): Promise<any> => {
+    const format = (c: any) => `
+Name: ${c.name || 'Unknown'}
+Skills: ${(c.skills || []).map((s: any) => typeof s === 'string' ? s : s?.name).filter(Boolean).join(', ')}
+Experience: ${(c.experience || []).map((e: any) => `${e.jobTitle} at ${e.company}`).join('; ')}
+Education: ${(c.education || []).map((e: any) => `${e.degree} from ${e.institution}`).join('; ')}
+`.trim();
+
+    const prompt = `
+You are an expert AI recruiter. Compare two candidates for the following job and return a structured JSON comparison.
+
+Job:
+${jobDescription}
+
+Candidate A:
+${format(candidateA)}
+
+Candidate B:
+${format(candidateB)}
+
+Return ONLY valid JSON with this exact schema:
+{
+  "winner": "A" | "B" | "Tie",
+  "summary": "string — 2–3 sentence summary of comparison",
+  "candidateA": { "strengths": ["string"], "weaknesses": ["string"], "matchScore": number },
+  "candidateB": { "strengths": ["string"], "weaknesses": ["string"], "matchScore": number }
+}`;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const text = result.response.text().replace(/```json|```/g, '').trim();
+        return JSON.parse(text);
+    } catch {
+        return {
+            winner: 'Tie',
+            summary: 'Comparison unavailable at this time.',
+            candidateA: { strengths: [], weaknesses: [], matchScore: 50 },
+            candidateB: { strengths: [], weaknesses: [], matchScore: 50 }
+        };
+    }
+};

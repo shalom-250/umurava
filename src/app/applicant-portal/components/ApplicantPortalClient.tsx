@@ -80,7 +80,7 @@ export default function ApplicantPortalClient() {
           {/* Title */}
           <div className="min-w-0">
             <h1 className="text-base sm:text-xl font-display font-700 text-foreground truncate">
-              Welcome back, {enrichedProfile.firstName} 👋
+              Welcome back, {enrichedProfile.firstName}
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate hidden sm:block">{enrichedProfile.headline}</p>
           </div>

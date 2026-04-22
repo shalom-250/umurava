@@ -119,7 +119,30 @@ export default function ProfileBuilderTab({ profile }: ProfileBuilderTabProps) {
   return (
     <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
       {/* Section Nav */}
-      <div className="w-full lg:w-52 shrink-0">
+      {/* Mobile/Tablet: horizontal scrollable pill strip */}
+      <div className="lg:hidden mb-0">
+        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+          {SECTIONS.map(section => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            return (
+              <button
+                key={`psmob-${section.id}`}
+                onClick={() => setActiveSection(section.id)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap border shrink-0 transition-colors ${isActive ? 'bg-primary-700 text-white border-primary-700' : 'bg-white text-muted-foreground border-border hover:bg-muted'
+                  }`}
+              >
+                <Icon size={12} />
+                {section.label}
+                <span className={`w-1.5 h-1.5 rounded-full ml-0.5 ${isSectionFilled(section.id) ? 'bg-green-400' : 'bg-red-400'}`} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop: vertical sidebar (lg+) */}
+      <div className="hidden lg:block w-52 shrink-0">
         <div className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <p className="text-xs font-semibold text-foreground">Profile Sections</p>

@@ -396,15 +396,15 @@ export default function JobBrowserTab({ jobs, applications, profile, initialJobI
             >
               <ChevronLeft size={14} /> Back to jobs
             </button>
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl font-display font-700 text-foreground">{selectedJob.title}</h2>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${jobStatusColors[selectedJob.status]}`}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h2 className="text-lg sm:text-xl font-display font-700 text-foreground leading-tight">{selectedJob.title}</h2>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border shrink-0 ${jobStatusColors[selectedJob.status]}`}>
                     {selectedJob.status}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
                   <span className="flex items-center gap-1"><MapPin size={11} /> {selectedJob.location}</span>
                   <span className="flex items-center gap-1"><Briefcase size={11} /> {selectedJob.type}</span>
                   <span className="flex items-center gap-1"><Clock size={11} /> Deadline: {selectedJob.deadline}</span>
@@ -416,7 +416,7 @@ export default function JobBrowserTab({ jobs, applications, profile, initialJobI
               <button
                 onClick={() => handleApply(selectedJob.id)}
                 disabled={applied.has(selectedJob.id) || applying === selectedJob.id || selectedJob.status === 'Closed' || selectedJob.status === 'Draft'}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all active:scale-95 min-w-[120px] justify-center shrink-0 ${applied.has(selectedJob.id)
+                className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-sm font-semibold transition-all active:scale-95 min-w-[110px] justify-center shrink-0 w-full sm:w-auto ${applied.has(selectedJob.id)
                   ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
                   : selectedJob.status === 'Closed' || selectedJob.status === 'Draft'
                     ? 'bg-muted text-muted-foreground cursor-not-allowed'

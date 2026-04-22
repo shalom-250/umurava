@@ -25,7 +25,7 @@ function StatusTimeline({ status }: { status: string }) {
           <React.Fragment key={`step-${step}`}>
             <div className="flex flex-col items-center">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${isPast ? 'bg-green-500 border-green-500' : isCurrent ? 'bg-primary-700 border-primary-700' :
-                  isRejected && step === 'Shortlisted' ? 'bg-red-100 border-red-300' : 'bg-white border-border'
+                isRejected && step === 'Shortlisted' ? 'bg-red-100 border-red-300' : 'bg-white border-border'
                 }`}>
                 {isPast ? (
                   <CheckCircle size={12} className="text-white" />
@@ -84,7 +84,7 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
           <div key={`myapp-${app.id}`} className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
             {/* Header */}
             <div
-              className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-muted/30 transition-colors"
+              className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 cursor-pointer hover:bg-muted/30 transition-colors"
               onClick={() => setExpandedApp(isExpanded ? null : app.id)}
             >
               <div className="flex items-start gap-4">
@@ -101,12 +101,12 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
                   <p className="text-xs text-muted-foreground">{app.company} · Applied {app.appliedDate}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 shrink-0">
                 {hasAI && (
                   <div className="text-right">
-                    <p className="text-[10px] text-muted-foreground">Match Score</p>
-                    <p className={`text-lg font-display font-700 tabular-nums ${(app.matchScore ?? 0) >= 80 ? 'text-green-600' : (app.matchScore ?? 0) >= 60 ? 'text-blue-600' : 'text-amber-600'
-                      }`}>{app.matchScore}/100</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">Match</p>
+                    <p className={`text-base sm:text-lg font-display font-700 tabular-nums ${(app.matchScore ?? 0) >= 80 ? 'text-green-600' : (app.matchScore ?? 0) >= 60 ? 'text-blue-600' : 'text-amber-600'
+                      }`}>{app.matchScore}</p>
                   </div>
                 )}
                 {isExpanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
@@ -114,17 +114,17 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
             </div>
 
             {/* Status Timeline */}
-            <div className="px-6 pb-4">
+            <div className="px-4 sm:px-6 pb-4">
               <StatusTimeline status={app.status} />
             </div>
 
             {/* Expanded AI Feedback */}
             {isExpanded && (
-              <div className="border-t border-border px-6 py-5 space-y-5 animate-fade-in">
+              <div className="border-t border-border px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 animate-fade-in">
                 {app.screeningResult ? (
                   <>
                     {/* Score breakdown */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
                       <div className="bg-green-50 rounded-lg p-3 text-center">
                         <p className="text-[10px] text-muted-foreground">Match Score</p>
                         <p className="text-2xl font-display font-700 text-green-700">{app.matchScore}/100</p>
@@ -151,7 +151,7 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
                     </div>
 
                     {/* Strengths & Gaps */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <p className="text-xs font-semibold text-green-700 mb-2">Strengths</p>
                         <ul className="space-y-1.5">

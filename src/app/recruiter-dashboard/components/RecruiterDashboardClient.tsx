@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react'; // Bump to fix chunk load error
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud } from 'lucide-react';
+import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings } from 'lucide-react';
 import KpiCards from './KpiCards';
 import ShortlistTable from './ShortlistTable';
 import SkillMatchChart from './SkillMatchChart';
@@ -11,6 +11,7 @@ import ApplicationsTrendChart from './ApplicationsTrendChart';
 import AppLogo from '@/components/ui/AppLogo';
 import CandidateReasoningDrawer from './CandidateReasoningDrawer';
 import CreateJobModal from './CreateJobModal';
+import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
 import { useSelector, useDispatch } from 'react-redux';
@@ -24,6 +25,7 @@ export default function RecruiterDashboardClient() {
   const [screeningDone, setScreeningDone] = useState(true);
   const [selectedCandidate, setSelectedCandidate] = useState<{ profile: TalentProfile; result: ScreeningResult } | null>(null);
   const [showCreateJob, setShowCreateJob] = useState(false);
+  const [showEditJob, setShowEditJob] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
   const [jobSearch, setJobSearch] = useState('');
   const [shortlistFilter, setShortlistFilter] = useState<'all' | 'recommended' | 'consider' | 'not-recommended'>('all');
@@ -381,7 +383,16 @@ export default function RecruiterDashboardClient() {
                   <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
                   Dashboard / {selectedJob.department}
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
+                  <button
+                    onClick={() => setShowEditJob(true)}
+                    className="p-1 text-gray-400 hover:text-[#00A1FF] hover:bg-blue-50 rounded-lg transition-all"
+                    title="Edit Job Details"
+                  >
+                    <Settings size={18} />
+                  </button>
+                </div>
                 <p className="mt-1 text-sm text-gray-500 font-medium">
                   {selectedJob.location} • {selectedJob.type} • Posted {new Date(selectedJob.postedDate || Date.now()).toLocaleDateString()}
                 </p>
@@ -572,6 +583,17 @@ export default function RecruiterDashboardClient() {
           onClose={() => setShowCreateJob(false)}
           onSuccess={() => {
             setShowCreateJob(false);
+            fetchJobs();
+          }}
+        />
+      )}
+
+      {showEditJob && selectedJob && (
+        <EditJobModal
+          job={selectedJob}
+          onClose={() => setShowEditJob(false)}
+          onSuccess={() => {
+            setShowEditJob(false);
             fetchJobs();
           }}
         />

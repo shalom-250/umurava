@@ -205,8 +205,8 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                   <div className="flex items-center gap-2">
                     {!isPending ? (
                       <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? 'bg-green-50 text-green-700 border-green-100' :
-                          result.recommendation === 'Consider' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                            'bg-red-50 text-red-700 border-red-100'
+                        result.recommendation === 'Consider' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                          'bg-red-50 text-red-700 border-red-100'
                         }`}>
                         {(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? <UserCheck size={12} /> :
                           result.recommendation === 'Not Recommended' ? <UserX size={12} /> : <Clock size={12} />}
@@ -253,17 +253,19 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-500">Show:</span>
-            <div className="flex bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm">
-              {PAGE_SIZE_OPTIONS.map(size => (
-                <button
-                  key={size}
-                  onClick={() => handlePageSizeChange(size)}
-                  className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${pageSize === size ? 'bg-[#00A1FF] text-white shadow-sm' : 'text-gray-500 hover:text-gray-900'
-                    }`}
-                >
-                  {size}
-                </button>
-              ))}
+            <div className="relative">
+              <select
+                value={pageSize}
+                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-[11px] font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00A1FF]/20 focus:border-[#00A1FF] transition-all cursor-pointer"
+              >
+                {PAGE_SIZE_OPTIONS.map(size => (
+                  <option key={size} value={size}>{size} per page</option>
+                ))}
+              </select>
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <ChevronDown size={14} />
+              </div>
             </div>
           </div>
           <p className="text-[11px] font-medium text-gray-500">
@@ -292,8 +294,8 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                   key={`page-${pageNum}`}
                   onClick={() => handlePageChange(pageNum)}
                   className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === pageNum
-                      ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-sm'
-                      : 'text-gray-500 hover:bg-gray-100'
+                    ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-sm'
+                    : 'text-gray-500 hover:bg-gray-100'
                     }`}
                 >
                   {pageNum}

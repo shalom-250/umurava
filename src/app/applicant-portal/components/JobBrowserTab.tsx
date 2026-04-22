@@ -222,6 +222,16 @@ export default function JobBrowserTab({ jobs, applications, profile }: JobBrowse
   const [applied, setApplied] = useState<Set<string>>(new Set(applications.map(a => a.jobId)));
 
   const filtered = jobs.filter(j => {
+    // 1. User Rule: Disappear 30 minutes after deadline if Closed
+    if (j.status === 'Closed' && j.deadline) {
+      const deadlineDate = new Date(j.deadline);
+      const now = new Date();
+      const thirtyMinutesAfter = new Date(deadlineDate.getTime() + 30 * 60000);
+      if (now > thirtyMinutesAfter) {
+        return false;
+      }
+    }
+
     const matchSearch = j.title.toLowerCase().includes(search.toLowerCase()) ||
       j.department.toLowerCase().includes(search.toLowerCase()) ||
       j.requiredSkills.some(s => s.toLowerCase().includes(search.toLowerCase()));

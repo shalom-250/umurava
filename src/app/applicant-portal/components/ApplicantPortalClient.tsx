@@ -93,11 +93,11 @@ export default function ApplicantPortalClient() {
   return (
     <div className="flex h-full overflow-hidden">
 
-      {/* ── Sidebar (desktop rail / mobile drawer) ─────── */}
+      {/* ── Mobile Sidebar Drawer ─────── */}
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
-          className="sm:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          className="sm:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -105,12 +105,9 @@ export default function ApplicantPortalClient() {
       <aside
         ref={sidebarRef}
         className={`
-          fixed inset-y-0 left-0 z-50 sm:relative sm:flex flex-col shrink-0 bg-white border-r border-border
-          transition-all duration-300 ease-in-out overflow-hidden
-          ${sidebarOpen
-            ? 'w-64 sm:w-56 translate-x-0'
-            : 'w-64 -translate-x-full sm:translate-x-0 sm:w-[60px]'
-          }
+          fixed inset-y-0 left-0 z-[60] sm:hidden flex flex-col shrink-0 bg-white border-r border-border
+          transition-all duration-300 ease-in-out overflow-hidden w-64
+          ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
         `}
       >
         {/* Header toggle button */}
@@ -200,30 +197,63 @@ export default function ApplicantPortalClient() {
       {/* ── Main Content Area ───────────────────────────────────────── */}
       <div className="flex flex-col flex-1 min-w-0">
 
-        {/* Top header — name + profile chip */}
-        <div className="bg-white border-b border-border px-4 sm:px-6 py-3 shrink-0">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
+        {/* Top header — Welcome + Navigation Tabs + profile chip */}
+        <div className="bg-white border-b border-border px-4 lg:px-6 py-2 sm:py-3 shrink-0 shadow-sm relative z-20">
+          <div className="flex items-center justify-between gap-4">
+
+            <div className="flex items-center gap-2 sm:gap-6 min-w-0">
+              {/* Mobile Menu Icon */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="sm:hidden p-1.5 -ml-1 hover:bg-muted rounded-lg transition-colors text-muted-foreground"
+                className="lg:hidden p-1.5 -ml-1 hover:bg-muted rounded-lg transition-colors text-muted-foreground"
               >
-                <Menu size={20} />
+                <Menu size={22} />
               </button>
-              <div className="min-w-0">
-                <h1 className="text-base sm:text-lg font-display font-700 text-foreground truncate">
-                  Welcome back, {enrichedProfile.firstName} 👋
+
+              <div className="hidden sm:block shrink-0">
+                <h1 className="text-sm font-display font-700 text-foreground truncate">
+                  Welcome, {enrichedProfile.firstName} 👋
                 </h1>
-                <p className="text-xs text-muted-foreground hidden sm:block truncate">{enrichedProfile.headline}</p>
               </div>
+
+              {/* Desktop Navigation Tabs (Horizontal) */}
+              <nav className="hidden lg:flex items-center h-10 bg-muted/30 rounded-xl px-1.5 border border-border/50">
+                {TABS.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  const count = tab.id === 'applications' ? badgeCount : 0;
+                  return (
+                    <button
+                      key={`headnav-${tab.id}`}
+                      onClick={() => handleNavigate(tab.id)}
+                      className={`
+                        flex items-center gap-2.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all
+                        ${isActive
+                          ? 'bg-white text-primary-700 shadow-sm ring-1 ring-black/5'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+                        }
+                      `}
+                    >
+                      <Icon size={15} />
+                      {tab.label}
+                      {count > 0 && (
+                        <span className="bg-primary-700 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 ml-1">
+                          {count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="hidden sm:block text-right">
-                <p className="text-[10px] text-muted-foreground">Completeness</p>
-                <p className="text-xs font-semibold text-primary-700">{realCompleteness}%</p>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="hidden lg:block text-right pr-2 border-r border-border h-8 flex flex-col justify-center">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-1">Completeness</p>
+                <p className="text-xs font-extra-bold text-primary-700 leading-none">{realCompleteness}%</p>
               </div>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary-100 flex items-center justify-center">
-                <span className="text-xs font-semibold text-primary-700">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-50 border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary-100 transition-all">
+                <span className="text-xs font-bold text-primary-700">
                   {enrichedProfile.firstName?.[0] || '?'}{enrichedProfile.lastName?.[0] || ''}
                 </span>
               </div>

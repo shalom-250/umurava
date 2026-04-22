@@ -138,30 +138,37 @@ export const extractCandidateInfoFromText = async (text: string): Promise<any> =
     const prompt = `
     Extract ALL candidate information from this resume text.
     IF ANY FIELD IS NOT FOUND, SET IT TO null.
-    Follow this exact JSON schema:
-    - name, phone, email, location, nationality, dob
-    - socialLinks: { linkedin, github, portfolio, website }
-    - personalStatement
-    - education: [{ institution, degree, fieldOfStudy, location, startYear, endYear, achievements: [] }]
-    - experience: [{ jobTitle, company, location, startDate, endDate, description, achievements: [], technologies: [], isCurrent }]
-    - skills: [{ name, level, type: 'Technical'|'Soft' }]
-    - certifications: [{ name, issuer, issueDate }]
-    - projects: [{ name, description, technologies: [], role }]
-    - languages: [{ name, level }]
-    - interests: { professional: [], personal: [] }
-    - hobbies: []
-    - references: [{ name, position, contactDetails }]
-    - backgroundSchool: [{ name, certificate, location }]
-    - awards: [{ title, issuer, year, description }]
-    - volunteerExperience: [{ organization, role, impact, duration }]
-    - extracurricularActivities: [{ activity, role, description }]
-    - publications: [{ title, platform, link, year }]
-    - additionalInformation: "Any other details not covered above"
+    Return a single, valid JSON object strictly matching this schema:
+    {
+      "name": "string",
+      "phone": "string",
+      "email": "string",
+      "location": "string",
+      "nationality": "string",
+      "dob": "string",
+      "socialLinks": { "linkedin": "string", "github": "string", "portfolio": "string", "website": "string" },
+      "personalStatement": "string",
+      "education": [{ "institution": "string", "degree": "string", "fieldOfStudy": "string", "location": "string", "startYear": "string", "endYear": "string", "achievements": ["string"] }],
+      "experience": [{ "jobTitle": "string", "company": "string", "location": "string", "startDate": "string", "endDate": "string", "description": "string", "achievements": ["string"], "technologies": ["string"], "isCurrent": false }],
+      "skills": [{ "name": "string", "level": "string", "type": "Technical|Soft" }],
+      "certifications": [{ "name": "string", "issuer": "string", "issueDate": "string" }],
+      "projects": [{ "name": "string", "description": "string", "technologies": ["string"], "role": "string" }],
+      "languages": [{ "name": "string", "level": "string" }],
+      "interests": { "professional": ["string"], "personal": ["string"] },
+      "hobbies": ["string"],
+      "references": [{ "name": "string", "position": "string", "contactDetails": "string" }],
+      "backgroundSchool": [{ "name": "string", "certificate": "string", "location": "string" }],
+      "awards": [{ "title": "string", "issuer": "string", "year": "string", "description": "string" }],
+      "volunteerExperience": [{ "organization": "string", "role": "string", "impact": "string", "duration": "string" }],
+      "extracurricularActivities": [{ "activity": "string", "role": "string", "description": "string" }],
+      "publications": [{ "title": "string", "platform": "string", "link": "string", "year": "string" }],
+      "additionalInformation": "string"
+    }
 
     Resume Text:
     ${text.substring(0, 10000)}
 
-    Return ONLY a valid JSON object.
+    Return ONLY the valid JSON object with NO markdown wrapping.
     `;
 
     try {
@@ -253,25 +260,33 @@ export const extractCandidateInfoFromFile = async (filePath: string, mimeType: s
         const prompt = `
             Extract ALL candidate information from this resume PDF.
             IF ANY FIELD IS NOT FOUND, SET IT TO null.
-            Follow this schema:
-            - name, phone, email, location, nationality, dob
-            - socialLinks: { linkedin, github, portfolio, website }
-            - personalStatement
-            - education: [{ institution, degree, fieldOfStudy, location, startYear, endYear, achievements: [] }]
-            - experience: [{ jobTitle, company, location, startDate, endDate, description, achievements: [], technologies: [], isCurrent }]
-            - skills: [{ name, level, type: 'Technical'|'Soft' }]
-            - certifications: [{ name, issuer, issueDate }]
-            - projects: [{ name, description, technologies: [], role }]
-            - languages: [{ name, level }]
-            - interests: { professional: [], personal: [] }
-            - hobbies: []
-            - references: [{ name, position, contactDetails }]
-            - backgroundSchool: [{ name, certificate, location }]
-            - awards: [{ title, issuer, year, description }]
-            - volunteerExperience: [{ organization, role, impact, duration }]
-            - extracurricularActivities: [{ activity, role, description }]
-            - publications: [{ title, platform, link, year }]
-            - additionalInformation: "Any other details not covered above"
+            Return a single, valid JSON object strictly matching this schema:
+            {
+              "name": "string",
+              "phone": "string",
+              "email": "string",
+              "location": "string",
+              "nationality": "string",
+              "dob": "string",
+              "socialLinks": { "linkedin": "string", "github": "string", "portfolio": "string", "website": "string" },
+              "personalStatement": "string",
+              "education": [{ "institution": "string", "degree": "string", "fieldOfStudy": "string", "location": "string", "startYear": "string", "endYear": "string", "achievements": ["string"] }],
+              "experience": [{ "jobTitle": "string", "company": "string", "location": "string", "startDate": "string", "endDate": "string", "description": "string", "achievements": ["string"], "technologies": ["string"], "isCurrent": false }],
+              "skills": [{ "name": "string", "level": "string", "type": "Technical|Soft" }],
+              "certifications": [{ "name": "string", "issuer": "string", "issueDate": "string" }],
+              "projects": [{ "name": "string", "description": "string", "technologies": ["string"], "role": "string" }],
+              "languages": [{ "name": "string", "level": "string" }],
+              "interests": { "professional": ["string"], "personal": ["string"] },
+              "hobbies": ["string"],
+              "references": [{ "name": "string", "position": "string", "contactDetails": "string" }],
+              "backgroundSchool": [{ "name": "string", "certificate": "string", "location": "string" }],
+              "awards": [{ "title": "string", "issuer": "string", "year": "string", "description": "string" }],
+              "volunteerExperience": [{ "organization": "string", "role": "string", "impact": "string", "duration": "string" }],
+              "extracurricularActivities": [{ "activity": "string", "role": "string", "description": "string" }],
+              "publications": [{ "title": "string", "platform": "string", "link": "string", "year": "string" }],
+              "additionalInformation": "string"
+            }
+            Return ONLY the valid JSON object with NO markdown wrapping.
         `;
 
         const result = await model.generateContent([

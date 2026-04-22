@@ -91,7 +91,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                 phone: data.phone || '',
                 location: data.location || '',
                 skills: Array.isArray(data.skills) ? data.skills : [],
-                skillsRaw: data.skillsRaw || (Array.isArray(data.skills) ? data.skills.join(', ') : ''),
+                skillsRaw: data.skillsRaw || (Array.isArray(data.skills) ? data.skills.map((s: any) => typeof s === 'string' ? s : s?.name || '').filter(Boolean).join(', ') : ''),
                 experience: Array.isArray(data.experience) ? data.experience : [],
                 education: Array.isArray(data.education) ? data.education : [],
                 additionalInformation: data.additionalInformation || null,

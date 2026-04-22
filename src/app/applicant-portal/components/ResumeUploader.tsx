@@ -31,6 +31,7 @@ interface ParsedData {
     publications: any[] | null;
     onlinePresence: any | null;
     additionalInformation: string | null;
+    resumeUrl?: string;
 }
 
 interface ResumeUploaderProps {
@@ -73,7 +74,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
     const startUploadFlow = async (f: File) => {
         setStatus('UPLOADING');
         const formData = new FormData();
-        formData.append('file', f);
+        formData.append('files', f);
 
         try {
             // Simulate/Show uploading state

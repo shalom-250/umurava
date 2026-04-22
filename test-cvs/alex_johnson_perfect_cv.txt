@@ -1,0 +1,54 @@
+Full Name: Alex Johnson
+Email: alex.johnson@example.com
+Phone: +250 788 123 456
+Location: Kigali, Rwanda
+Nationality: Rwandan
+Date of Birth: 15 March 1995
+
+Personal Statement
+I am a highly motivated software engineer with over 5 years of experience building scalable web applications. My goal is to leverage advanced AI technologies to solve complex business problems.
+
+Education
+University of Rwanda, Kigali
+Bachelor of Science in Software Engineering
+2014 - 2018
+Achievements: Graduated with First Class Honors.
+
+Work Experience
+Senior Frontend Developer
+Tech Innovators Ltd, Kigali
+January 2019 - Present
+- Led a team of 5 engineers to rebuild the core dashboard architecture in Next.js.
+- Improved application performance by 40% and reduced technical debt.
+Technologies: React, Next.js, Node.js, Typescript.
+
+Skills
+Technical: React (Expert), Node.js (Intermediate), Typescript (Expert), GraphQA (Intermediate).
+Soft: Leadership, Communication, Agile Methadologies.
+
+Projects
+Candidate Matching System
+- Built an AI-powered resume screening tool using OpenAI APIs and Node.js.
+Technologies: Node.js, Express, MongoDB.
+Role: Lead Developer.
+
+Certifications
+AWS Certified Cloud Practitioner - AWS (2021)
+Certified Scrum Master - Scrum Alliance (2020)
+
+Languages
+English (Fluent)
+Kinyarwanda (Native)
+French (Intermediate)
+
+References
+Available upon request.
+
+Awards
+Best Employee of the Year - Tech Innovators Ltd - 2022
+Description: Awarded for outstanding contribution to the frontend architecture overhaul.
+
+Social Presence
+LinkedIn: linkedin.com/in/alexjohnson
+GitHub: github.com/alexjohnsondev
+Website: alexjohnson.dev

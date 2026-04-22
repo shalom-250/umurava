@@ -170,8 +170,22 @@ export const saveCandidates = async (req: Request, res: Response) => {
     }
 
     try {
-        const result = await Candidate.insertMany(candidates);
-        res.status(201).json(result);
+        const operations = candidates.map(candidate => ({
+            updateOne: {
+                filter: { email: candidate.email },
+                update: { $set: { ...candidate, source: 'structured' } },
+                upsert: true
+            }
+        }));
+
+        await Candidate.bulkWrite(operations);
+
+        // After bulkWrite, we need to return the actually saved candidate objects (with IDs)
+        // so the frontend can link them to jobs
+        const savedEmails = candidates.map(c => c.email);
+        const finalCandidates = await Candidate.find({ email: { $in: savedEmails } });
+
+        res.status(201).json(finalCandidates);
     } catch (error: any) {
         console.error("Save Candidates Error:", error);
         res.status(500).json({ message: 'Failed to save candidates: ' + error.message });

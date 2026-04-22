@@ -111,16 +111,16 @@ export default function DraftProfilesTable({
                 <div className="flex items-center gap-3">
                     <button
                         onClick={onScreenAll}
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 border border-orange-200 rounded-lg text-xs font-bold hover:bg-orange-50 transition-all shadow-sm"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-100 border border-blue-500/20 group"
                     >
-                        <Sparkles size={14} />
+                        <Sparkles size={16} className="group-hover:animate-pulse" />
                         Screen These Drafts
                     </button>
                     <button
                         onClick={onCreateAll}
-                        className="flex items-center gap-2 px-5 py-2 bg-orange-500 text-white rounded-lg text-xs font-bold hover:bg-orange-600 active:scale-[0.98] transition-all shadow-md shadow-orange-100"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-100 border border-orange-400/20 group"
                     >
-                        <UserPlus size={14} />
+                        <UserPlus size={16} className="group-hover:scale-110 transition-transform" />
                         Create All Profiles
                     </button>
                 </div>
@@ -228,14 +228,26 @@ export default function DraftProfilesTable({
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={(e) => startEditing(e, idx)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Basic Info">
+                                                <div className="flex items-center justify-end gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-xl">
+                                                    <button
+                                                        onClick={(e) => startEditing(e, idx)}
+                                                        className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 shadow-sm"
+                                                        title="Edit Basic Info"
+                                                    >
                                                         <Edit2 size={14} />
                                                     </button>
-                                                    <button onClick={(e) => { e.stopPropagation(); onCreateProfile(idx); }} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all" title="Confirm & Create">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); onCreateProfile(idx); }}
+                                                        className="p-2 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-all border border-orange-100 shadow-sm"
+                                                        title="Confirm & Create"
+                                                    >
                                                         <UserPlus size={14} />
                                                     </button>
-                                                    <button onClick={(e) => { e.stopPropagation(); onRemove(idx); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Remove Draft">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
+                                                        className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all border border-red-100 shadow-sm"
+                                                        title="Remove Draft"
+                                                    >
                                                         <Trash2 size={14} />
                                                     </button>
                                                 </div>

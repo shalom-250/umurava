@@ -82,11 +82,17 @@ export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: U
             if (res.parsedCandidates && res.parsedCandidates.length > 0) {
                 const candidates = res.parsedCandidates.map((c: any) => ({
                     ...c,
-                    // skillsRaw is used for the mini-preview and early validation, 
-                    // though the table now uses more structured data
+                    // skillsRaw is used for the mini-preview and early validation
                     skillsRaw: Array.isArray(c.skills)
                         ? c.skills.map((s: any) => typeof s === 'string' ? s : s.name).join(', ')
-                        : (c.skillsRaw || '')
+                        : (c.skillsRaw || ''),
+                    // Prepare experience and education text for the preview textareas
+                    experienceText: Array.isArray(c.experience)
+                        ? c.experience.map((e: any) => `${e.role} at ${e.company}`).join('; ')
+                        : (typeof c.experience === 'string' ? c.experience : ''),
+                    educationText: Array.isArray(c.education)
+                        ? c.education.map((e: any) => `${e.degree} from ${e.institution}`).join('; ')
+                        : (typeof c.education === 'string' ? c.education : '')
                 }));
                 setParsedCandidates(candidates);
                 setStep('preview');
@@ -126,10 +132,18 @@ export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: U
             const nameParts = (c.name || '').split(' ');
             return {
                 ...c,
-                firstName: nameParts[0] || c.firstName || '',
-                lastName: nameParts.slice(1).join(' ') || c.lastName || '',
-                skills: c.skillsRaw ? c.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0) : [],
-                experience: c.experience ? [{ company: '', role: '', description: c.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : []
+                firstName: c.name ? nameParts[0] : (c.firstName || 'Candidate'),
+                lastName: c.name ? nameParts.slice(1).join(' ') : (c.lastName || ''),
+                // Use structured data if it exists, otherwise fallback to raw parsing
+                skills: Array.isArray(c.skills) && c.skills.length > 0
+                    ? c.skills
+                    : (c.skillsRaw ? c.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0) : []),
+                experience: Array.isArray(c.experience) && c.experience.length > 0
+                    ? c.experience
+                    : (c.experienceText ? [{ company: 'Previous', role: 'Role', description: c.experienceText, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : []),
+                education: Array.isArray(c.education) && c.education.length > 0
+                    ? c.education
+                    : (c.educationText ? [{ institution: 'University', degree: c.educationText, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : [])
             };
         });
 
@@ -244,7 +258,9 @@ export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: U
                                     <div key={idx} className="bg-white border border-gray-200 rounded-xl p-5 relative overflow-hidden">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-[#00A1FF]"></div>
                                         <div className="flex justify-between items-start mb-3">
-                                            <h4 className="text-sm font-bold text-gray-800 ml-2">Candidate #{idx + 1}</h4>
+                                            <h4 className="text-sm font-bold text-gray-800 ml-2">
+                                                {c.name ? c.name : `Candidate #${idx + 1}`}
+                                            </h4>
                                             <button
                                                 onClick={() => setParsedCandidates(prev => prev.filter((_, i) => i !== idx))}
                                                 className="text-gray-400 hover:text-red-500"
@@ -286,8 +302,20 @@ export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: U
                                             </div>
                                             <div className="col-span-2">
                                                 <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">Experience Summary</label>
-                                                <textarea value={c.experience || ''} onChange={e => handleFieldChange(idx, 'experience', e.target.value)} rows={2} className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 resize-none text-gray-600" />
+                                                <textarea
+                                                    value={c.experienceText || ''}
+                                                    onChange={e => handleFieldChange(idx, 'experienceText', e.target.value)}
+                                                    rows={2}
+                                                    className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 resize-none text-gray-600"
+                                                    placeholder={c.experience === null ? "null" : ""}
+                                                />
                                             </div>
+                                            {c.additionalInformation && (
+                                                <div className="col-span-2 p-3 bg-orange-50 rounded-lg border border-orange-100">
+                                                    <label className="block text-[10px] font-bold text-orange-600 uppercase tracking-wide mb-1">Extra Details Extracted</label>
+                                                    <p className="text-[11px] text-orange-800 leading-tight">{c.additionalInformation}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

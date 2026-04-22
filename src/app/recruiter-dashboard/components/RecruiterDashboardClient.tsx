@@ -306,10 +306,10 @@ export default function RecruiterDashboardClient() {
         : (profile.skillsRaw ? profile.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0) : []),
       experience: Array.isArray(profile.experience) && profile.experience.length > 0
         ? profile.experience
-        : (profile.experience && typeof profile.experience === 'string' ? [{ company: 'Previous', role: 'Role', description: profile.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : profile.experience || []),
+        : (profile.experienceText ? [{ company: 'Previous', role: 'Role', description: profile.experienceText, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : (typeof profile.experience === 'string' ? [{ company: 'Previous', role: 'Role', description: profile.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : [])),
       education: Array.isArray(profile.education) && profile.education.length > 0
         ? profile.education
-        : (profile.education && typeof profile.education === 'string' ? [{ institution: 'University', degree: profile.education, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : profile.education || [])
+        : (profile.educationText ? [{ institution: 'University', degree: profile.educationText, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : (typeof profile.education === 'string' ? [{ institution: 'University', degree: profile.education, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : []))
     }];
 
     try {
@@ -356,10 +356,10 @@ export default function RecruiterDashboardClient() {
           : (p.skillsRaw ? p.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0) : []),
         experience: Array.isArray(p.experience) && p.experience.length > 0
           ? p.experience
-          : (p.experience && typeof p.experience === 'string' ? [{ company: 'Previous', role: 'Role', description: p.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : p.experience || []),
+          : (p.experienceText ? [{ company: 'Previous', role: 'Role', description: p.experienceText, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : (typeof p.experience === 'string' ? [{ company: 'Previous', role: 'Role', description: p.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : [])),
         education: Array.isArray(p.education) && p.education.length > 0
           ? p.education
-          : (p.education && typeof p.education === 'string' ? [{ institution: 'University', degree: p.education, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : p.education || [])
+          : (p.educationText ? [{ institution: 'University', degree: p.educationText, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : (typeof p.education === 'string' ? [{ institution: 'University', degree: p.education, fieldOfStudy: '', startYear: 2020, endYear: 2024 }] : []))
       };
     });
 

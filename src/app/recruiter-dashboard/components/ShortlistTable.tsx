@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { TalentProfile, ScreeningResult, recommendationColors } from '@/lib/mockData';
-import { Eye, MapPin, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { Eye, ExternalLink, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Clock } from 'lucide-react';
 
 interface ShortlistTableProps {
   results: ScreeningResult[];
@@ -11,6 +11,8 @@ interface ShortlistTableProps {
 
 type SortKey = 'rank' | 'matchScore' | 'name';
 type SortDir = 'asc' | 'desc';
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 function ScoreBar({ score }: { score: number }) {
   const color = score >= 80 ? 'bg-green-500' : score >= 65 ? 'bg-blue-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-400';
@@ -29,6 +31,10 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(key); setSortDir('asc'); }
@@ -38,7 +44,7 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
     const profileA = profiles.find(p => p.id === a.candidateId);
     const profileB = profiles.find(p => p.id === b.candidateId);
     let valA: string | number = 0, valB: string | number = 0;
-    if (sortKey === 'rank') { valA = a.rank; valB = b.rank; }
+    if (sortKey === 'rank') { valA = a.rank || 999; valB = b.rank || 999; }
     else if (sortKey === 'matchScore') { valA = a.matchScore; valB = b.matchScore; }
     else if (sortKey === 'name') {
       valA = `${profileA?.firstName} ${profileA?.lastName}` || '';
@@ -55,6 +61,21 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
       <ChevronDown size={10} className={sortKey === col && sortDir === 'desc' ? 'text-primary-700' : 'text-muted-foreground'} />
     </span>
   );
+
+  // Pagination Logic
+  const totalItems = results.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedResults = sorted.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
 
   if (results.length === 0) {
     return (
@@ -102,12 +123,13 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
             </th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">AI Strengths</th>
             <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">AI Gaps / Risks</th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recommendation</th>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">AI Recommendation</th>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recruitment Status</th>
             <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {sorted.map((result, i) => {
+          {paginatedResults.map((result, i) => {
             const profile = profiles.find(p => p.id === result.candidateId);
             if (!profile) return null;
             const isHovered = hoveredRow === result.candidateId;
@@ -117,14 +139,10 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
             const initialsBg = isPending ? 'bg-gray-100' : 'bg-primary-100';
             const initialsText = isPending ? 'text-gray-500' : 'text-primary-700';
 
-            const docStats = result.documentStatus || [];
-            const missingCount = docStats.filter(d => d.status === 'missing').length;
-            const totalDocs = docStats.length;
-
             return (
               <tr
                 key={`shortlist-row-${result.candidateId}`}
-                className={`border-b border-border/60 transition-colors cursor-pointer ${isHovered ? 'bg-primary-50/40' : i % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}
+                className={`border-b border-border/60 transition-colors cursor-pointer ${isHovered ? 'bg-primary-50/40' : (startIndex + i) % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}
                 onMouseEnter={() => setHoveredRow(result.candidateId)}
                 onMouseLeave={() => setHoveredRow(null)}
                 onClick={() => onViewCandidate(result)}
@@ -170,18 +188,35 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                 </td>
                 <td className="px-4 py-3">
                   <p className="text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 truncate max-w-[200px]" title={Array.isArray(result.strengths) ? result.strengths.join(', ') : result.strengths}>
-                    {Array.isArray(result.strengths) ? result.strengths[0] : result.strengths}
+                    {Array.isArray(result.strengths) ? result.strengths[0] : (result.strengths || 'N/A')}
                   </p>
                 </td>
                 <td className="px-4 py-3">
                   <p className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-100 truncate max-w-[200px]" title={Array.isArray(result.gaps) ? result.gaps.join(', ') : result.gaps}>
-                    {Array.isArray(result.gaps) ? result.gaps[0] : result.gaps}
+                    {Array.isArray(result.gaps) ? result.gaps[0] : (result.gaps || 'N/A')}
                   </p>
                 </td>
                 <td className="px-4 py-3">
                   <span className={`text-[10px] font-semibold px-2 py-1 rounded-full border ${isPending ? 'bg-gray-50 text-gray-400 border-gray-200' : recommendationColors[result.recommendation]}`}>
                     {isPending ? 'Unanalyzed' : result.recommendation}
                   </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {!isPending ? (
+                      <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? 'bg-green-50 text-green-700 border-green-100' :
+                          result.recommendation === 'Consider' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                            'bg-red-50 text-red-700 border-red-100'
+                        }`}>
+                        {(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? <UserCheck size={12} /> :
+                          result.recommendation === 'Not Recommended' ? <UserX size={12} /> : <Clock size={12} />}
+                        {(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? 'Shortlisted' :
+                          result.recommendation === 'Not Recommended' ? 'Rejected' : 'Under Review'}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-medium text-gray-400 italic">—</span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
@@ -212,6 +247,70 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
           })}
         </tbody>
       </table>
+
+      {/* Pagination Footer */}
+      <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-500">Show:</span>
+            <div className="flex bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm">
+              {PAGE_SIZE_OPTIONS.map(size => (
+                <button
+                  key={size}
+                  onClick={() => handlePageSizeChange(size)}
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${pageSize === size ? 'bg-[#00A1FF] text-white shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-[11px] font-medium text-gray-500">
+            Showing <span className="text-gray-900 font-bold">{startIndex + 1}</span> to <span className="text-gray-900 font-bold">{Math.min(startIndex + pageSize, totalItems)}</span> of <span className="text-gray-900 font-bold">{totalItems}</span> candidates
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 disabled:opacity-40 hover:bg-gray-50 transition-all shadow-sm"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <div className="flex items-center gap-1 mx-1">
+            {[...Array(totalPages)].map((_, i) => {
+              const pageNum = i + 1;
+              if (totalPages > 5 && pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
+                if (pageNum === 2 || pageNum === totalPages - 1) return <span key={`dots-${pageNum}`} className="px-1 text-gray-400 text-xs text-center min-w-[20px]">...</span>;
+                return null;
+              }
+              return (
+                <button
+                  key={`page-${pageNum}`}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === pageNum
+                      ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-sm'
+                      : 'text-gray-500 hover:bg-gray-100'
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 disabled:opacity-40 hover:bg-gray-50 transition-all shadow-sm"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

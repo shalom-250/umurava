@@ -30,7 +30,7 @@ interface EligibilityResult {
 
 function checkEligibility(job: Job, profile: any): EligibilityResult {
   const candidateSkills = (profile.skills || []).map((s: any) =>
-    (typeof s === 'string' ? s : s.name).toLowerCase()
+    (typeof s === 'string' ? s : (s?.name || '')).toLowerCase()
   );
 
   const requiredSkills: string[] = job.requiredSkills || [];

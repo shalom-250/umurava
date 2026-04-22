@@ -71,7 +71,10 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
             const simulatedBatch = batch.map((c, idx) => {
                 const jobSkillsLower = jobDescription.toLowerCase();
                 const candSkills = c.skills || [];
-                const matched = candSkills.filter((s: string) => jobSkillsLower.includes(s.toLowerCase())).length;
+                const matched = candSkills.filter((s: any) => {
+                    const skillName = typeof s === 'string' ? s : s?.name;
+                    return skillName && jobSkillsLower.includes(skillName.toLowerCase());
+                }).length;
                 const matchScore = Math.min(100, 40 + (matched * 10) + (Math.random() * 15));
 
                 return {
@@ -84,7 +87,7 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
                         education: Math.round(matchScore * 0.85)
                     },
                     relevance: matchScore,
-                    strengths: candSkills.slice(0, 3).join(', ') + " (Strong match)",
+                    strengths: candSkills.slice(0, 3).map((s: any) => typeof s === 'string' ? s : s?.name).filter(Boolean).join(', ') + " (Strong match)",
                     gaps: "Minor experience gap in secondary tools",
                     aiReasoning: `[Simulated Output] This candidate demonstrates solid alignment with the core requirements. Skill overlap score is ${Math.round(matchScore)}/100 based on keyword extraction.`,
                     recommendation: matchScore >= 70 ? 'Shortlist' : matchScore >= 55 ? 'Waitlist' : 'Reject' as any,

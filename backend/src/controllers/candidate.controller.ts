@@ -82,17 +82,17 @@ export const parseCandidateFile = (req: Request, res: Response) => {
                 if (fileExtension === '.pdf') {
                     try {
                         aiInfo = await extractCandidateInfoFromFile(filePath, 'application/pdf');
-                        const isNamePlaceholder = aiInfo.name.toLowerCase().includes('unknown') || aiInfo.name.toLowerCase().includes('candidate');
-                        const isEmailPlaceholder = aiInfo.email.toLowerCase().includes('unknown') || aiInfo.email.toLowerCase().includes('example.com');
+                        const isNamePlaceholder = aiInfo?.name?.toLowerCase().includes('unknown') || aiInfo?.name?.toLowerCase().includes('candidate') || !aiInfo?.name;
+                        const isEmailPlaceholder = aiInfo?.email?.toLowerCase().includes('unknown') || aiInfo?.email?.toLowerCase().includes('example.com') || !aiInfo?.email;
 
                         if (isNamePlaceholder || isEmailPlaceholder) {
                             try {
                                 text = await extractTextFromPdf(filePath);
                                 const betterInfo = await extractCandidateInfoFromText(text);
-                                if (!betterInfo.name.toLowerCase().includes('unknown')) aiInfo.name = betterInfo.name;
-                                if (!betterInfo.email.toLowerCase().includes('unknown')) aiInfo.email = betterInfo.email;
-                                if (!aiInfo.phone) aiInfo.phone = betterInfo.phone;
-                                if (aiInfo.skills.length === 0) aiInfo.skills = betterInfo.skills;
+                                if (betterInfo?.name && !betterInfo.name.toLowerCase().includes('unknown')) aiInfo.name = betterInfo.name;
+                                if (betterInfo?.email && !betterInfo.email.toLowerCase().includes('unknown')) aiInfo.email = betterInfo.email;
+                                if (!aiInfo.phone) aiInfo.phone = betterInfo?.phone || null;
+                                if (aiInfo.skills?.length === 0) aiInfo.skills = betterInfo?.skills || [];
                             } catch (e: any) {
                                 console.warn("Secondary extraction failed:", e.message);
                             }

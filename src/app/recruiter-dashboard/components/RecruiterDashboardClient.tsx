@@ -586,10 +586,10 @@ export default function RecruiterDashboardClient() {
           {selectedJob && (
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
               <div className="xl:col-span-2">
-                <SkillMatchChart results={screeningResults} profiles={talentProfiles} job={selectedJob} />
+                <SkillMatchChart results={filteredResults} profiles={talentProfiles} job={selectedJob} />
               </div>
               <div>
-                <ApplicantBreakdownChart jobTitle={selectedJob.title} results={screeningResults} />
+                <ApplicantBreakdownChart jobTitle={selectedJob.title} results={filteredResults} />
               </div>
             </div>
           )}
@@ -674,7 +674,7 @@ export default function RecruiterDashboardClient() {
               />
             )}
 
-            {applications.length === 0 && (
+            {applications.length === 0 && !isScreening && (
               <div className="p-20 text-center">
                 <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Plus className="text-blue-500" size={32} />

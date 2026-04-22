@@ -13,6 +13,7 @@ import CandidateReasoningDrawer from './CandidateReasoningDrawer';
 import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
+import DraftProfilesTable from './DraftProfilesTable';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
@@ -34,6 +35,7 @@ export default function RecruiterDashboardClient() {
   const [loading, setLoading] = useState(true);
   const [talentProfiles, setTalentProfiles] = useState<TalentProfile[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
+  const [draftProfiles, setDraftProfiles] = useState<any[]>([]);
 
   const selectedJobId = currentJobId;
   const screeningResults = (selectedJobId && allResults[selectedJobId]) || [];
@@ -281,6 +283,97 @@ export default function RecruiterDashboardClient() {
     }
   };
 
+  const handleUpdateDraftProfile = (idx: number, profile: any) => {
+    const updated = [...draftProfiles];
+    updated[idx] = profile;
+    setDraftProfiles(updated);
+  };
+
+  const handleRemoveDraftProfile = (idx: number) => {
+    setDraftProfiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleCreateProfile = async (idx: number, skipToast = false) => {
+    const profile = draftProfiles[idx];
+    const nameParts = (profile.name || '').split(' ');
+    const finalPayload = [{
+      ...profile,
+      firstName: nameParts[0] || profile.firstName || 'Candidate',
+      lastName: nameParts.slice(1).join(' ') || profile.lastName || '',
+      skills: profile.skillsRaw ? profile.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0) : [],
+      experience: profile.experience ? [{ company: '', role: '', description: profile.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : []
+    }];
+
+    try {
+      await api.post('/candidates', { candidates: finalPayload });
+      if (!skipToast) toast.success(`Profile created for ${profile.name}`);
+      setDraftProfiles(prev => prev.filter((_, i) => i !== idx));
+      fetchCandidates();
+      return true;
+    } catch (error: any) {
+      console.error(error);
+      if (!skipToast) toast.error(`Failed to create profile: ${error.message}`);
+      return false;
+    }
+  };
+
+  const handleCreateAllProfiles = async () => {
+    const loader = toast.loading('Creating all profiles...');
+    let successCount = 0;
+    for (let i = 0; i < draftProfiles.length; i++) {
+      const ok = await handleCreateProfile(i, true);
+      if (ok) successCount++;
+    }
+    toast.dismiss(loader);
+    toast.success(`Successfully created ${successCount} profiles`);
+  };
+
+  const handleScreenDrafts = async () => {
+    if (!selectedJobId) {
+      toast.error('Please select a job first');
+      return;
+    }
+
+    const loader = toast.loading('Saving drafts and triggering AI screening...');
+
+    // 1. Save all drafts as candidates
+    const profilesToSave = draftProfiles.map(p => {
+      const nameParts = (p.name || '').split(' ');
+      return {
+        ...p,
+        firstName: nameParts[0] || p.firstName || 'Candidate',
+        lastName: nameParts.slice(1).join(' ') || p.lastName || '',
+        skills: p.skillsRaw ? p.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0) : [],
+        experience: p.experience ? [{ company: '', role: '', description: p.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : []
+      };
+    });
+
+    try {
+      // Bulk save
+      const savedCandidates = await api.post('/candidates', { candidates: profilesToSave });
+
+      // 2. Apply them to the job
+      for (const cand of savedCandidates) {
+        try {
+          await api.post('/applications', { jobId: selectedJobId, candidateId: cand._id });
+        } catch (e) {
+          // Ignore "already applied" errors
+        }
+      }
+
+      toast.dismiss(loader);
+      setDraftProfiles([]);
+      fetchCandidates();
+      fetchApplications();
+
+      // 3. Trigger screening
+      handleTriggerScreening(false);
+    } catch (error: any) {
+      toast.dismiss(loader);
+      toast.error(`Screening failed: ${error.message}`);
+    }
+  };
+
   // Generate mock trend data for charts
   const trendData = useMemo(() => {
     if (!selectedJob) return [];
@@ -475,6 +568,18 @@ export default function RecruiterDashboardClient() {
             </div>
           )}
 
+          {/* Draft Profiles Table */}
+          {draftProfiles.length > 0 && (
+            <DraftProfilesTable
+              profiles={draftProfiles}
+              onUpdate={handleUpdateDraftProfile}
+              onRemove={handleRemoveDraftProfile}
+              onCreateProfile={handleCreateProfile}
+              onCreateAll={handleCreateAllProfiles}
+              onScreenAll={handleScreenDrafts}
+            />
+          )}
+
           {/* Table Section */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
@@ -605,6 +710,10 @@ export default function RecruiterDashboardClient() {
           onSuccess={() => {
             setShowUploadResume(false);
             fetchCandidates();
+          }}
+          onExtracted={(candidates) => {
+            setDraftProfiles(prev => [...prev, ...candidates]);
+            toast.success(`${candidates.length} profiles extracted to draft table`);
           }}
         />
       )}

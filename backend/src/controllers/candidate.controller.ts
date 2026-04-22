@@ -37,7 +37,7 @@ const upload = multer({
         }
         cb(new Error('Only PDF, DOCX, and CSV files are allowed'));
     },
-}).single('file');
+}).array('files', 100);
 
 export const parseCandidateFile = (req: Request, res: Response) => {
     upload(req, res, async (err) => {
@@ -46,131 +46,102 @@ export const parseCandidateFile = (req: Request, res: Response) => {
             return;
         }
 
-        if (!req.file) {
-            res.status(400).json({ message: 'Please upload a file' });
+        const files = req.files as Express.Multer.File[];
+
+        if (!files || files.length === 0) {
+            res.status(400).json({ message: 'Please upload at least one file' });
             return;
         }
 
-        const filePath = req.file.path;
-        const fileExtension = path.extname(req.file.originalname).toLowerCase();
+        const allParsedCandidates: any[] = [];
 
         try {
-            let aiInfo: any = null;
-            let text = '';
+            for (const file of files) {
+                const filePath = file.path;
+                const fileExtension = path.extname(file.originalname).toLowerCase();
+                let aiInfo: any = null;
+                let text = '';
 
-            if (fileExtension === '.pdf') {
-                try {
-                    // Try direct PDF processing first (robust to bad XRef, supports OCR)
-                    aiInfo = await extractCandidateInfoFromFile(filePath, 'application/pdf');
+                if (fileExtension === '.pdf') {
+                    try {
+                        aiInfo = await extractCandidateInfoFromFile(filePath, 'application/pdf');
+                        const isNamePlaceholder = aiInfo.name.toLowerCase().includes('unknown') || aiInfo.name.toLowerCase().includes('candidate');
+                        const isEmailPlaceholder = aiInfo.email.toLowerCase().includes('unknown') || aiInfo.email.toLowerCase().includes('example.com');
 
-                    // Suspicious result check: If AI returned placeholders, try local text extraction as secondary source
-                    const isNamePlaceholder = aiInfo.name.toLowerCase().includes('unknown') || aiInfo.name.toLowerCase().includes('candidate');
-                    const isEmailPlaceholder = aiInfo.email.toLowerCase().includes('unknown') || aiInfo.email.toLowerCase().includes('example.com');
-
-                    if (isNamePlaceholder || isEmailPlaceholder) {
+                        if (isNamePlaceholder || isEmailPlaceholder) {
+                            try {
+                                text = await extractTextFromPdf(filePath);
+                                const betterInfo = await extractCandidateInfoFromText(text);
+                                if (!betterInfo.name.toLowerCase().includes('unknown')) aiInfo.name = betterInfo.name;
+                                if (!betterInfo.email.toLowerCase().includes('unknown')) aiInfo.email = betterInfo.email;
+                                if (!aiInfo.phone) aiInfo.phone = betterInfo.phone;
+                                if (aiInfo.skills.length === 0) aiInfo.skills = betterInfo.skills;
+                            } catch (e: any) {
+                                console.warn("Secondary extraction failed:", e.message);
+                            }
+                        }
+                    } catch (pdfError: any) {
                         try {
-                            console.log("AI returned placeholders for PDF, attempting local extraction backup...");
                             text = await extractTextFromPdf(filePath);
-                            const betterInfo = await extractCandidateInfoFromText(text);
-
-                            // Merge only if better info was found
-                            if (!betterInfo.name.toLowerCase().includes('unknown')) aiInfo.name = betterInfo.name;
-                            if (!betterInfo.email.toLowerCase().includes('unknown')) aiInfo.email = betterInfo.email;
-                            if (!aiInfo.phone) aiInfo.phone = betterInfo.phone;
-                            if (aiInfo.skills.length === 0) aiInfo.skills = betterInfo.skills;
-                        } catch (e: any) {
-                            console.warn("Secondary extraction attempt failed:", e.message);
+                            aiInfo = await extractCandidateInfoFromText(text);
+                        } catch (innerTextError: any) {
+                            console.error("PDF extraction failed:", innerTextError.message);
                         }
                     }
-                } catch (pdfError: any) {
-                    console.warn("Direct PDF extraction failed, trying local text extraction fallback:", pdfError.message);
+                } else if (fileExtension === '.doc' || fileExtension === '.docx') {
                     try {
-                        text = await extractTextFromPdf(filePath);
+                        text = await extractTextFromDocx(filePath);
                         aiInfo = await extractCandidateInfoFromText(text);
-                    } catch (innerTextError: any) {
-                        console.error("Local PDF text extraction also failed:", innerTextError.message);
-                        throw new Error("This PDF file is corrupted or unreadable. Please try a different version or format (DOCX/CSV).");
+                    } catch (docError: any) {
+                        console.error("DOCX extraction failed:", docError.message);
+                    }
+                } else if (fileExtension === '.csv') {
+                    try {
+                        const candidatesData = await parseCandidatesCsv(filePath);
+                        const mappedCsvData = candidatesData.map((c) => {
+                            const findValue = (possibleKeys: string[]) => {
+                                const key = Object.keys(c).find(k => possibleKeys.includes(k.trim().toLowerCase()));
+                                return key ? c[key] : '';
+                            };
+                            const fullName = findValue(['name', 'full name', 'candidate name', 'candidate']) || 'Unknown Candidate';
+                            const nameParts = fullName.split(' ');
+                            return {
+                                firstName: nameParts[0],
+                                lastName: nameParts.slice(1).join(' ') || '',
+                                email: findValue(['email', 'mail', 'email address']) || 'no-email@example.com',
+                                phone: findValue(['phone', 'mobile', 'contact', 'phone number']) || '',
+                                skills: (findValue(['skills', 'core skills', 'technologies', 'tech stack']) || '').replace(/[\n\r"]/g, '').split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })).filter((s: any) => s.name.length > 0),
+                                experience: [{ company: 'Previous', role: 'Role', description: findValue(['experience', 'years of exp', 'yoe', 'work experience', 'years of experience']) || '', startDate: '', endDate: '', isCurrent: false, technologies: [] }],
+                                source: 'structured',
+                            };
+                        });
+                        allParsedCandidates.push(...mappedCsvData);
+                    } catch (csvError: any) {
+                        console.error("CSV extraction failed:", csvError.message);
                     }
                 }
-            } else if (fileExtension === '.doc' || fileExtension === '.docx') {
-                text = await extractTextFromDocx(filePath);
-                aiInfo = await extractCandidateInfoFromText(text);
-            }
 
-            if (aiInfo) {
-                // Exhaustive phone discovery if AI missed it but we have text
-                if (!aiInfo.phone && text) {
-                    const phoneMatch = text.match(/(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,6}/);
-                    if (phoneMatch) aiInfo.phone = phoneMatch[0];
+                if (aiInfo) {
+                    const nameParts = (aiInfo.name || 'Unknown Candidate').split(' ');
+                    allParsedCandidates.push({
+                        firstName: nameParts[0] || '',
+                        lastName: nameParts.slice(1).join(' ') || '',
+                        email: aiInfo.email || '',
+                        phone: aiInfo.phone || '',
+                        skills: (aiInfo.skills || []).map((s: any) => typeof s === 'string' ? { name: s, level: 'Intermediate', yearsOfExperience: 1 } : s),
+                        experience: typeof aiInfo.experience === 'string' ? [{ company: '', role: '', description: aiInfo.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : (aiInfo.experience || []),
+                        education: typeof aiInfo.education === 'string' ? [{ institution: '', degree: aiInfo.education, fieldOfStudy: '', startYear: 2020, endYear: null }] : (aiInfo.education || []),
+                        source: 'unstructured',
+                    });
                 }
 
-                const nameParts = (aiInfo.name || 'Unknown Candidate').split(' ');
-                const candidateData = {
-                    firstName: nameParts[0],
-                    lastName: nameParts.slice(1).join(' ') || '',
-                    email: aiInfo.email || 'unknown@example.com',
-                    phone: aiInfo.phone || '',
-                    skills: (aiInfo.skills || []).map((s: any) => typeof s === 'string' ? { name: s, level: 'Intermediate', yearsOfExperience: 1 } : s),
-                    experience: typeof aiInfo.experience === 'string' ? [{
-                        company: 'Extracted Experience',
-                        role: 'Professional',
-                        description: aiInfo.experience,
-                        startDate: '',
-                        endDate: '',
-                        isCurrent: false,
-                        technologies: []
-                    }] : (aiInfo.experience || []),
-                    education: typeof aiInfo.education === 'string' ? [{
-                        institution: 'Extracted Education',
-                        degree: aiInfo.education,
-                        fieldOfStudy: '',
-                        startYear: 2020,
-                        endYear: null
-                    }] : (aiInfo.education || []),
-                    extractedText: text || 'Extracted via direct AI processing',
-                    source: 'unstructured',
-                };
-
-                // Remove file after parsing
                 if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-                res.status(200).json({ parsedCandidates: [candidateData] });
-            } else if (fileExtension === '.csv') {
-                const candidatesData = await parseCandidatesCsv(filePath);
-                const mappedCsvData = candidatesData.map((c) => {
-                    const findValue = (possibleKeys: string[]) => {
-                        const key = Object.keys(c).find(k => possibleKeys.includes(k.trim().toLowerCase()));
-                        return key ? c[key] : '';
-                    };
-
-                    const fullName = findValue(['name', 'full name', 'candidate name', 'candidate']) || 'Unknown Candidate';
-                    const nameParts = fullName.split(' ');
-                    const email = findValue(['email', 'mail', 'email address']) || 'no-email@example.com';
-                    const phone = findValue(['phone', 'mobile', 'contact', 'phone number']) || '';
-                    const rawSkills = findValue(['skills', 'core skills', 'technologies', 'tech stack']);
-                    const experience = findValue(['experience', 'years of exp', 'yoe', 'work experience', 'years of experience']) || '';
-
-                    return {
-                        firstName: nameParts[0],
-                        lastName: nameParts.slice(1).join(' ') || '',
-                        email,
-                        phone,
-                        skills: rawSkills ? rawSkills.replace(/[\n\r"]/g, '').split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })) : [],
-                        experience: [{ company: 'Previous', role: 'Role', description: experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }],
-                        source: 'structured',
-                    };
-                });
-
-                fs.unlinkSync(filePath);
-                res.status(200).json({ parsedCandidates: mappedCsvData });
-            } else {
-                // If it was a PDF/DOCX but no text was extracted
-                fs.unlinkSync(filePath);
-                res.status(400).json({ message: 'Could not extract text from this document. Please ensure it is not an image-only PDF or use a different format.' });
             }
+
+            res.status(200).json({ parsedCandidates: allParsedCandidates });
         } catch (error: any) {
-            console.error("Upload & Parse Error:", error);
-            res.status(500).json({ message: 'Failed to process file: ' + (error.message || 'Unknown error') });
+            console.error("Bulk Parse Error:", error);
+            res.status(500).json({ message: 'Failed to process files: ' + (error.message || 'Unknown error') });
         }
     });
 };
@@ -334,7 +305,7 @@ export const updateMyProfile = async (req: any, res: Response): Promise<void> =>
 
 export const applyForJob = async (req: any, res: Response): Promise<void> => {
     const user = req.user;
-    const { jobId } = req.body;
+    const { jobId, candidateId } = req.body;
 
     if (!jobId) {
         res.status(400).json({ message: 'jobId is required' });
@@ -342,9 +313,15 @@ export const applyForJob = async (req: any, res: Response): Promise<void> => {
     }
 
     try {
-        const candidate = await Candidate.findOne({ email: user.email });
+        let candidate;
+        if (user.role === 'recruiter' && candidateId) {
+            candidate = await Candidate.findById(candidateId);
+        } else {
+            candidate = await Candidate.findOne({ email: user.email });
+        }
+
         if (!candidate) {
-            res.status(404).json({ message: 'Candidate profile not found. Please complete your profile first.' });
+            res.status(404).json({ message: 'Candidate profile not found.' });
             return;
         }
 

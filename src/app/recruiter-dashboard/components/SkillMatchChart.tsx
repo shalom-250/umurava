@@ -51,9 +51,24 @@ export default function SkillMatchChart({ results, profiles, job }: SkillMatchCh
 
   return (
     <div className="bg-white rounded-xl border border-border shadow-card p-5">
-      <div className="mb-4">
-        <h2 className="text-base font-display font-600 text-foreground">Skill Match Comparison — Top 5 Candidates</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">AI-scored skill proficiency vs. job requirements (0–100)</p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-display font-600 text-foreground">Skill Match Comparison — Top 5 Candidates</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">AI-scored proficiency vs. requirements</p>
+        </div>
+        {job?.lastScreenedAt && (
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider leading-none mb-1">
+              Data Updated
+            </span>
+            <span className="text-xs font-bold text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-primary-100">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
+              {new Date(job.lastScreenedAt).toLocaleString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+              })}
+            </span>
+          </div>
+        )}
       </div>
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={data} margin={{ top: 4, right: 16, left: -8, bottom: 0 }}>

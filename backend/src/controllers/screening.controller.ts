@@ -93,6 +93,9 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
 
         await Promise.all(screeningPromises);
 
+        // Update Job with last screening timestamp
+        await Job.findByIdAndUpdate(jobId, { lastScreenedAt: new Date() });
+
         res.json({ message: 'Screening completed successfully', results: rankingResults });
     } catch (error) {
         console.error(error);
@@ -154,6 +157,10 @@ export const runTestScreening = async (req: Request, res: Response): Promise<voi
         const rankingResults = await rankCandidates(jobDescription, candidatesForAI);
 
         // Return results to FE for testing
+        if (!(typeof jobId === 'string' && jobId.startsWith('job-'))) {
+            await Job.findByIdAndUpdate(jobId, { lastScreenedAt: new Date() });
+        }
+
         res.json({
             message: 'Test Screening completed successfully',
             results: rankingResults,

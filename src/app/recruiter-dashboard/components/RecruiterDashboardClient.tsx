@@ -222,7 +222,7 @@ export default function RecruiterDashboardClient() {
         matchScore: r.score,
         recommendation: r.recommendation === 'Shortlist' ? 'Strongly Recommend' :
           r.recommendation === 'Waitlist' ? 'Consider' : 'Not Recommended',
-        skillBreakdown: [
+        skillBreakdown: r.skillBreakdown || [
           { skill: 'Skills', score: r.weightedScore?.skills || 0, required: true },
           { skill: 'Experience', score: r.weightedScore?.experience || 0, required: true },
           { skill: 'Education', score: r.weightedScore?.education || 0, required: true }
@@ -230,11 +230,14 @@ export default function RecruiterDashboardClient() {
         strengths: Array.isArray(r.strengths) ? r.strengths : [r.strengths],
         gaps: Array.isArray(r.gaps) ? r.gaps : [r.gaps],
         aiReasoning: r.aiReasoning,
-        interviewQuestions: r.interviewQuestions
+        interviewQuestions: r.interviewQuestions,
+        documentStatus: r.documentStatus
       }));
 
       if (selectedJobId) {
         dispatch(setScreeningResults({ jobId: selectedJobId, results: mappedResults }));
+        // Refresh job data to get updated lastScreenedAt
+        fetchJobs();
       }
       toast.success(isReRun ? 'AI Screening Refreshed!' : 'AI Screening Complete!');
     } catch (error: any) {
@@ -361,6 +364,18 @@ export default function RecruiterDashboardClient() {
             )}
 
             <div className="flex items-center gap-3">
+              {selectedJob?.lastScreenedAt && (
+                <div className="hidden xl:flex flex-col items-end mr-2 pr-4 border-r border-gray-200">
+                  <span className="text-[9px] uppercase font-bold text-gray-400 tracking-widest leading-none mb-1">
+                    Last Analysis
+                  </span>
+                  <span className="text-xs font-bold text-gray-700">
+                    {new Date(selectedJob.lastScreenedAt).toLocaleString('en-US', {
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
               <button
                 onClick={() => setShowUploadResume(true)}
                 disabled={selectedJob?.status === 'Closed' || !selectedJob}

@@ -14,6 +14,7 @@ export interface IJob extends Document {
     salaryRange: string;
     deadline: string;
     requiredDocuments: string[];
+    lastScreenedAt?: Date;
     status: 'Active' | 'Draft' | 'Screening' | 'Closed';
     createdAt: Date;
 }
@@ -32,6 +33,7 @@ const JobSchema: Schema = new Schema({
     salaryRange: { type: String },
     deadline: { type: String },
     requiredDocuments: [{ type: String }],
+    lastScreenedAt: { type: Date },
     status: { type: String, enum: ['Active', 'Draft', 'Screening', 'Closed'], default: 'Active' },
     createdAt: { type: Date, default: Date.now },
 });

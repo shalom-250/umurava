@@ -27,9 +27,9 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
   const cards = [
     {
       id: 'kpi-total',
-      label: 'Total Applicants',
-      value: (job.applicantCount || 0).toString(),
-      sub: 'Newly applied candidates',
+      label: 'New Applicants',
+      value: Math.max(0, (job.applicantCount || 0) - screeningResults.length).toString(),
+      sub: `${job.applicantCount || 0} total applications received`,
       icon: Users,
       trend: 'up' as const,
       color: 'blue',

@@ -110,6 +110,7 @@ export interface Job {
   avgMatchScore: number;
   department: string;
   requiredDocuments?: string[];
+  lastScreenedAt?: string;
 }
 
 export interface Application {

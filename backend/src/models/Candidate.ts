@@ -8,14 +8,19 @@ export interface ICandidate extends Document {
     headline?: string;
     bio?: string;
     location?: string;
-    skills: { name: string; level: string; yearsOfExperience: number }[];
+    nationality?: string;
+    dob?: string;
+    personalStatement?: string;
+    skills: { name: string; level: string; yearsOfExperience: number; type: 'Technical' | 'Soft' | 'Other' }[];
     languages: { name: string; proficiency: string }[];
     experience: {
         company: string;
         role: string;
+        location?: string;
         startDate: string;
         endDate: string;
         description: string;
+        achievements?: string[];
         technologies: string[];
         isCurrent: boolean;
     }[];
@@ -23,8 +28,15 @@ export interface ICandidate extends Document {
         institution: string;
         degree: string;
         fieldOfStudy: string;
+        location?: string;
         startYear: number;
         endYear: number | null;
+        achievements?: string[];
+    }[];
+    backgroundSchool?: {
+        name: string;
+        certificate?: string;
+        location?: string;
     }[];
     certifications: { name: string; issuer: string; issueDate: string }[];
     projects: {
@@ -36,6 +48,39 @@ export interface ICandidate extends Document {
         startDate: string;
         endDate: string;
     }[];
+    interests?: {
+        professional: string[];
+        personal: string[];
+    };
+    hobbies?: string[];
+    references?: {
+        name: string;
+        position: string;
+        contactDetails: string;
+    }[];
+    awards?: {
+        title: string;
+        issuer: string;
+        year: string;
+        description?: string;
+    }[];
+    volunteerExperience?: {
+        organization: string;
+        role: string;
+        impact?: string;
+        duration?: string;
+    }[];
+    extracurricularActivities?: {
+        activity: string;
+        role: string;
+        description?: string;
+    }[];
+    publications?: {
+        title: string;
+        platform: string;
+        link?: string;
+        year?: string;
+    }[];
     availability: {
         status: string;
         type: string;
@@ -45,6 +90,7 @@ export interface ICandidate extends Document {
         linkedin?: string;
         github?: string;
         portfolio?: string;
+        website?: string;
     };
     resumeUrl?: string;
     extractedText?: string;
@@ -60,10 +106,14 @@ const CandidateSchema: Schema = new Schema({
     headline: { type: String },
     bio: { type: String },
     location: { type: String },
+    nationality: { type: String },
+    dob: { type: String },
+    personalStatement: { type: String },
     skills: [{
         name: String,
         level: String,
-        yearsOfExperience: Number
+        yearsOfExperience: Number,
+        type: { type: String, enum: ['Technical', 'Soft', 'Other'], default: 'Other' }
     }],
     languages: [{
         name: String,
@@ -72,9 +122,11 @@ const CandidateSchema: Schema = new Schema({
     experience: [{
         company: String,
         role: String,
+        location: String,
         startDate: String,
         endDate: String,
         description: String,
+        achievements: [String],
         technologies: [String],
         isCurrent: Boolean
     }],
@@ -82,8 +134,15 @@ const CandidateSchema: Schema = new Schema({
         institution: String,
         degree: String,
         fieldOfStudy: String,
+        location: String,
         startYear: Number,
-        endYear: Number
+        endYear: Number,
+        achievements: [String]
+    }],
+    backgroundSchool: [{
+        name: String,
+        certificate: String,
+        location: String
     }],
     certifications: [{
         name: String,
@@ -99,6 +158,39 @@ const CandidateSchema: Schema = new Schema({
         startDate: String,
         endDate: String
     }],
+    interests: {
+        professional: [String],
+        personal: [String]
+    },
+    hobbies: [String],
+    references: [{
+        name: String,
+        position: String,
+        contactDetails: String
+    }],
+    awards: [{
+        title: String,
+        issuer: String,
+        year: String,
+        description: String
+    }],
+    volunteerExperience: [{
+        organization: String,
+        role: String,
+        impact: String,
+        duration: String
+    }],
+    extracurricularActivities: [{
+        activity: String,
+        role: String,
+        description: String
+    }],
+    publications: [{
+        title: String,
+        platform: String,
+        link: String,
+        year: String
+    }],
     availability: {
         status: { type: String, default: 'Available' },
         type: { type: String, default: 'Full-time' },
@@ -107,7 +199,8 @@ const CandidateSchema: Schema = new Schema({
     socialLinks: {
         linkedin: String,
         github: String,
-        portfolio: String
+        portfolio: String,
+        website: String
     },
     resumeUrl: { type: String },
     extractedText: { type: String },

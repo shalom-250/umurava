@@ -82,9 +82,11 @@ export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: U
             if (res.parsedCandidates && res.parsedCandidates.length > 0) {
                 const candidates = res.parsedCandidates.map((c: any) => ({
                     ...c,
-                    name: c.name || (c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` : c.firstName || c.lastName || ''),
-                    skillsRaw: (c.skills || []).map((s: any) => typeof s === 'string' ? s : s.name).join(', '),
-                    experience: c.experience && c.experience.length > 0 ? (typeof c.experience[0] === 'string' ? c.experience[0] : c.experience[0].description) : ''
+                    // skillsRaw is used for the mini-preview and early validation, 
+                    // though the table now uses more structured data
+                    skillsRaw: Array.isArray(c.skills)
+                        ? c.skills.map((s: any) => typeof s === 'string' ? s : s.name).join(', ')
+                        : (c.skillsRaw || '')
                 }));
                 setParsedCandidates(candidates);
                 setStep('preview');

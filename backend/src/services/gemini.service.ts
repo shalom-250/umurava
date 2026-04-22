@@ -37,15 +37,14 @@ export interface IRankingResult {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const rankCandidates = async (jobDescription: string, candidates: any[]): Promise<IRankingResult[]> => {
-    // Increased batch size to 30 because Gemini Flash has a 1 Million token context window.
     const BATCH_SIZE = 5;
     const allResults: IRankingResult[] = [];
 
     for (let i = 0; i < candidates.length; i += BATCH_SIZE) {
         const batch = candidates.slice(i, i + BATCH_SIZE);
-        let retries = 2; // Reduced retries to avoid 90-second lockups
+        let retries = 2;
         let success = false;
-        let delay = 5000; // Flat 5s delay for quick recovery attempts
+        let delay = 5000;
 
         while (retries > 0 && !success) {
             try {
@@ -53,7 +52,6 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
                 allResults.push(...batchResult);
                 success = true;
 
-                // Pacing delay
                 if (i + BATCH_SIZE < candidates.length) {
                     await sleep(1500);
                 }
@@ -63,14 +61,11 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
                     await sleep(delay);
                     retries--;
                 } else {
-                    retries = 0; // abort retries on hard errors like 500, parsing, etc
+                    retries = 0;
                 }
             }
         }
 
-        // --- FALLBACK LOGIC ---
-        // If Gemini completely fails due to strict Free Tier quotas, use a local fallback simulator.
-        // This ensures the Recruiter Dashboard always receives functional data and never hangs.
         if (!success) {
             console.warn("⚠️ AI service exhausted. Falling back to local simulation engine for this batch.");
             const simulatedBatch = batch.map((c, idx) => {
@@ -85,7 +80,7 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
                 return {
                     candidateId: c._id || c.id,
                     score: Math.round(matchScore),
-                    rank: 0, // Assigned later
+                    rank: 0,
                     weightedScore: {
                         skills: Math.round(matchScore * 0.9),
                         experience: Math.round(matchScore * 0.8),
@@ -112,7 +107,6 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
 };
 
 const rankBatch = async (jobDescription: string, candidates: any[]): Promise<IRankingResult[]> => {
-    // Compressed prompt for token efficiency
     const prompt = `
     Job: ${jobDescription}
     Candidates: ${JSON.stringify(candidates.map(c => ({
@@ -121,24 +115,11 @@ const rankBatch = async (jobDescription: string, candidates: any[]): Promise<IRa
         skills: c.skills,
         exp: (c.experience || "").substring(0, 500),
         edu: (c.education || "").substring(0, 300),
-        docs: c.documentChecklist // Pass for analysis
+        docs: c.documentChecklist
     })))}
     
-    Task: Rank candidates 1-100 on: Skills(40%), Exp(30%), Edu(20%), Docs(10%). Penalty -20 if missing key skills or required documents.
-    Output: JSON array of:
-    { 
-      "candidateId", 
-      "score", 
-      "rank", 
-      "weightedScore":{skills,experience,education}, 
-      "recommendation":"Shortlist"|"Waitlist"|"Reject", 
-      "strengths", 
-      "gaps", 
-      "aiReasoning", 
-      "interviewQuestions":[],
-      "skillBreakdown": [{"skill": string, "score": number, "required": boolean}]
-    }
-    Keep text professional & concise.
+    Task: Rank candidates 1-100 on: Skills(40%), Exp(30%), Edu(20%), Docs(10%).
+    Output: JSON array of objects with candidateId, score, rank, weightedScore, recommendation, strengths, gaps, aiReasoning, interviewQuestions, skillBreakdown.
     `;
 
     try {
@@ -153,35 +134,35 @@ const rankBatch = async (jobDescription: string, candidates: any[]): Promise<IRa
     }
 };
 
-export const extractCandidateInfo = async (text: string): Promise<any> => {
-    return extractCandidateInfoFromText(text);
-};
-
 export const extractCandidateInfoFromText = async (text: string): Promise<any> => {
     const prompt = `
-    Extract the following information from the candidate's resume text:
-    - Name
-    - Email
-    - Phone number
-    - Key skills (as a list)
-    - Brief summary of experience
-    - Brief summary of education
-    
+    Extract ALL the following information from the candidate's resume text. 
+    IF ANY FIELD IS NOT FOUND, SET IT TO null. 
+    Be extremely thorough.
+
+    Fields to extract:
+    1. Personal Info: name, phone, email, location (city, country), nationality, dob, linkedin, github, portfolio, website.
+    2. personalStatement: A short paragraph (3-5 lines) or profile summary.
+    3. education: Array of { institution, degree, fieldOfStudy, location, startYear, endYear, achievements (array) }.
+    4. experience: Array of { jobTitle, company, location, startDate, endDate, description, achievements (array), technologies (array), isCurrent (boolean) }.
+    5. skills: Array of { name, level, type ('Technical' | 'Soft') }.
+    6. certifications: Array of { name, issuer, issueDate }.
+    7. projects: Array of { name, description, technologies (array), role }.
+    8. languages: Array of { name, level ('Basic' | 'Intermediate' | 'Fluent') }.
+    9. interests: { professional (array), personal (array) }.
+    10. hobbies: Array of strings.
+    11. references: Array of { name, position, contactDetails } or "Available upon request".
+    12. backgroundSchool: Array of { name, certificate, location }. (Earlier Education)
+    13. awards: Array of { title, issuer, year, description }.
+    14. volunteerExperience: Array of { organization, role, impact, duration }.
+    15. extracurricularActivities: Array of { activity, role, description }.
+    16. publications: Array of { title, platform, link, year }.
+
     Resume Text:
-    ${text.substring(0, 8000)}
-    
-    Return ONLY a valid JSON object. Do not include markdown formatting.
-    
-    Expected JSON Format:
-    {
-      "name": "Full Name",
-      "email": "email@example.com",
-      "phone": "string",
-      "skills": ["Skill1", "Skill2"],
-      "experience": "Summary of experience",
-      "education": "Summary of education"
-    }
-  `;
+    ${text.substring(0, 10000)}
+
+    Return ONLY a valid JSON object.
+    `;
 
     try {
         const result = await model.generateContent(prompt);
@@ -196,9 +177,8 @@ export const extractCandidateInfoFromText = async (text: string): Promise<any> =
 };
 
 export const extractCandidateInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
-    // Only use direct file processing for PDFs. For others, we rely on text extraction first.
     if (mimeType !== 'application/pdf') {
-        throw new Error("Direct file processing only supported for PDF in this helper.");
+        throw new Error("Direct file processing only supported for PDF.");
     }
 
     try {
@@ -206,16 +186,26 @@ export const extractCandidateInfoFromFile = async (filePath: string, mimeType: s
         const base64Data = fileBuffer.toString('base64');
 
         const prompt = `
-            Extract candidate information from this resume PDF.
-            Return a JSON object with: 
-            - name (Full name)
-            - email (Email address)
-            - phone (Full International Phone Number - look for labels like T:, P:, Tel:, Phone:, or just numbers at the top)
-            - skills (array of technical and soft skills)
-            - experience (brief summary)
-            - education (brief summary)
-            
-            Be as accurate as possible. If a field is missing, use null.
+            Extract ALL candidate information from this resume PDF.
+            IF ANY FIELD IS NOT FOUND, SET IT TO null.
+            Follow this schema:
+            - name, phone, email, location, nationality, dob
+            - socialLinks: { linkedin, github, portfolio, website }
+            - personalStatement
+            - education: [{ institution, degree, fieldOfStudy, location, startYear, endYear, achievements: [] }]
+            - experience: [{ jobTitle, company, location, startDate, endDate, description, achievements: [], technologies: [], isCurrent }]
+            - skills: [{ name, level, type: 'Technical'|'Soft' }]
+            - certifications: [{ name, issuer, issueDate }]
+            - projects: [{ name, description, technologies: [], role }]
+            - languages: [{ name, level }]
+            - interests: { professional: [], personal: [] }
+            - hobbies: []
+            - references: [{ name, position, contactDetails }]
+            - backgroundSchool: [{ name, certificate, location }]
+            - awards: [{ title, issuer, year, description }]
+            - volunteerExperience: [{ organization, role, impact, duration }]
+            - extracurricularActivities: [{ activity, role, description }]
+            - publications: [{ title, platform, link, year }]
         `;
 
         const result = await model.generateContent([
@@ -231,208 +221,85 @@ export const extractCandidateInfoFromFile = async (filePath: string, mimeType: s
         const response = await result.response;
         const cleanJson = response.text().replace(/```json|```/g, "").trim();
         const parsed = JSON.parse(cleanJson);
-
-        // PDF binary mode doesn't give us the text easily, so we pass empty string for secondary regex 
-        // unless we also try to extract text locally as a backup.
         return normalizeParsedData(parsed, "");
     } catch (error: any) {
         console.warn("⚠️ Gemini Direct PDF Error:", error.message);
-        throw error; // Let the caller decide how to handle (e.g. try text extraction fallback)
-    }
-};
-
-export const extractJobInfoFromText = async (text: string): Promise<any> => {
-    const prompt = `
-    Extract job posting information from the following text:
-    - title (e.g. Senior AI/ML Engineer)
-    - description (Detailed description of the role)
-    - requirements (list of what the candidate needs to have)
-    - skills (list of specific technical or soft skills)
-    - mustHaveSkills (subset of skills that are absolutely required)
-    - department (e.g. Engineering, Sales, HR)
-    - location (e.g. Kigali, Rwanda OR Remote)
-    - type ("Full-time", "Part-time", or "Contract")
-    - experienceLevel ("Junior", "Mid-level", "Senior", or "Lead")
-    - salaryRange (e.g. 1,000,000 - 1,500,000 RWF)
-    - deadline (Estimated date if found, otherwise null)
-    
-    Text:
-    ${text.substring(0, 8000)}
-    
-    Return ONLY a valid JSON object. Do not include markdown formatting.
-    `;
-
-    try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
-    } catch (error: any) {
-        console.error("Job Extraction Error:", error);
         throw error;
     }
 };
 
-export const extractJobInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
-    if (mimeType !== 'application/pdf') {
-        throw new Error("Direct file processing only supported for PDF.");
-    }
-
-    try {
-        const fileBuffer = fs.readFileSync(filePath);
-        const base64Data = fileBuffer.toString('base64');
-
-        const prompt = `
-            Extract job posting information from this document.
-            Return a JSON object with: 
-            - title
-            - description
-            - requirements (array)
-            - skills (array)
-            - mustHaveSkills (array)
-            - department
-            - location
-            - type ("Full-time" | "Part-time" | "Contract")
-            - experienceLevel ("Junior" | "Mid-level" | "Senior" | "Lead")
-            - salaryRange
-            - deadline (formatted as YYYY-MM-DD if possible)
-            
-            Be as accurate as possible. If a field is missing, use null.
-        `;
-
-        const result = await model.generateContent([
-            {
-                inlineData: {
-                    data: base64Data,
-                    mimeType: "application/pdf",
-                },
-            },
-            prompt,
-        ]);
-
-        const response = await result.response;
-        const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
-    } catch (error: any) {
-        console.warn("⚠️ Job File Extraction Error:", error.message);
-        throw error;
-    }
-};
-
-/**
- * Normalizes keys (phone vs phoneNumber) and performs aggressive regex fallback if AI missed it.
- */
-/**
- * Normalizes keys and performs aggressive regex fallback for missing/placeholder fields.
- */
 const normalizeParsedData = (data: any, originalText: string): any => {
-    let name = data.name || data.fullName || "";
-    let email = data.email || data.emailAddress || "";
-    let phone = data.phone || data.phoneNumber || data.contact || data.mobile || "";
-    let skills = Array.isArray(data.skills) ? data.skills : (typeof data.skills === 'string' ? data.skills.split(',').map((s: any) => s.trim()) : []);
+    let name = data.name || data.fullName || null;
+    let email = data.email || data.emailAddress || null;
+    let phone = data.phone || data.phoneNumber || data.contact || null;
 
-    const isPlaceholder = (val: string, placeholders: string[]) =>
-        !val || placeholders.some(p => val.toLowerCase().includes(p.toLowerCase()));
-
-    const namePlaceholders = ['unknown', 'candidate', 'resume', 'cv'];
-    const emailPlaceholders = ['unknown', 'example.com', 'no-email'];
-
-    // 1. Aggressive Email Discovery
-    if (isPlaceholder(email, emailPlaceholders) && originalText) {
+    // Fallback for names/emails/phones if AI missed them but they exist in text
+    if (!email && originalText) {
         const emailMatch = originalText.match(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/);
         if (emailMatch) email = emailMatch[0];
     }
-
-    // 2. Aggressive Phone Discovery
     if (!phone && originalText) {
-        // Broadened Regex for international formats: allows +, dots, spaces, parens, and varying lengths
         const phoneMatch = originalText.match(/(?:\+?\d{1,4}[\s.-]?)?\(?\d{2,5}\)?[\s.-]?\d{2,4}[\s.-]?\d{2,4}[\s.-]?\d{2,6}/);
         if (phoneMatch) phone = phoneMatch[0];
     }
 
-    // 3. Aggressive Name Discovery (Skip headers, find first 2-5 word line)
-    if (isPlaceholder(name, namePlaceholders) && originalText) {
-        const headerKeywords = ['resume', 'cv', 'curriculum', 'vitae', 'contact', 'info', 'profile', 'personal', 'information'];
-        const lines = originalText.split('\n')
-            .map(l => l.trim())
-            .filter(l => l.length > 0 && !headerKeywords.some(hk => l.toLowerCase().startsWith(hk)));
-
-        if (lines.length > 0) {
-            for (const line of lines) {
-                const words = line.split(/\s+/);
-                if (words.length >= 2 && words.length <= 5) {
-                    name = line.substring(0, 50);
-                    break;
-                }
-            }
-            if (isPlaceholder(name, namePlaceholders)) {
-                name = lines[0].substring(0, 50);
-            }
-        }
-    }
-
-    // 4. Aggressive Skills Discovery (Keyword matching)
-    if (skills.length === 0 && originalText) {
-        const commonTech = [
-            'JavaScript', 'TypeScript', 'React', 'Node.js', 'Express', 'Python', 'Django', 'Flask',
-            'Java', 'Spring', 'Spring Boot', 'PHP', 'Laravel', 'C++', 'C#', '.NET', 'SQL', 'PostgreSQL',
-            'MongoDB', 'AWS', 'Azure', 'Docker', 'Kubernetes', 'HTML', 'CSS', 'Tailwind', 'Next.js',
-            'Vue.js', 'Angular', 'Flutter', 'React Native', 'Swift', 'Kotlin', 'Go', 'Rust', 'Ruby', 'Rails'
-        ];
-        const lowerText = originalText.toLowerCase();
-        skills = commonTech.filter(s => lowerText.includes(s.toLowerCase()));
-    }
-
     return {
-        name: name || 'Unknown Candidate',
-        email: email || 'unknown@example.com',
-        phone: phone || '',
-        skills: skills,
-        experience: data.experience || data.workExperience || "Experience details not extracted.",
-        education: data.education || data.academic || "Education details not extracted."
+        firstName: name ? name.split(' ')[0] : null,
+        lastName: name ? name.split(' ').slice(1).join(' ') : null,
+        name: name,
+        email: email,
+        phone: phone,
+        location: data.location || null,
+        nationality: data.nationality || null,
+        dob: data.dob || null,
+        personalStatement: data.personalStatement || null,
+        bio: data.personalStatement || null,
+        socialLinks: {
+            linkedin: data.linkedin || data.socialLinks?.linkedin || null,
+            github: data.github || data.socialLinks?.github || null,
+            portfolio: data.portfolio || data.socialLinks?.portfolio || null,
+            website: data.website || data.socialLinks?.website || null,
+        },
+        skills: (data.skills || []).map((s: any) => typeof s === 'string' ? { name: s, level: 'Intermediate', type: 'Technical' } : {
+            name: s.name || null,
+            level: s.level || 'Intermediate',
+            type: s.type || 'Technical'
+        }),
+        education: (data.education || []).map((e: any) => ({
+            institution: e.institution || null,
+            degree: e.degree || null,
+            fieldOfStudy: e.fieldOfStudy || null,
+            location: e.location || null,
+            startYear: e.startYear || null,
+            endYear: e.endYear || null,
+            achievements: e.achievements || []
+        })),
+        experience: (data.experience || []).map((ex: any) => ({
+            company: ex.company || null,
+            role: ex.jobTitle || ex.role || null,
+            location: ex.location || null,
+            startDate: ex.startDate || null,
+            endDate: ex.endDate || null,
+            description: ex.description || null,
+            achievements: ex.achievements || [],
+            technologies: ex.technologies || [],
+            isCurrent: ex.isCurrent || false
+        })),
+        certifications: data.certifications || [],
+        projects: data.projects || [],
+        languages: data.languages || [],
+        interests: data.interests || { professional: [], personal: [] },
+        hobbies: data.hobbies || [],
+        references: data.references || [],
+        backgroundSchool: data.backgroundSchool || [],
+        awards: data.awards || [],
+        volunteerExperience: data.volunteerExperience || [],
+        extracurricularActivities: data.extracurricularActivities || [],
+        publications: data.publications || [],
+        source: 'unstructured'
     };
 };
 
 const getFallbackInfo = (text: string): any => {
-    // Pass empty object to trigger full regex discovery in normalizeParsedData
     return normalizeParsedData({}, text);
-};
-
-export const compareCandidates = async (jobDescription: string, candidateA: any, candidateB: any): Promise<any> => {
-    const prompt = `
-        Compare these two candidates for the following job:
-        
-        Job:
-        ${jobDescription}
-        
-        Candidate A:
-        ${JSON.stringify(candidateA)}
-        
-        Candidate B:
-        ${JSON.stringify(candidateB)}
-        
-        Provide a side-by-side comparison. Who is the better fit and why?
-        Return ONLY a valid JSON object.
-        
-        Expected JSON Format:
-        {
-            "winner": "Candidate Name",
-            "justification": "Detailed explanation",
-            "comparison": {
-                "skills": "Comp A vs Comp B",
-                "experience": "Comp A vs Comp B",
-                "education": "Comp A vs Comp B"
-            }
-        }
-    `;
-
-    try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
-    } catch (error) {
-        console.error("Gemini Comparison Error:", error);
-        throw new Error("Failed to compare candidates");
-    }
 };

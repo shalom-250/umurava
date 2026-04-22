@@ -122,15 +122,8 @@ export const parseCandidateFile = (req: Request, res: Response) => {
                 }
 
                 if (aiInfo) {
-                    const nameParts = (aiInfo.name || 'Unknown Candidate').split(' ');
                     allParsedCandidates.push({
-                        firstName: nameParts[0] || '',
-                        lastName: nameParts.slice(1).join(' ') || '',
-                        email: aiInfo.email || '',
-                        phone: aiInfo.phone || '',
-                        skills: (aiInfo.skills || []).map((s: any) => typeof s === 'string' ? { name: s, level: 'Intermediate', yearsOfExperience: 1 } : s),
-                        experience: typeof aiInfo.experience === 'string' ? [{ company: '', role: '', description: aiInfo.experience, startDate: '', endDate: '', isCurrent: false, technologies: [] }] : (aiInfo.experience || []),
-                        education: typeof aiInfo.education === 'string' ? [{ institution: '', degree: aiInfo.education, fieldOfStudy: '', startYear: 2020, endYear: null }] : (aiInfo.education || []),
+                        ...aiInfo,
                         source: 'unstructured',
                     });
                 }

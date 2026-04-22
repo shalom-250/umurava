@@ -2,7 +2,9 @@
 import React, { useState, useEffect, useMemo } from 'react'; // Bump to fix chunk load error
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen } from 'lucide-react';
+import DraftProfilesTable from './DraftProfilesTable';
+import StoredFilesModal from './StoredFilesModal';
+import TalentPoolTable from './TalentPoolTable';
 import KpiCards from './KpiCards';
 import ShortlistTable from './ShortlistTable';
 import SkillMatchChart from './SkillMatchChart';
@@ -13,9 +15,8 @@ import CandidateReasoningDrawer from './CandidateReasoningDrawer';
 import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
-import DraftProfilesTable from './DraftProfilesTable';
-import StoredFilesModal from './StoredFilesModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
+import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -38,6 +39,7 @@ export default function RecruiterDashboardClient() {
   const [talentProfiles, setTalentProfiles] = useState<TalentProfile[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [draftProfiles, setDraftProfiles] = useState<any[]>([]);
+  const [activeView, setActiveView] = useState<'job-dashboard' | 'talent-pool'>('job-dashboard');
 
   const selectedJobId = currentJobId;
   const screeningResults = (selectedJobId && allResults[selectedJobId]) || [];
@@ -413,25 +415,41 @@ export default function RecruiterDashboardClient() {
     <div className="flex bg-[#F8FAFC] min-h-[calc(100vh-64px)]">
       {/* Job Selection Sidebar - Optimized to fit in standard dashboard layout */}
       <aside className="w-80 border-r border-gray-200 bg-white flex flex-col shrink-0 sticky top-0 h-[calc(100vh-64px)]">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-gray-900">Job Selection</h3>
+        <div className="p-4 border-b border-gray-100 flex flex-col gap-2">
+          <button
+            onClick={() => setActiveView('talent-pool')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeView === 'talent-pool'
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-transparent'
+              }`}
+          >
+            <Users size={18} />
+            Shared Talent Pool
+          </button>
+
+          <div className="h-px bg-gray-100 my-1" />
+
+          <div className="flex items-center justify-between px-1">
+            <h3 className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">Active Jobs</h3>
             <button
               onClick={() => setShowCreateJob(true)}
-              className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-md text-blue-600 transition-colors"
               title="Create New Job"
             >
-              <Plus size={18} />
+              <Plus size={16} />
             </button>
           </div>
+        </div>
+
+        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/30">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
             <input
               type="text"
-              placeholder="Search active jobs..."
+              placeholder="Filter jobs..."
               value={jobSearch}
               onChange={(e) => setJobSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00A1FF] focus:border-transparent"
+              className="w-full pl-9 pr-4 py-1.5 bg-white border border-gray-100 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
             />
           </div>
         </div>
@@ -449,11 +467,14 @@ export default function RecruiterDashboardClient() {
           ) : (
             filteredJobs.map((job) => {
               const jId = (job as any).id || (job as any)._id;
-              const isActive = selectedJobId === jId;
+              const isActive = selectedJobId === jId && activeView === 'job-dashboard';
               return (
                 <button
                   key={jId}
-                  onClick={() => setSelectedJobId(jId)}
+                  onClick={() => {
+                    setSelectedJobId(jId);
+                    setActiveView('job-dashboard');
+                  }}
                   className={`w-full text-left p-4 transition-all border-b border-gray-50 group relative ${isActive
                     ? 'bg-blue-50/30 border-l-4 border-l-[#00A1FF]'
                     : 'hover:bg-gray-50 border-l-4 border-l-transparent'
@@ -485,217 +506,264 @@ export default function RecruiterDashboardClient() {
       {/* Dashboard Main Content */}
       <div className="flex-1 min-w-0">
         <div className="max-w-7xl mx-auto p-6 space-y-8">
-          {/* Header Internal - Compact */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-gray-200">
-            {selectedJob ? (
-              <div>
-                <div className="flex items-center gap-2 mb-1 text-xs font-bold text-blue-600 uppercase tracking-widest">
-                  <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
-                  Dashboard / {selectedJob.department}
-                </div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
-                  <button
-                    onClick={() => setShowEditJob(true)}
-                    className="p-1 text-gray-400 hover:text-[#00A1FF] hover:bg-blue-50 rounded-lg transition-all"
-                    title="Edit Job Details"
-                  >
-                    <Settings size={18} />
-                  </button>
-                </div>
-                <p className="mt-1 text-sm text-gray-500 font-medium">
-                  {selectedJob.location} • {selectedJob.type} • Posted {new Date(selectedJob.postedDate || Date.now()).toLocaleDateString()}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Select a Job</h2>
-                <p className="mt-1 text-sm text-gray-500 font-medium italic">No active job selected</p>
-              </div>
-            )}
-
-            <div className="flex items-center gap-3">
-              {selectedJob?.lastScreenedAt && (
-                <div className="hidden xl:flex flex-col items-end mr-2 pr-4 border-r border-gray-200">
-                  <span className="text-[9px] uppercase font-bold text-gray-400 tracking-widest leading-none mb-1">
-                    Last Analysis
-                  </span>
-                  <span className="text-xs font-bold text-gray-700">
-                    {new Date(selectedJob.lastScreenedAt).toLocaleString('en-US', {
-                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    })}
-                  </span>
-                </div>
-              )}
-              <button
-                onClick={() => setShowUploadResume(true)}
-                disabled={selectedJob?.status === 'Closed' || !selectedJob}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-              >
-                <UploadCloud size={16} />
-                Upload CVs
-              </button>
-              {selectedJob && (
-                <button
-                  onClick={() => setShowStoredFiles(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all shadow-sm"
-                >
-                  <FolderOpen size={16} />
-                  Stored CVs
-                </button>
-              )}
-              {screeningResults.length > 0 && (
-                <button
-                  onClick={() => handleTriggerScreening(true)}
-                  disabled={isScreening}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                >
-                  <RefreshCw size={16} className={isScreening ? 'animate-spin' : ''} />
-                  Refresh AI
-                </button>
-              )}
-              <button
-                onClick={() => handleTriggerScreening(false)}
-                disabled={isScreening || selectedJob?.status === 'Closed' || !selectedJob}
-                className="flex items-center gap-2 px-6 py-2 bg-[#00A1FF] text-white rounded-lg text-sm font-bold hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md shadow-blue-100"
-              >
-                {isScreening ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Screening...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={16} />
-                    {screeningResults.length > 0 ? 'Re-run Screening' : 'Run AI Screening'}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* KPI Section */}
-          {selectedJob && (
-            <KpiCards
-              job={selectedJob}
-              screeningResults={screeningResults}
-            />
-          )}
-
-          {/* Charts Section */}
-          {selectedJob && (
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-              <div className="xl:col-span-2">
-                <SkillMatchChart results={filteredResults} profiles={talentProfiles} job={selectedJob} />
-              </div>
-              <div>
-                <ApplicantBreakdownChart jobTitle={selectedJob.title} results={filteredResults} />
-              </div>
-            </div>
-          )}
-
-          {/* Draft Profiles Table */}
-          {draftProfiles.length > 0 && (
-            <DraftProfilesTable
-              profiles={draftProfiles}
-              onUpdate={handleUpdateDraftProfile}
-              onRemove={handleRemoveDraftProfile}
-              onCreateProfile={handleCreateProfile}
-              onCreateAll={handleCreateAllProfiles}
-              onScreenAll={handleScreenDrafts}
-            />
-          )}
-
-          {/* Table Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">AI-Shortlisted Candidates</h3>
-                <p className="text-xs text-gray-500 font-medium mt-1">Ranked based on multi-dimensional skill & experience analysis</p>
-              </div>
-              <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
-                {(['all', 'recommended', 'consider', 'not-recommended'] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setShortlistFilter(filter)}
-                    className={`px-3 py-1.5 rounded-md text-[10px] font-bold capitalize transition-all ${shortlistFilter === filter
-                      ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
-                      : 'text-gray-500 hover:text-gray-700'
-                      }`}
-                  >
-                    {filter.replace('-', ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {isScreening ? (
-              <div className="p-8">
-                <div className="animate-pulse space-y-6">
-                  {/* Header Skeleton */}
-                  <div className="flex gap-4 border-b border-gray-100 pb-4">
-                    <div className="h-4 bg-gray-200 rounded w-16"></div>
-                    <div className="h-4 bg-gray-200 rounded w-48"></div>
-                    <div className="h-4 bg-gray-200 rounded w-32"></div>
-                    <div className="h-4 bg-gray-200 rounded flex-1"></div>
-                  </div>
-                  {/* Row Skeletons */}
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 py-2">
-                      <div className="w-8 h-8 rounded-full bg-blue-100/50 shrink-0"></div>
-                      <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0"></div>
-                      <div className="space-y-2 flex-1">
-                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                        <div className="h-3 bg-gray-100 rounded w-1/3"></div>
-                      </div>
-                      <div className="h-4 bg-green-100 rounded w-24 shrink-0"></div>
-                      <div className="h-4 bg-amber-100 rounded w-24 shrink-0"></div>
-                      <div className="h-6 bg-gray-200 rounded-full w-20 shrink-0"></div>
+          {/* Main Dashboard View */}
+          {activeView === 'job-dashboard' ? (
+            <>
+              {/* Header Internal - Compact */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-gray-200">
+                {selectedJob ? (
+                  <div>
+                    <div className="flex items-center gap-2 mb-1 text-xs font-bold text-blue-600 uppercase tracking-widest">
+                      <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+                      Dashboard / {selectedJob.department}
                     </div>
-                  ))}
-                  <div className="flex flex-col items-center justify-center pt-4">
-                    <Loader2 size={24} className="text-[#00A1FF] animate-spin mb-2" />
-                    <p className="text-sm font-bold text-gray-500">Unifying and evaluating talent pool...</p>
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
+                      <button
+                        onClick={() => setShowEditJob(true)}
+                        className="p-1 text-gray-400 hover:text-[#00A1FF] hover:bg-blue-50 rounded-lg transition-all"
+                        title="Edit Job Details"
+                      >
+                        <Settings size={18} />
+                      </button>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-500 font-medium">
+                      {selectedJob.location} • {selectedJob.type} • Posted {new Date(selectedJob.postedDate || Date.now()).toLocaleDateString()}
+                    </p>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <ShortlistTable
-                results={filteredResults}
-                profiles={talentProfiles}
-                onUpdateStatus={handleUpdateApplicationStatus}
-                onViewCandidate={(res) => {
-                  const profile = talentProfiles.find(p => p.id === res.candidateId);
-                  if (profile) {
-                    setSelectedCandidate({ profile, result: res });
-                  } else {
-                    toast.error('Candidate profile details not available');
-                  }
-                }}
-              />
-            )}
+                ) : (
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Select a Job</h2>
+                    <p className="mt-1 text-sm text-gray-500 font-medium italic">No active job selected</p>
+                  </div>
+                )}
 
-            {applications.length === 0 && !isScreening && (
-              <div className="p-20 text-center">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Plus className="text-blue-500" size={32} />
-                </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">No Applicants Yet</h4>
-                <p className="text-gray-500 max-w-sm mx-auto mb-8 font-medium text-sm">
-                  This job listing hasn't received any applications to analyze yet.
-                </p>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center gap-3">
+                  {selectedJob?.lastScreenedAt && (
+                    <div className="hidden xl:flex flex-col items-end mr-2 pr-4 border-r border-gray-200">
+                      <span className="text-[9px] uppercase font-bold text-gray-400 tracking-widest leading-none mb-1">
+                        Last Analysis
+                      </span>
+                      <span className="text-xs font-bold text-gray-700">
+                        {new Date(selectedJob.lastScreenedAt).toLocaleString('en-US', {
+                          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  )}
                   <button
                     onClick={() => setShowUploadResume(true)}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm"
+                    disabled={selectedJob?.status === 'Closed' || !selectedJob}
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
                   >
-                    <UploadCloud size={18} />
+                    <UploadCloud size={16} />
                     Upload CVs
+                  </button>
+                  {selectedJob && (
+                    <button
+                      onClick={() => setShowStoredFiles(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all shadow-sm"
+                    >
+                      <FolderOpen size={16} />
+                      Stored CVs
+                    </button>
+                  )}
+                  {screeningResults.length > 0 && (
+                    <button
+                      onClick={() => handleTriggerScreening(true)}
+                      disabled={isScreening}
+                      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                    >
+                      <RefreshCw size={16} className={isScreening ? 'animate-spin' : ''} />
+                      Refresh AI
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleTriggerScreening(false)}
+                    disabled={isScreening || selectedJob?.status === 'Closed' || !selectedJob}
+                    className="flex items-center gap-2 px-6 py-2 bg-[#00A1FF] text-white rounded-lg text-sm font-bold hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md shadow-blue-100"
+                  >
+                    {isScreening ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Screening...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={16} />
+                        {screeningResults.length > 0 ? 'Re-run Screening' : 'Run AI Screening'}
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* KPI Section */}
+              {selectedJob && (
+                <KpiCards
+                  job={selectedJob}
+                  screeningResults={screeningResults}
+                />
+              )}
+
+              {/* Charts Section */}
+              {selectedJob && (
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                  <div className="xl:col-span-2">
+                    <SkillMatchChart results={filteredResults} profiles={talentProfiles} job={selectedJob} />
+                  </div>
+                  <div>
+                    <ApplicantBreakdownChart jobTitle={selectedJob.title} results={filteredResults} />
+                  </div>
+                </div>
+              )}
+
+              {/* Draft Profiles Table */}
+              {draftProfiles.length > 0 && (
+                <DraftProfilesTable
+                  profiles={draftProfiles}
+                  onUpdate={handleUpdateDraftProfile}
+                  onRemove={handleRemoveDraftProfile}
+                  onCreateProfile={handleCreateProfile}
+                  onCreateAll={handleCreateAllProfiles}
+                  onScreenAll={handleScreenDrafts}
+                />
+              )}
+
+              {/* Table Section */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">AI-Shortlisted Candidates</h3>
+                    <p className="text-xs text-gray-500 font-medium mt-1">Ranked based on multi-dimensional skill & experience analysis</p>
+                  </div>
+                  <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
+                    {(['all', 'recommended', 'consider', 'not-recommended'] as const).map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setShortlistFilter(filter)}
+                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold capitalize transition-all ${shortlistFilter === filter
+                          ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
+                          : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                      >
+                        {filter.replace('-', ' ')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {isScreening ? (
+                  <div className="p-8">
+                    <div className="animate-pulse space-y-6">
+                      {/* Header Skeleton */}
+                      <div className="flex gap-4 border-b border-gray-100 pb-4">
+                        <div className="h-4 bg-gray-200 rounded w-16"></div>
+                        <div className="h-4 bg-gray-200 rounded w-48"></div>
+                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                        <div className="h-4 bg-gray-200 rounded flex-1"></div>
+                      </div>
+                      {/* Row Skeletons */}
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 py-2">
+                          <div className="w-8 h-8 rounded-full bg-blue-100/50 shrink-0"></div>
+                          <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0"></div>
+                          <div className="space-y-2 flex-1">
+                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                            <div className="h-3 bg-gray-100 rounded w-1/3"></div>
+                          </div>
+                          <div className="h-4 bg-green-100 rounded w-24 shrink-0"></div>
+                          <div className="h-4 bg-amber-100 rounded w-24 shrink-0"></div>
+                          <div className="h-6 bg-gray-200 rounded-full w-20 shrink-0"></div>
+                        </div>
+                      ))}
+                      <div className="flex flex-col items-center justify-center pt-4">
+                        <Loader2 size={24} className="text-[#00A1FF] animate-spin mb-2" />
+                        <p className="text-sm font-bold text-gray-500">Unifying and evaluating talent pool...</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ShortlistTable
+                    results={filteredResults}
+                    profiles={talentProfiles}
+                    onUpdateStatus={handleUpdateApplicationStatus}
+                    onViewCandidate={(res) => {
+                      const profile = talentProfiles.find(p => p.id === res.candidateId);
+                      if (profile) {
+                        setSelectedCandidate({ profile, result: res });
+                      } else {
+                        toast.error('Candidate profile details not available');
+                      }
+                    }}
+                  />
+                )}
+
+                {applications.length === 0 && !isScreening && (
+                  <div className="p-20 text-center">
+                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Plus className="text-blue-500" size={32} />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">No Applicants Yet</h4>
+                    <p className="text-gray-500 max-w-sm mx-auto mb-8 font-medium text-sm">
+                      This job listing hasn't received any applications to analyze yet.
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => setShowUploadResume(true)}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm"
+                      >
+                        <UploadCloud size={18} />
+                        Upload CVs
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-200">
+                <div>
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                    <Users className="text-blue-600" size={28} />
+                    Shared Talent Pool
+                  </h2>
+                  <p className="text-sm text-gray-500 font-medium mt-1">
+                    Manage and browse all talent profiles across your organization
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowUploadResume(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95"
+                  >
+                    <Plus size={16} />
+                    Add New Talent
+                  </button>
+                </div>
+              </div>
+
+              <TalentPoolTable
+                profiles={talentProfiles}
+                onViewCandidate={(profile) => {
+                  // Create a dummy screening result for the drawer to work
+                  const dummyResult: ScreeningResult = {
+                    candidateId: profile.id,
+                    rank: 0,
+                    matchScore: 0,
+                    recommendation: 'Awaiting AI Analysis' as any,
+                    skillBreakdown: [],
+                    strengths: ['Global Talent Profile'],
+                    gaps: ['Not evaluated for a specific job'],
+                    aiReasoning: 'This candidate is part of the global talent pool. Run AI screening for a specific job to see match analytics.',
+                    documentStatus: []
+                  };
+                  setSelectedCandidate({ profile, result: dummyResult });
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 

@@ -195,3 +195,38 @@ export const getJobById = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const getJobFiles = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const job = await Job.findById(req.params.id);
+        if (!job) {
+            res.status(404).json({ message: 'Job not found' });
+            return;
+        }
+
+        const sanitizedTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
+        const jobDir = path.join('uploads', sanitizedTitle);
+
+        if (!fs.existsSync(jobDir)) {
+            res.json([]);
+            return;
+        }
+
+        const files = fs.readdirSync(jobDir);
+        const fileDetails = files.map(file => {
+            const filePath = path.join(jobDir, file);
+            const stats = fs.statSync(filePath);
+            return {
+                name: file,
+                path: filePath.replace(/\\/g, '/'),
+                size: stats.size,
+                createdAt: stats.birthtime
+            };
+        });
+
+        res.json(fileDetails);
+    } catch (error) {
+        console.error("Error listing job files:", error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

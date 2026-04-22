@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react'; // Bump to fix chunk load error
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings } from 'lucide-react';
+import { Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen } from 'lucide-react';
 import KpiCards from './KpiCards';
 import ShortlistTable from './ShortlistTable';
 import SkillMatchChart from './SkillMatchChart';
@@ -14,6 +14,7 @@ import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import DraftProfilesTable from './DraftProfilesTable';
+import StoredFilesModal from './StoredFilesModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
@@ -28,6 +29,7 @@ export default function RecruiterDashboardClient() {
   const [showCreateJob, setShowCreateJob] = useState(false);
   const [showEditJob, setShowEditJob] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
+  const [showStoredFiles, setShowStoredFiles] = useState(false);
   const [jobSearch, setJobSearch] = useState('');
   const [shortlistFilter, setShortlistFilter] = useState<'all' | 'recommended' | 'consider' | 'not-recommended'>('all');
   const [mounted, setMounted] = useState(false);
@@ -533,6 +535,15 @@ export default function RecruiterDashboardClient() {
                 <UploadCloud size={16} />
                 Upload CVs
               </button>
+              {selectedJob && (
+                <button
+                  onClick={() => setShowStoredFiles(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all shadow-sm"
+                >
+                  <FolderOpen size={16} />
+                  Stored CVs
+                </button>
+              )}
               {screeningResults.length > 0 && (
                 <button
                   onClick={() => handleTriggerScreening(true)}
@@ -722,6 +733,7 @@ export default function RecruiterDashboardClient() {
       {showUploadResume && (
         <UploadResumeModal
           onClose={() => setShowUploadResume(false)}
+          jobTitle={selectedJob?.title}
           onSuccess={() => {
             setShowUploadResume(false);
             fetchCandidates();
@@ -730,6 +742,14 @@ export default function RecruiterDashboardClient() {
             setDraftProfiles(prev => [...prev, ...candidates]);
             toast.success(`${candidates.length} profiles extracted to draft table`);
           }}
+        />
+      )}
+
+      {showStoredFiles && selectedJob && (
+        <StoredFilesModal
+          jobId={(selectedJob as any).id || (selectedJob as any)._id}
+          jobTitle={selectedJob.title}
+          onClose={() => setShowStoredFiles(false)}
         />
       )}
     </div>

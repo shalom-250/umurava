@@ -20,10 +20,27 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);
+        const jobTitle = req.query.jobTitle as string;
+        let dest = uploadDir;
+        if (jobTitle) {
+            // Sanitize job title for directory name
+            const sanitizedTitle = jobTitle.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
+            dest = path.join(uploadDir, sanitizedTitle);
+        }
+
+        if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest, { recursive: true });
+        }
+        cb(null, dest);
     },
     filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+        const candidateName = req.query.candidateName as string;
+        if (candidateName) {
+            const sanitizedName = candidateName.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
+            cb(null, `${sanitizedName}-CV-${Date.now()}${path.extname(file.originalname)}`);
+        } else {
+            cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+        }
     },
 });
 
@@ -125,10 +142,15 @@ export const parseCandidateFile = (req: Request, res: Response) => {
                     allParsedCandidates.push({
                         ...aiInfo,
                         source: 'unstructured',
+                        resumeUrl: filePath.replace(/\\/g, '/') // Ensure URL/Path is preserved
                     });
                 }
 
-                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+                // Only unlink if no jobTitle was provided (meaning it's just a temporary parse)
+                const jobTitle = req.query.jobTitle as string;
+                if (!jobTitle && fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
             }
 
             res.status(200).json({ parsedCandidates: allParsedCandidates });
@@ -336,6 +358,32 @@ export const applyForJob = async (req: any, res: Response): Promise<void> => {
             status: 'Applied',
             appliedAt: new Date(),
         });
+
+        // Job-specific CV storage: copy candidate's resume to job folder if it exists
+        if (candidate.resumeUrl && fs.existsSync(candidate.resumeUrl)) {
+            const sanitizedJobTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
+            const jobDir = path.join('uploads', sanitizedJobTitle);
+
+            if (!fs.existsSync(jobDir)) {
+                fs.mkdirSync(jobDir, { recursive: true });
+            }
+
+            const fileName = path.basename(candidate.resumeUrl);
+            const newPath = path.join(jobDir, fileName).replace(/\\/g, '/');
+
+            if (candidate.resumeUrl !== newPath) {
+                try {
+                    fs.copyFileSync(candidate.resumeUrl, newPath);
+                    application.attachments.push({
+                        name: 'Resume',
+                        url: newPath
+                    });
+                    await application.save();
+                } catch (copyErr) {
+                    console.error("Failed to copy resume to job directory:", copyErr);
+                }
+            }
+        }
 
         res.status(201).json({ message: 'Application submitted successfully!', application });
     } catch (error: any) {

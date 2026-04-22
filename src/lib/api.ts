@@ -1,4 +1,4 @@
-let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Ensure the URL does not have a trailing slash and ends with /api
 if (API_BASE_URL.endsWith('/')) {

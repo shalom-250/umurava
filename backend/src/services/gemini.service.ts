@@ -6,7 +6,7 @@ dotenv.config();
 
 const apiKey = process.env.GEMINI_API_KEY || "";
 if (!apiKey || apiKey === "GEMINI_API_KEY") {
-    console.warn("⚠️ GEMINI_API_KEY is missing or using default placeholder in .env");
+    console.warn(" GEMINI_API_KEY is missing or using default placeholder in .env");
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -174,6 +174,71 @@ export const extractCandidateInfoFromText = async (text: string): Promise<any> =
     } catch (error: any) {
         console.warn("⚠️ Gemini Text Extraction Error. Using fallback.", error.message);
         return getFallbackInfo(text);
+    }
+};
+
+export const extractJobInfoFromText = async (text: string): Promise<any> => {
+    const prompt = `
+    Extract job information from the following text.
+    Return a JSON object with:
+    - title: string
+    - description: string
+    - requirements: string[]
+    - skills: string[]
+    - mustHaveSkills: string[]
+    - department: string
+    - location: string
+    - type: string (e.g. Full-time, Internship)
+    - experienceLevel: string (e.g. Junior, Senior)
+    - salaryRange: string
+    - deadline: string
+
+    Job Text:
+    ${text.substring(0, 5000)}
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const cleanJson = response.text().replace(/```json|```/g, "").trim();
+        return JSON.parse(cleanJson);
+    } catch (error: any) {
+        console.error("Gemini Job Text Extraction Error:", error);
+        return null;
+    }
+};
+
+export const extractJobInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+    if (mimeType !== 'application/pdf') {
+        throw new Error("Direct file processing for jobs only supported for PDF.");
+    }
+
+    try {
+        const fileBuffer = fs.readFileSync(filePath);
+        const base64Data = fileBuffer.toString('base64');
+
+        const prompt = `
+            Extract job information from this PDF.
+            Return a JSON object with:
+            - title, description, requirements (array), skills (array), mustHaveSkills (array), department, location, type, experienceLevel, salaryRange, deadline.
+        `;
+
+        const result = await model.generateContent([
+            {
+                inlineData: {
+                    data: base64Data,
+                    mimeType: "application/pdf",
+                },
+            },
+            prompt,
+        ]);
+
+        const response = await result.response;
+        const cleanJson = response.text().replace(/```json|```/g, "").trim();
+        return JSON.parse(cleanJson);
+    } catch (error: any) {
+        console.error("Gemini Job File Extraction Error:", error);
+        throw error;
     }
 };
 

@@ -8,9 +8,10 @@ interface UploadResumeModalProps {
     onClose: () => void;
     onSuccess?: () => void;
     onExtracted?: (candidates: any[]) => void;
+    jobTitle?: string;
 }
 
-export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: UploadResumeModalProps) {
+export default function UploadResumeModal({ onClose, onSuccess, onExtracted, jobTitle }: UploadResumeModalProps) {
     const [step, setStep] = useState<'upload' | 'preview'>('upload');
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +79,8 @@ export default function UploadResumeModal({ onClose, onSuccess, onExtracted }: U
         });
 
         try {
-            const res = await api.postForm('/candidates/parse', formData);
+            const url = jobTitle ? `/candidates/parse?jobTitle=${encodeURIComponent(jobTitle)}` : '/candidates/parse';
+            const res = await api.postForm(url, formData);
             if (res.parsedCandidates && res.parsedCandidates.length > 0) {
                 const candidates = res.parsedCandidates.map((c: any) => ({
                     ...c,

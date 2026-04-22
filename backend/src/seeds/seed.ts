@@ -93,6 +93,7 @@ const seedData = async () => {
                 status: jd.status === 'Active' || jd.status === 'Draft' || jd.status === 'Closed' ? jd.status : 'Active',
                 deadline: "2026-05-30",
                 experienceLevel: 'Mid-level',
+                requiredDocuments: ['Resume / CV', 'Degree Certificate', 'Portfolio'],
                 salaryRange: 'Negotiable'
             });
             createdJobs.push(job);
@@ -126,13 +127,13 @@ const seedData = async () => {
                 experienceStr = `${3 + (i % 2)} years of UI/UX design.`;
             }
 
-            const hasMissingDocs = i % 10 === 0;
             const candidate = await Candidate.create({
                 firstName,
                 lastName,
                 email: `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/ /g, '.')}@example.rw`,
                 phone: `+25078${Math.floor(1000000 + Math.random() * 9000000)}`,
                 skills: skills.map(s => ({ name: s, level: 'Intermediate', yearsOfExperience: 2 })),
+                resumeUrl: 'https://www.example.com/cv.pdf',
                 experience: [{
                     company: 'Kigali Tech Hub',
                     role: 'Specialist',
@@ -162,11 +163,16 @@ const seedData = async () => {
             const targetApplicantCount = (j % 2 === 0) ? 12 : 5;
             const finalApplicants = createdCandidates.sort(() => 0.5 - Math.random()).slice(0, targetApplicantCount);
 
-            for (const cand of finalApplicants) {
+            for (let k = 0; k < finalApplicants.length; k++) {
+                const cand = finalApplicants[k];
+                // Randomly add portfolio for half the candidates
+                const attachments = k % 2 === 0 ? [{ name: 'Portfolio', url: 'https://example.com/portfolio.pdf' }] : [];
+
                 await Application.create({
                     jobId: job._id,
                     candidateId: cand._id,
                     status: 'Applied',
+                    attachments: attachments,
                     appliedAt: new Date(Date.now() - Math.random() * 1296000000)
                 });
             }

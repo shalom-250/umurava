@@ -34,19 +34,44 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
 
         const jobDescription = `${job.title}\n${job.description}\nRequirements: ${job.requirements.join(', ')}\nSkills: ${job.skills.join(', ')}\nMust-Have Priority: ${job.mustHaveSkills.join(', ')}`;
 
-        // Prepare candidate data for Gemini
-        const candidatesForAI = candidates.map(c => ({
-            id: c._id,
-            name: `${c.firstName} ${c.lastName}`.trim(),
-            skills: (c.skills || []).map((s: any) => typeof s === 'string' ? s : s.name),
-            experience: c.experience,
-            text: c.extractedText?.substring(0, 2000) // Truncate text to avoid token limits
-        }));
+        // Prepare candidate data for Gemini with document verification
+        const jobRequiredDocs = job.requiredDocuments || ['Resume / CV'];
+
+        const candidatesForAI = applications.map(app => {
+            const c = app.candidateId as any;
+            const appAttachments = app.attachments || [];
+
+            // Build document status checklist
+            const docStatus = jobRequiredDocs.map(docName => {
+                // Check if document exists in application attachments OR candidate profile
+                const isResume = docName.toLowerCase().includes('resume') || docName.toLowerCase().includes('cv');
+                const attachment = appAttachments.find((a: any) => a.name.toLowerCase().includes(docName.toLowerCase()));
+
+                if (isResume && c.resumeUrl) {
+                    return { name: docName, status: 'completed', url: c.resumeUrl };
+                } else if (attachment) {
+                    return { name: docName, status: 'completed', url: attachment.url };
+                }
+                return { name: docName, status: 'missing' };
+            });
+
+            return {
+                id: c._id,
+                name: `${c.firstName} ${c.lastName}`.trim(),
+                skills: (c.skills || []).map((s: any) => typeof s === 'string' ? s : s.name),
+                experience: c.experience,
+                text: c.extractedText?.substring(0, 2000),
+                documentChecklist: docStatus // Pass to Gemini
+            };
+        });
 
         const rankingResults = await rankCandidates(jobDescription, candidatesForAI);
 
         // Save results to database
         const screeningPromises = rankingResults.map(async (result) => {
+            // Find the corresponding docStatus we generated
+            const candidateData = candidatesForAI.find(c => c.id.toString() === result.candidateId.toString());
+
             return Screening.findOneAndUpdate(
                 { jobId, candidateId: result.candidateId },
                 {
@@ -59,6 +84,8 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
                     aiReasoning: result.aiReasoning,
                     recommendation: result.recommendation,
                     interviewQuestions: result.interviewQuestions,
+                    skillBreakdown: result.skillBreakdown,
+                    documentStatus: candidateData?.documentChecklist || []
                 },
                 { upsert: true, new: true }
             );

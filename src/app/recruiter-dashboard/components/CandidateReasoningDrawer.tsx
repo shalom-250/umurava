@@ -248,9 +248,10 @@ export default function CandidateReasoningDrawer({ profile, result, application,
           {/* Documents Section */}
           <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
             <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-2">
-              Applied Documents
+              Uploaded Documents
             </p>
             <div className="space-y-2">
+              {/* Primary Resume */}
               {profile.resumeUrl ? (
                 <a
                   href={profile.resumeUrl}
@@ -264,14 +265,38 @@ export default function CandidateReasoningDrawer({ profile, result, application,
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-900">Main Resume / CV</p>
-                      <p className="text-[10px] text-gray-500">PDF Document • Verified</p>
+                      <p className="text-[10px] text-gray-500">PDF Document • Primary</p>
                     </div>
                   </div>
                   <ExternalLink size={14} className="text-gray-400 group-hover:text-blue-500" />
                 </a>
-              ) : (
+              ) : null}
+
+              {/* Other application attachments */}
+              {application?.attachments?.map((file: any, idx: number) => (
+                <a
+                  key={`att-${idx}`}
+                  href={file.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-50 text-gray-600 rounded-md group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <Download size={16} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">{file.name || `Attachment ${idx + 1}`}</p>
+                      <p className="text-[10px] text-gray-500">Document File</p>
+                    </div>
+                  </div>
+                  <ExternalLink size={14} className="text-gray-400 group-hover:text-blue-500" />
+                </a>
+              ))}
+
+              {!profile.resumeUrl && (!application?.attachments || application.attachments.length === 0) && (
                 <div className="p-3 bg-gray-100/50 rounded-lg border border-dashed border-gray-300 text-center">
-                  <p className="text-[10px] text-gray-500 italic">No resume file attached to this profile</p>
+                  <p className="text-[10px] text-gray-500 italic">No files attached to this application</p>
                 </div>
               )}
             </div>

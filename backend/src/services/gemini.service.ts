@@ -27,6 +27,11 @@ export interface IRankingResult {
     aiReasoning: string;
     recommendation: 'Shortlist' | 'Waitlist' | 'Reject';
     interviewQuestions: string[];
+    skillBreakdown: {
+        skill: string;
+        score: number;
+        required: boolean;
+    }[];
 }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -91,7 +96,12 @@ export const rankCandidates = async (jobDescription: string, candidates: any[]):
                     gaps: "Minor experience gap in secondary tools",
                     aiReasoning: `[Simulated Output] This candidate demonstrates solid alignment with the core requirements. Skill overlap score is ${Math.round(matchScore)}/100 based on keyword extraction.`,
                     recommendation: matchScore >= 70 ? 'Shortlist' : matchScore >= 55 ? 'Waitlist' : 'Reject' as any,
-                    interviewQuestions: ["Can you describe your experience with these specific tools?", "How do you handle demanding project deadlines?"]
+                    interviewQuestions: ["Can you describe your experience with these specific tools?", "How do you handle demanding project deadlines?"],
+                    skillBreakdown: candSkills.slice(0, 5).map((s: any) => ({
+                        skill: typeof s === 'string' ? s : s?.name || 'Skill',
+                        score: Math.round(40 + Math.random() * 60),
+                        required: true
+                    }))
                 };
             });
             allResults.push(...simulatedBatch);
@@ -110,12 +120,24 @@ const rankBatch = async (jobDescription: string, candidates: any[]): Promise<IRa
         name: c.name,
         skills: c.skills,
         exp: (c.experience || "").substring(0, 500),
-        edu: (c.education || "").substring(0, 300)
+        edu: (c.education || "").substring(0, 300),
+        docs: c.documentChecklist // Pass for analysis
     })))}
     
-    Task: Rank candidates 1-100 on: Skills(50%), Exp(30%), Edu(20%). Penalty -20 if missing key skills.
+    Task: Rank candidates 1-100 on: Skills(40%), Exp(30%), Edu(20%), Docs(10%). Penalty -20 if missing key skills or required documents.
     Output: JSON array of:
-    { "candidateId", "score", "rank", "weightedScore":{skills,experience,education}, "recommendation":"Shortlist"|"Waitlist"|"Reject", "strengths", "gaps", "aiReasoning", "interviewQuestions":[] }
+    { 
+      "candidateId", 
+      "score", 
+      "rank", 
+      "weightedScore":{skills,experience,education}, 
+      "recommendation":"Shortlist"|"Waitlist"|"Reject", 
+      "strengths", 
+      "gaps", 
+      "aiReasoning", 
+      "interviewQuestions":[],
+      "skillBreakdown": [{"skill": string, "score": number, "required": boolean}]
+    }
     Keep text professional & concise.
     `;
 

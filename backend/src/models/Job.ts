@@ -13,6 +13,7 @@ export interface IJob extends Document {
     experienceLevel: 'Junior' | 'Mid-level' | 'Senior' | 'Lead';
     salaryRange: string;
     deadline: string;
+    requiredDocuments: string[];
     status: 'Active' | 'Draft' | 'Screening' | 'Closed';
     createdAt: Date;
 }
@@ -30,6 +31,7 @@ const JobSchema: Schema = new Schema({
     experienceLevel: { type: String, enum: ['Junior', 'Mid-level', 'Senior', 'Lead'], default: 'Junior' },
     salaryRange: { type: String },
     deadline: { type: String },
+    requiredDocuments: [{ type: String }],
     status: { type: String, enum: ['Active', 'Draft', 'Screening', 'Closed'], default: 'Active' },
     createdAt: { type: Date, default: Date.now },
 });

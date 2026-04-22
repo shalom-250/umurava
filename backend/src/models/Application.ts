@@ -5,6 +5,7 @@ export interface IApplication extends Document {
     candidateId: mongoose.Types.ObjectId;
     status: 'Applied' | 'Screened' | 'Interview' | 'Offered' | 'Hired' | 'Rejected' | 'Under Review';
     appliedAt: Date;
+    attachments: { name: string; url: string }[];
     updatedAt: Date;
 }
 
@@ -17,6 +18,10 @@ const ApplicationSchema: Schema = new Schema({
         default: 'Applied'
     },
     appliedAt: { type: Date, default: Date.now },
+    attachments: [{
+        name: String,
+        url: String
+    }],
     updatedAt: { type: Date, default: Date.now },
 });
 

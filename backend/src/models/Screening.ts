@@ -21,6 +21,11 @@ export interface IScreening extends Document {
         score: number;
         required: boolean;
     }[];
+    documentStatus: {
+        name: string;
+        status: 'completed' | 'missing';
+        url?: string;
+    }[];
     createdAt: Date;
 }
 
@@ -44,6 +49,11 @@ const ScreeningSchema: Schema = new Schema({
         skill: { type: String },
         score: { type: Number },
         required: { type: Boolean }
+    }],
+    documentStatus: [{
+        name: { type: String },
+        status: { type: String, enum: ['completed', 'missing'] },
+        url: { type: String }
     }],
     createdAt: { type: Date, default: Date.now },
 });

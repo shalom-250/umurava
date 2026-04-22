@@ -31,6 +31,7 @@ export default function RecruiterDashboardClient() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [talentProfiles, setTalentProfiles] = useState<TalentProfile[]>([]);
+  const [applications, setApplications] = useState<any[]>([]);
 
   const selectedJobId = currentJobId;
   const screeningResults = (selectedJobId && allResults[selectedJobId]) || [];
@@ -130,6 +131,7 @@ export default function RecruiterDashboardClient() {
   useEffect(() => {
     if (selectedJobId) {
       fetchScreeningResults(selectedJobId);
+      fetchApplications();
     }
   }, [selectedJobId]);
 
@@ -151,6 +153,36 @@ export default function RecruiterDashboardClient() {
     if (shortlistFilter === 'not-recommended') return r.recommendation === 'Not Recommended';
     return true;
   }), [screeningResults, shortlistFilter]);
+
+  const fetchApplications = async () => {
+    if (!selectedJobId) return;
+    try {
+      const data = await api.get('/applications');
+      const jobApplications = data.filter((app: any) =>
+        (app.jobId?._id || app.jobId) === selectedJobId
+      );
+      setApplications(jobApplications);
+    } catch (error) {
+      console.error('Failed to fetch applications:', error);
+    }
+  };
+
+  const handleUpdateApplicationStatus = async (candidateId: string, newStatus: string) => {
+    const app = applications.find(a => (a.candidateId?._id || a.candidateId) === candidateId);
+    if (!app) {
+      toast.error('Application not found for this candidate');
+      return;
+    }
+
+    try {
+      await api.put(`/applications/${app._id}`, { status: newStatus });
+      toast.success(`Candidate status updated to ${newStatus}`);
+      fetchApplications();
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      toast.error('Failed to update candidate status');
+    }
+  };
 
   const handleTriggerScreening = async (isReRun = false) => {
     if (selectedJob?.status === 'Closed') {
@@ -469,6 +501,8 @@ export default function RecruiterDashboardClient() {
         <CandidateReasoningDrawer
           profile={selectedCandidate.profile}
           result={selectedCandidate.result}
+          application={applications.find(a => (a.candidateId?._id || a.candidateId) === selectedCandidate.result.candidateId)}
+          onUpdateStatus={(status) => handleUpdateApplicationStatus(selectedCandidate.result.candidateId, status)}
           onClose={() => setSelectedCandidate(null)}
         />
       )}

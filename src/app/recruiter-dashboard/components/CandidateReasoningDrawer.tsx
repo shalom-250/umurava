@@ -6,6 +6,8 @@ import { X, MapPin, ExternalLink, CheckCircle, AlertTriangle, Star, Globe, Award
 interface CandidateReasoningDrawerProps {
   profile: TalentProfile;
   result: ScreeningResult;
+  application?: any;
+  onUpdateStatus?: (status: string) => void;
   onClose: () => void;
 }
 
@@ -16,7 +18,7 @@ const skillLevelColors: Record<string, string> = {
   Beginner: 'bg-red-100 text-red-700',
 };
 
-export default function CandidateReasoningDrawer({ profile, result, onClose }: CandidateReasoningDrawerProps) {
+export default function CandidateReasoningDrawer({ profile, result, application, onUpdateStatus, onClose }: CandidateReasoningDrawerProps) {
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
   const currentRole = profile.experience.find(e => e.isCurrent);
 
@@ -65,7 +67,7 @@ export default function CandidateReasoningDrawer({ profile, result, onClose }: C
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin size={11} /> {profile.location}</span>
             <span className={`px-2 py-0.5 rounded-full font-medium ${profile.availability.status === 'Available' ? 'bg-green-50 text-green-700' :
-                profile.availability.status === 'Open to Opportunities' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
+              profile.availability.status === 'Open to Opportunities' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'
               }`}>{profile.availability.status} · {profile.availability.type}</span>
             {profile.availability.startDate && <span>From {profile.availability.startDate}</span>}
           </div>
@@ -220,30 +222,66 @@ export default function CandidateReasoningDrawer({ profile, result, onClose }: C
           )}
 
           {/* Social Links */}
-          {profile.socialLinks && (
-            <div className="flex items-center gap-3 pt-2 border-t border-border">
-              {profile.socialLinks.linkedin && (
-                <a href={profile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
-                  <ExternalLink size={11} /> LinkedIn
-                </a>
-              )}
-              {profile.socialLinks.github && (
-                <a href={profile.socialLinks.github} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-foreground hover:underline">
-                  <ExternalLink size={11} /> GitHub
-                </a>
-              )}
-              {profile.socialLinks.portfolio && (
-                <a href={profile.socialLinks.portfolio} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-accent-500 hover:underline">
-                  <Globe size={11} /> Portfolio
-                </a>
-              )}
-            </div>
+        </div>
           )}
+
+        {/* Documents Section */}
+        <div className="bg-gray-50 border border-gray-100 rounded-lg p-4">
+          <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-2">
+            Applied Documents
+          </p>
+          <div className="space-y-2">
+            {profile.resumeUrl ? (
+              <a
+                href={profile.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 text-blue-600 rounded-md">
+                    <Download size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">Main Resume / CV</p>
+                    <p className="text-[10px] text-gray-500">PDF Document • Verified</p>
+                  </div>
+                </div>
+                <ExternalLink size={14} className="text-gray-400 group-hover:text-blue-500" />
+              </a>
+            ) : (
+              <div className="p-3 bg-gray-100/50 rounded-lg border border-dashed border-gray-300 text-center">
+                <p className="text-[10px] text-gray-500 italic">No resume file attached to this profile</p>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Recruitment Actions */}
+        <div className="pt-6 border-t border-border space-y-3">
+          <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Recruitment Actions</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => onUpdateStatus?.('Interview')}
+              className="flex-1 px-4 py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50 transition-all shadow-sm"
+            >
+              Shortlist for Interview
+            </button>
+            <button
+              onClick={() => onUpdateStatus?.('Hired')}
+              className="flex-1 px-4 py-2.5 bg-[#00A1FF] text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-100"
+            >
+              Hire this Candidate
+            </button>
+          </div>
+          <button
+            onClick={() => onUpdateStatus?.('Rejected')}
+            className="w-full px-4 py-2 text-gray-500 text-xs font-medium hover:text-red-500 transition-all"
+          >
+            Mark as Not Interested
+          </button>
         </div>
       </div>
     </div>
+    </div >
   );
 }

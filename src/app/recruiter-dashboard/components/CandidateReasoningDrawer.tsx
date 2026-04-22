@@ -280,26 +280,61 @@ export default function CandidateReasoningDrawer({ profile, result, application,
           {/* Recruitment Actions */}
           <div className="pt-6 border-t border-border space-y-3">
             <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Recruitment Actions</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => onUpdateStatus?.('Interview')}
-                className="flex-1 px-4 py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50 transition-all shadow-sm"
-              >
-                Shortlist for Interview
-              </button>
-              <button
-                onClick={() => onUpdateStatus?.('Hired')}
-                className="flex-1 px-4 py-2.5 bg-[#00A1FF] text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-100"
-              >
-                Hire this Candidate
-              </button>
-            </div>
-            <button
-              onClick={() => onUpdateStatus?.('Rejected')}
-              className="w-full px-4 py-2 text-gray-500 text-xs font-medium hover:text-red-500 transition-all"
-            >
-              Mark as Not Interested
-            </button>
+
+            {result.matchScore >= 70 ? (
+              <>
+                {/* Score >= 70: Multi-stage path */}
+                <div className="flex gap-3">
+                  {application?.status !== 'Interview' && application?.status !== 'Hired' && (
+                    <button
+                      onClick={() => onUpdateStatus?.('Interview')}
+                      className="flex-1 px-4 py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50 transition-all shadow-sm"
+                    >
+                      Shortlist for Interview
+                    </button>
+                  )}
+
+                  {application?.status !== 'Hired' ? (
+                    <button
+                      onClick={() => onUpdateStatus?.('Hired')}
+                      className={`flex-1 px-4 py-2.5 bg-[#00A1FF] text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-100 ${application?.status === 'Interview' ? 'w-full' : ''
+                        }`}
+                    >
+                      Hire this Candidate
+                    </button>
+                  ) : (
+                    <div className="w-full py-3 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center justify-center gap-2 font-bold text-sm">
+                      <CheckCircle size={16} />
+                      Candidate Hired
+                    </div>
+                  )}
+                </div>
+
+                {application?.status !== 'Hired' && (
+                  <button
+                    onClick={() => onUpdateStatus?.('Rejected')}
+                    className="w-full px-4 py-2 text-gray-500 text-xs font-medium hover:text-red-500 transition-all"
+                  >
+                    Mark as Not Interested
+                  </button>
+                )}
+              </>
+            ) : (
+              /* Score < 70: Only Reject path */
+              <div className="space-y-3">
+                <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg text-center">
+                  <p className="text-[11px] text-amber-700 leading-tight">
+                    AI recommendation is below the target threshold for this role.
+                  </p>
+                </div>
+                <button
+                  onClick={() => onUpdateStatus?.('Rejected')}
+                  className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-red-50 hover:text-red-600 transition-all border border-gray-200"
+                >
+                  Reject Candidate
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

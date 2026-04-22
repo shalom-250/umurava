@@ -140,7 +140,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                             <p className="text-xs text-muted-foreground mt-1">or <button onClick={() => fileInputRef.current?.click()} className="text-primary-700 font-medium hover:underline">click to browse files</button></p>
                             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.doc,.docx,.csv" />
 
-                            <div className="mt-8 flex items-center justify-center gap-6 text-[11px] text-muted-foreground">
+                            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[11px] text-muted-foreground">
                                 <span className="flex items-center gap-1.5"><FileText size={12} /> PDF, DOCX, CSV</span>
                                 <span className="flex items-center gap-1.5"><Loader2 size={12} /> Max 5MB</span>
                             </div>
@@ -168,7 +168,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                     </div>
                 )}
 
-                <div className="mt-8 pt-6 border-t border-border grid grid-cols-2 gap-4">
+                <div className="mt-8 pt-6 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="text-[11px] leading-relaxed text-muted-foreground">
                         <p className="font-semibold text-foreground mb-1 font-sans">We will extract:</p>
                         <ul className="grid grid-cols-2 gap-x-4">
@@ -193,14 +193,14 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
 
     if (status === 'REVIEW' && parsedData) {
         return (
-            <div className="bg-white rounded-2xl border border-border shadow-card p-8 max-w-4xl mx-auto max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-2xl border border-border shadow-card p-4 sm:p-8 max-w-4xl mx-auto max-h-[95vh] sm:max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-start mb-6 shrink-0">
                     <div>
-                        <h2 className="text-xl font-display font-700 text-foreground flex items-center gap-2">
-                            <CheckCircle size={22} className="text-green-500" />
-                            We’ve extracted your details
+                        <h2 className="text-lg sm:text-xl font-display font-700 text-foreground flex items-center gap-2">
+                            <CheckCircle size={22} className="text-green-500 shrink-0" />
+                            <span className="leading-tight">We’ve extracted your details</span>
                         </h2>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                             Please review the 17+ categories we found and correct any information.
                         </p>
                     </div>
@@ -210,13 +210,13 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                     {/* Basic Info */}
                     <div>
                         <SectionHeader title="1. Personal Information" />
-                        <div className="grid grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                             <FieldGroup label="Full Name">
                                 <input
                                     type="text"
                                     value={parsedData.name}
                                     onChange={e => setParsedData({ ...parsedData, name: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                 />
                             </FieldGroup>
                             <FieldGroup label="Email">
@@ -224,7 +224,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                                     type="email"
                                     value={parsedData.email}
                                     onChange={e => setParsedData({ ...parsedData, email: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                 />
                             </FieldGroup>
                             <FieldGroup label="Phone Number">
@@ -232,7 +232,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                                     type="text"
                                     value={parsedData.phone}
                                     onChange={e => setParsedData({ ...parsedData, phone: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                     placeholder="Missing"
                                 />
                             </FieldGroup>
@@ -241,7 +241,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                                     type="text"
                                     value={parsedData.location}
                                     onChange={e => setParsedData({ ...parsedData, location: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                     placeholder="Missing"
                                 />
                             </FieldGroup>
@@ -250,7 +250,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                                     type="text"
                                     value={parsedData.nationality || ''}
                                     onChange={e => setParsedData({ ...parsedData, nationality: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                     placeholder="Missing"
                                 />
                             </FieldGroup>
@@ -259,7 +259,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                                     type="text"
                                     value={parsedData.dob || ''}
                                     onChange={e => setParsedData({ ...parsedData, dob: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                     placeholder="Missing"
                                 />
                             </FieldGroup>
@@ -281,10 +281,10 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                     </div>
 
                     {/* Experience & Education */}
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <SectionHeader title="3. Education" />
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {parsedData.education.length > 0 ? parsedData.education.map((edu, i) => (
                                     <div key={i} className="p-3 border border-border rounded-lg bg-gray-50/50">
                                         <p className="text-xs font-bold text-foreground">{edu.degree || edu.qualification || 'Degree'}</p>
@@ -295,7 +295,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                         </div>
                         <div>
                             <SectionHeader title="4. Work Experience" />
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {parsedData.experience.length > 0 ? parsedData.experience.map((exp, i) => (
                                     <div key={i} className="p-3 border border-border rounded-lg bg-gray-50/50">
                                         <p className="text-xs font-bold text-foreground">{exp.role || exp.jobTitle || 'Role'}</p>
@@ -309,33 +309,33 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                     {/* Skills & Other */}
                     <div>
                         <SectionHeader title="5. Skills & Languages" />
-                        <div className="grid grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                             <FieldGroup label="Technical & Soft Skills">
                                 <input
                                     type="text"
                                     value={parsedData.skillsRaw}
                                     onChange={e => setParsedData({ ...parsedData, skillsRaw: e.target.value })}
-                                    className="w-full px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
+                                    className="w-full px-3 sm:px-4 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-700/20 outline-none transition-all"
                                 />
                             </FieldGroup>
                             <FieldGroup label="Languages">
-                                <p className="text-xs py-2">
+                                <div className="text-xs py-2 min-h-[38px] flex items-center">
                                     {parsedData.languages && parsedData.languages.length > 0
                                         ? parsedData.languages.map((l: any) => `${l.name} (${l.level})`).join(', ')
-                                        : <span className="text-red-500 font-bold italic">null</span>}
-                                </p>
+                                        : <span className="text-red-500 font-bold italic">No languages extracted</span>}
+                                </div>
                             </FieldGroup>
                         </div>
                     </div>
 
                     {/* Projects, Awards, etc */}
-                    <div className="grid grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-5">
                         <div>
                             <SectionHeader title="6. Projects" />
                             <p className="text-xs">
                                 {parsedData.projects && parsedData.projects.length > 0
                                     ? `${parsedData.projects.length} project(s) found`
-                                    : <span className="text-red-500 font-bold italic">null</span>}
+                                    : <span className="text-red-500 italic opacity-70">None found</span>}
                             </p>
                         </div>
                         <div>
@@ -343,7 +343,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                             <p className="text-xs">
                                 {parsedData.awards && parsedData.awards.length > 0
                                     ? `${parsedData.awards.length} award(s) found`
-                                    : <span className="text-red-500 font-bold italic">null</span>}
+                                    : <span className="text-red-500 italic opacity-70">None found</span>}
                             </p>
                         </div>
                         <div>
@@ -351,7 +351,7 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                             <div className="space-y-1">
                                 {parsedData.socialLinks && Object.values(parsedData.socialLinks).some(Boolean) ? Object.entries(parsedData.socialLinks).map(([k, v]) => (
                                     v ? <p key={k} className="text-[10px] text-primary-700 underline truncate flex items-center gap-1">{k}: <a href={v as string} target="_blank" rel="noreferrer">{v as string}</a></p> : null
-                                )) : <span className="text-red-500 font-bold italic">null</span>}
+                                )) : <span className="text-red-500 italic opacity-70">None found</span>}
                             </div>
                         </div>
                     </div>
@@ -371,26 +371,25 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                     )}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-border flex items-center justify-between shrink-0">
+                <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
                     <button
                         onClick={() => setStatus('IDLE')}
-                        className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
+                        className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-all w-full sm:w-auto"
                     >
                         <RotateCcw size={14} /> Not correct? Upload different resume
                     </button>
-
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
                             onClick={onCancel}
-                            className="px-5 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted rounded-lg transition-all"
+                            className="flex-1 sm:flex-initial px-5 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted rounded-lg transition-all"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={() => onConfirm(parsedData)}
-                            className="flex items-center gap-2 px-8 py-2.5 bg-primary-700 text-white text-sm font-semibold rounded-lg hover:bg-primary-800 transition-all shadow-md transform active:scale-95"
+                            className="flex-[2] sm:flex-initial flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 bg-primary-700 text-white text-sm font-semibold rounded-lg hover:bg-primary-800 transition-all shadow-md transform active:scale-95"
                         >
-                            Confirm & Sync Profile <ChevronRight size={16} />
+                            Confirm & Sync <ChevronRight size={16} className="hidden sm:block" />
                         </button>
                     </div>
                 </div>

@@ -112,8 +112,10 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
             if (!profile) return null;
             const isHovered = hoveredRow === result.candidateId;
             const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
-            const currentRole = profile.experience.find(e => e.isCurrent);
+            const isPending = result.recommendation === 'Awaiting AI Analysis' as any || result.rank === 0;
             const rankColors = ['bg-yellow-400', 'bg-gray-300', 'bg-amber-600'];
+            const initialsBg = isPending ? 'bg-gray-100' : 'bg-primary-100';
+            const initialsText = isPending ? 'text-gray-500' : 'text-primary-700';
 
             const docStats = result.documentStatus || [];
             const missingCount = docStats.filter(d => d.status === 'missing').length;
@@ -128,28 +130,43 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                 onClick={() => onViewCandidate(result)}
               >
                 <td className="px-4 py-3">
-                  <div className="flex items-center justify-center w-7 h-7 rounded-full font-display font-700 text-xs"
+                  <div className="flex items-center justify-center w-7 h-7 rounded-full font-display font-700 text-xs shadow-sm border"
                     style={{
-                      backgroundColor: result.rank <= 3 ? (rankColors[result.rank - 1] + '33') : '#f1f5f9',
-                      color: result.rank <= 3 ? (result.rank === 1 ? '#b45309' : result.rank === 2 ? '#6b7280' : '#92400e') : '#64748b'
+                      backgroundColor: isPending ? '#f8fafc' : result.rank <= 3 ? (rankColors[result.rank - 1] + '33') : '#f1f5f9',
+                      color: isPending ? '#94a3b8' : result.rank <= 3 ? (result.rank === 1 ? '#b45309' : result.rank === 2 ? '#6b7280' : '#92400e') : '#64748b',
+                      borderColor: isPending ? '#e2e8f0' : 'transparent'
                     }}
                   >
-                    #{result.rank}
+                    {isPending ? '—' : `#${result.rank}`}
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-semibold text-primary-700">{initials}</span>
+                    <div className={`w-8 h-8 rounded-full ${initialsBg} flex items-center justify-center shrink-0`}>
+                      <span className={`text-xs font-semibold ${initialsText}`}>{initials}</span>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground">{profile.firstName} {profile.lastName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground">{profile.firstName} {profile.lastName}</p>
+                        {isPending && (
+                          <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[9px] font-bold uppercase rounded-md">New</span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground truncate max-w-[140px]">{profile.email}</p>
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-3 min-w-[130px]">
-                  <ScoreBar score={result.matchScore} />
+                  {isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-gray-200 animate-pulse w-full opacity-30" />
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-400 italic">Pending</span>
+                    </div>
+                  ) : (
+                    <ScoreBar score={result.matchScore} />
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <p className="text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 truncate max-w-[200px]" title={Array.isArray(result.strengths) ? result.strengths.join(', ') : result.strengths}>
@@ -162,8 +179,8 @@ export default function ShortlistTable({ results, profiles, onViewCandidate }: S
                   </p>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-[10px] font-semibold px-2 py-1 rounded-full border ${recommendationColors[result.recommendation]}`}>
-                    {result.recommendation}
+                  <span className={`text-[10px] font-semibold px-2 py-1 rounded-full border ${isPending ? 'bg-gray-50 text-gray-400 border-gray-200' : recommendationColors[result.recommendation]}`}>
+                    {isPending ? 'Unanalyzed' : result.recommendation}
                   </span>
                 </td>
                 <td className="px-4 py-3">

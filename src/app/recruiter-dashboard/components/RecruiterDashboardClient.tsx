@@ -161,13 +161,39 @@ export default function RecruiterDashboardClient() {
   });
 
 
-  const filteredResults = useMemo(() => screeningResults.filter(r => {
-    if (shortlistFilter === 'all') return true;
-    if (shortlistFilter === 'recommended') return r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend';
-    if (shortlistFilter === 'consider') return r.recommendation === 'Consider';
-    if (shortlistFilter === 'not-recommended') return r.recommendation === 'Not Recommended';
-    return true;
-  }), [screeningResults, shortlistFilter]);
+  const filteredResults = useMemo(() => {
+    // 1. Start with actual screening results
+    const results = [...screeningResults];
+
+    // 2. Identify candidates in applications who ARE NOT in screeningResults
+    const unscreenedApps = applications.filter(app => {
+      const candId = app.candidateId?._id || app.candidateId;
+      return !results.some(r => r.candidateId === candId);
+    });
+
+    // 3. Create "Synthetic" pending results for them
+    const pendingResults: ScreeningResult[] = (unscreenedApps || []).map(app => ({
+      candidateId: app.candidateId?._id || app.candidateId,
+      rank: 0, // Mark as 0 for "New"
+      matchScore: 0,
+      recommendation: 'Awaiting AI Analysis' as any,
+      skillBreakdown: [],
+      strengths: ['Pending Evaluation'],
+      gaps: ['Pending Evaluation'],
+      aiReasoning: 'This candidate has recently applied and has not been analyzed by the AI yet.',
+      interviewQuestions: [],
+      documentStatus: []
+    }));
+
+    const combined = [...results, ...pendingResults];
+
+    // 4. Apply filters
+    if (shortlistFilter === 'all') return combined;
+    if (shortlistFilter === 'recommended') return combined.filter(r => r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend');
+    if (shortlistFilter === 'consider') return combined.filter(r => r.recommendation === 'Consider');
+    if (shortlistFilter === 'not-recommended') return combined.filter(r => r.recommendation === 'Not Recommended');
+    return combined;
+  }, [screeningResults, applications, shortlistFilter]);
 
   const fetchApplications = async () => {
     if (!selectedJobId) return;
@@ -506,22 +532,24 @@ export default function RecruiterDashboardClient() {
               />
             )}
 
-            {screeningResults.length === 0 && (
+            {applications.length === 0 && (
               <div className="p-20 text-center">
                 <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="text-blue-500" size={32} />
+                  <Plus className="text-blue-500" size={32} />
                 </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">No Screening Results</h4>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">No Applicants Yet</h4>
                 <p className="text-gray-500 max-w-sm mx-auto mb-8 font-medium text-sm">
-                  Run the AI screening to rank and analyze applicants for this role.
+                  This job listing hasn't received any applications to analyze yet.
                 </p>
-                <button
-                  onClick={() => handleTriggerScreening(false)}
-                  className="inline-flex items-center gap-2 px-8 py-2.5 bg-[#00A1FF] text-white rounded-xl font-bold hover:bg-blue-600 transition-all"
-                >
-                  <Sparkles size={16} />
-                  Start Screening
-                </button>
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setShowUploadResume(true)}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm"
+                  >
+                    <UploadCloud size={18} />
+                    Upload CVs
+                  </button>
+                </div>
               </div>
             )}
           </div>

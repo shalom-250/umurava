@@ -15,9 +15,20 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
-        const candidates = await Candidate.find({}); // Or filter by some criteria
+        // Fetch only candidates who have applied to this specific job
+        const applications = await Application.find({ jobId }).populate('candidateId');
+
+        if (applications.length === 0) {
+            res.status(400).json({ message: 'No candidates have applied to this job yet.' });
+            return;
+        }
+
+        const candidates = applications
+            .map(app => app.candidateId)
+            .filter(c => c !== null) as any[];
+
         if (candidates.length === 0) {
-            res.status(400).json({ message: 'No candidates to screen' });
+            res.status(400).json({ message: 'Applicant data is incomplete.' });
             return;
         }
 
@@ -87,14 +98,15 @@ export const runTestScreening = async (req: Request, res: Response): Promise<voi
         // single holistic talent pool evaluating everyone against the Job Requirements.
         let candidates: any[] = [];
 
-        const allCandidates = await Candidate.find({});
-
         if (typeof jobId === 'string' && jobId.startsWith('job-')) {
-            // Mock job fallback: For speed, limit to 10 latest candidates
-            candidates = allCandidates.reverse().slice(0, 10);
+            // Mock job fallback: For speed, use a sample of candidates
+            candidates = await Candidate.find({}).limit(10);
         } else {
-            // Real Job: Evaluate the entire unified pool 
-            candidates = allCandidates;
+            // Real Job: Evaluate only actual applicants
+            const applications = await Application.find({ jobId }).populate('candidateId');
+            candidates = applications
+                .map(app => app.candidateId)
+                .filter(c => c !== null);
         }
 
         if (candidates.length === 0) {

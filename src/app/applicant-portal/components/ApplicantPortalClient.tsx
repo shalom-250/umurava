@@ -93,11 +93,11 @@ export default function ApplicantPortalClient() {
   return (
     <div className="flex h-full overflow-hidden">
 
-      {/* ── Mobile Sidebar Drawer ─────── */}
+      {/* ── Sidebar (desktop rail / mobile drawer) ─────── */}
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
-          className="sm:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm transition-opacity"
+          className="sm:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -105,9 +105,12 @@ export default function ApplicantPortalClient() {
       <aside
         ref={sidebarRef}
         className={`
-          fixed inset-y-0 left-0 z-[60] sm:hidden flex flex-col shrink-0 bg-white border-r border-border
-          transition-all duration-300 ease-in-out overflow-hidden w-64
-          ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+          fixed inset-y-0 left-0 z-50 sm:relative sm:flex flex-col shrink-0 bg-white border-r border-border
+          transition-all duration-300 ease-in-out overflow-hidden
+          ${sidebarOpen
+            ? 'w-64 sm:w-56 translate-x-0'
+            : 'w-64 -translate-x-full sm:translate-x-0 sm:w-[60px]'
+          }
         `}
       >
         {/* Header toggle button */}
@@ -197,8 +200,8 @@ export default function ApplicantPortalClient() {
       {/* ── Main Content Area ───────────────────────────────────────── */}
       <div className="flex flex-col flex-1 min-w-0">
 
-        {/* Top header — name + navigation + profile */}
-        <div className="bg-white border-b border-border px-4 sm:px-6 py-2 sm:py-3 shrink-0">
+        {/* Top header — name + profile chip */}
+        <div className="bg-white border-b border-border px-4 sm:px-6 py-3 shrink-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <button
@@ -208,55 +211,19 @@ export default function ApplicantPortalClient() {
                 <Menu size={20} />
               </button>
               <div className="min-w-0">
-                <h1 className="text-sm sm:text-base font-display font-700 text-foreground truncate hidden lg:block">
-                  {enrichedProfile.firstName} {enrichedProfile.lastName}
+                <h1 className="text-base sm:text-lg font-display font-700 text-foreground truncate">
+                  Welcome back, {enrichedProfile.firstName} 👋
                 </h1>
-                <h1 className="text-base font-display font-700 text-foreground truncate lg:hidden">
-                  {enrichedProfile.firstName} 👋
-                </h1>
+                <p className="text-xs text-muted-foreground hidden sm:block truncate">{enrichedProfile.headline}</p>
               </div>
             </div>
-
-            {/* Desktop Navigation Tabs */}
-            <nav className="hidden sm:flex items-center gap-1 mx-4">
-              {TABS.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                const count = tab.id === 'applications' ? badgeCount : 0;
-                return (
-                  <button
-                    key={`headnav-${tab.id}`}
-                    onClick={() => handleNavigate(tab.id)}
-                    className={`
-                      flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all relative
-                      ${isActive
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      }
-                    `}
-                  >
-                    <Icon size={14} />
-                    {tab.label}
-                    {count > 0 && (
-                      <span className="bg-primary-700 text-white text-[9px] font-bold rounded-full px-1.5 py-0.5 ml-0.5">
-                        {count}
-                      </span>
-                    )}
-                    {isActive && (
-                      <span className="absolute -bottom-[9px] left-2 right-2 h-0.5 bg-primary-700 rounded-t-full" />
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <div className="hidden md:block text-right">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="hidden sm:block text-right">
                 <p className="text-[10px] text-muted-foreground">Completeness</p>
                 <p className="text-xs font-semibold text-primary-700">{realCompleteness}%</p>
               </div>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary-100 flex items-center justify-center border-2 border-white shadow-sm">
-                <span className="text-xs font-semibold text-primary-700 uppercase">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary-100 flex items-center justify-center">
+                <span className="text-xs font-semibold text-primary-700">
                   {enrichedProfile.firstName?.[0] || '?'}{enrichedProfile.lastName?.[0] || ''}
                 </span>
               </div>

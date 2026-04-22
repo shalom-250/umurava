@@ -29,7 +29,7 @@ interface ParsedData {
     volunteerExperience: any[] | null;
     extracurricularActivities: any[] | null;
     publications: any[] | null;
-    onlinePresence: any | null;
+    socialLinks: { linkedin?: string; github?: string; portfolio?: string; website?: string } | null;
     additionalInformation: string | null;
     resumeUrl?: string;
 }
@@ -349,8 +349,8 @@ export default function ResumeUploader({ onConfirm, onCancel }: ResumeUploaderPr
                         <div>
                             <SectionHeader title="8. Social Presence" />
                             <div className="space-y-1">
-                                {parsedData.onlinePresence ? Object.entries(parsedData.onlinePresence).map(([k, v]) => (
-                                    v ? <p key={k} className="text-[10px] text-primary-700 underline truncate">{v as string}</p> : null
+                                {parsedData.socialLinks && Object.values(parsedData.socialLinks).some(Boolean) ? Object.entries(parsedData.socialLinks).map(([k, v]) => (
+                                    v ? <p key={k} className="text-[10px] text-primary-700 underline truncate flex items-center gap-1">{k}: <a href={v as string} target="_blank" rel="noreferrer">{v as string}</a></p> : null
                                 )) : <span className="text-red-500 font-bold italic">null</span>}
                             </div>
                         </div>

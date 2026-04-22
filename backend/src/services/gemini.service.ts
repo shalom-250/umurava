@@ -136,28 +136,27 @@ const rankBatch = async (jobDescription: string, candidates: any[]): Promise<IRa
 
 export const extractCandidateInfoFromText = async (text: string): Promise<any> => {
     const prompt = `
-    Extract ALL the following information from the candidate's resume text. 
-    IF ANY FIELD IS NOT FOUND, SET IT TO null. 
-    Be extremely thorough.
-
-    Fields to extract:
-    1. Personal Info: name, phone, email, location (city, country), nationality, dob, linkedin, github, portfolio, website.
-    2. personalStatement: A short paragraph (3-5 lines) or profile summary.
-    3. education: Array of { institution, degree, fieldOfStudy, location, startYear, endYear, achievements (array) }.
-    4. experience: Array of { jobTitle, company, location, startDate, endDate, description, achievements (array), technologies (array), isCurrent (boolean) }.
-    5. skills: Array of { name, level, type ('Technical' | 'Soft') }.
-    6. certifications: Array of { name, issuer, issueDate }.
-    7. projects: Array of { name, description, technologies (array), role }.
-    8. languages: Array of { name, level ('Basic' | 'Intermediate' | 'Fluent') }.
-    9. interests: { professional (array), personal (array) }.
-    10. hobbies: Array of strings.
-    11. references: Array of { name, position, contactDetails } or "Available upon request".
-    12. backgroundSchool: Array of { name, certificate, location }. (Earlier Education)
-    13. awards: Array of { title, issuer, year, description }.
-    14. volunteerExperience: Array of { organization, role, impact, duration }.
-    15. extracurricularActivities: Array of { activity, role, description }.
-    16. publications: Array of { title, platform, link, year }.
-    17. additionalInformation: ANY other information from the CV that does not fit into the standard categories above (e.g. military service, unusual sections, detailed bio, etc.).
+    Extract ALL candidate information from this resume text.
+    IF ANY FIELD IS NOT FOUND, SET IT TO null.
+    Follow this exact JSON schema:
+    - name, phone, email, location, nationality, dob
+    - socialLinks: { linkedin, github, portfolio, website }
+    - personalStatement
+    - education: [{ institution, degree, fieldOfStudy, location, startYear, endYear, achievements: [] }]
+    - experience: [{ jobTitle, company, location, startDate, endDate, description, achievements: [], technologies: [], isCurrent }]
+    - skills: [{ name, level, type: 'Technical'|'Soft' }]
+    - certifications: [{ name, issuer, issueDate }]
+    - projects: [{ name, description, technologies: [], role }]
+    - languages: [{ name, level }]
+    - interests: { professional: [], personal: [] }
+    - hobbies: []
+    - references: [{ name, position, contactDetails }]
+    - backgroundSchool: [{ name, certificate, location }]
+    - awards: [{ title, issuer, year, description }]
+    - volunteerExperience: [{ organization, role, impact, duration }]
+    - extracurricularActivities: [{ activity, role, description }]
+    - publications: [{ title, platform, link, year }]
+    - additionalInformation: "Any other details not covered above"
 
     Resume Text:
     ${text.substring(0, 10000)}

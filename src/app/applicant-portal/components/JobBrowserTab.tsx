@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import {
   Search, MapPin, Clock, Briefcase, ChevronRight, CheckCircle,
   Loader2, X, XCircle, AlertTriangle, ArrowRight, ShieldCheck,
-  GraduationCap, Zap, ListChecks
+  GraduationCap, Zap, ListChecks, ChevronLeft
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -219,11 +219,12 @@ export default function JobBrowserTab({ jobs, applications, profile, initialJobI
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [selectedJob, setSelectedJob] = useState<Job | null>(jobs.find(j => j.status === 'Active') || null);
+  const [mobileShowDetail, setMobileShowDetail] = useState(false);
 
   React.useEffect(() => {
     if (initialJobId) {
       const job = jobs.find(j => (j as any)._id === initialJobId || j.id === initialJobId);
-      if (job) setSelectedJob(job);
+      if (job) { setSelectedJob(job); setMobileShowDetail(true); }
     }
   }, [initialJobId, jobs]);
   const [applying, setApplying] = useState<string | null>(null);
@@ -288,9 +289,9 @@ export default function JobBrowserTab({ jobs, applications, profile, initialJobI
   };
 
   return (
-    <div className="flex gap-5 h-full">
-      {/* Job List */}
-      <div className="w-80 shrink-0 flex flex-col gap-3">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-5 h-full">
+      {/* Job List — hidden on mobile when detail is open */}
+      <div className={`w-full md:w-80 shrink-0 flex flex-col gap-3 ${mobileShowDetail ? 'hidden md:flex' : 'flex'}`}>
         {/* Search & Filters */}
         <div className="bg-white rounded-xl border border-border shadow-card p-3 space-y-2">
           <div className="relative">
@@ -343,7 +344,7 @@ export default function JobBrowserTab({ jobs, applications, profile, initialJobI
             return (
               <button
                 key={`jobcard-${job.id}`}
-                onClick={() => setSelectedJob(job)}
+                onClick={() => { setSelectedJob(job); setMobileShowDetail(true); }}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'border-primary-300 bg-primary-50 shadow-card' : 'border-border bg-white hover:border-gray-300 hover:shadow-card'}`}
               >
                 <div className="flex items-start justify-between mb-1.5">
@@ -386,8 +387,15 @@ export default function JobBrowserTab({ jobs, applications, profile, initialJobI
 
       {/* Job Detail */}
       {selectedJob ? (
-        <div className="flex-1 bg-white rounded-xl border border-border shadow-card overflow-y-auto scrollbar-thin">
-          <div className="sticky top-0 bg-white border-b border-border px-6 py-5 z-10">
+        <div className={`flex-1 bg-white rounded-xl border border-border shadow-card overflow-y-auto scrollbar-thin ${mobileShowDetail ? '' : 'hidden md:block'}`}>
+          <div className="sticky top-0 bg-white border-b border-border px-4 sm:px-6 py-4 sm:py-5 z-10">
+            {/* Mobile back button */}
+            <button
+              onClick={() => setMobileShowDetail(false)}
+              className="flex items-center gap-1 text-xs text-primary-700 font-medium mb-2 md:hidden"
+            >
+              <ChevronLeft size={14} /> Back to jobs
+            </button>
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">

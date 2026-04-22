@@ -117,9 +117,9 @@ export default function ProfileBuilderTab({ profile }: ProfileBuilderTabProps) {
   };
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
       {/* Section Nav */}
-      <div className="w-52 shrink-0">
+      <div className="w-full lg:w-52 shrink-0">
         <div className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <p className="text-xs font-semibold text-foreground">Profile Sections</p>

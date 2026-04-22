@@ -1,22 +1,19 @@
 'use client';
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
-
 import { User, Briefcase, FileText, LayoutDashboard, Loader2 } from 'lucide-react';
 import ApplicantDashboardTab from './ApplicantDashboardTab';
 import ProfileBuilderTab from './ProfileBuilderTab';
 import JobBrowserTab from './JobBrowserTab';
 import MyApplicationsTab from './MyApplicationsTab';
-import Icon from '@/components/ui/AppIcon';
-
 
 type Tab = 'dashboard' | 'profile' | 'jobs' | 'applications';
 
-const TABS: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [
+const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
   { id: 'profile', label: 'My Profile', icon: User },
   { id: 'jobs', label: 'Browse Jobs', icon: Briefcase },
-  { id: 'applications', label: 'My Applications', icon: FileText, badge: 3 },
+  { id: 'applications', label: 'Applications', icon: FileText },
 ];
 
 export default function ApplicantPortalClient() {
@@ -54,11 +51,10 @@ export default function ApplicantPortalClient() {
   }
 
   const profile = stats.profile || { firstName: '', lastName: '', skills: [], languages: [], experience: [], education: [], certifications: [], projects: [], availability: { status: 'Available', type: 'Full-time' } };
-  const applications = stats.applications;
-  const recommendedJobs = stats.recommendedJobs;
-  const browseJobs = stats.browseJobs || [];
+  const applications = stats.applications ?? [];
+  const recommendedJobs = stats.recommendedJobs ?? [];
+  const browseJobs = stats.browseJobs ?? [];
 
-  // Single source-of-truth: same 8-section logic used in ProfileBuilderTab sidebar
   const sectionFilled = {
     basic: !!(profile.firstName && profile.lastName && profile.email && profile.phone),
     skills: (profile.skills?.length ?? 0) > 0,
@@ -71,40 +67,45 @@ export default function ApplicantPortalClient() {
   };
   const filledCount = Object.values(sectionFilled).filter(Boolean).length;
   const realCompleteness = Math.round((filledCount / 8) * 100);
-
-  // Override backend-calculated value so every child sees the same number
   const enrichedProfile = { ...profile, profileCompleteness: realCompleteness };
+  const badgeCount = applications.length;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Top Header */}
-      <div className="bg-white border-b border-border px-6 py-4">
-        <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-display font-700 text-foreground">
+    /* Outer wrapper: flex column, full screen height, and add bottom padding on mobile for the fixed nav bar */
+    <div className="flex flex-col h-full pb-[64px] sm:pb-0">
+
+      {/* ── Top Header ─────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-border px-4 sm:px-6 py-3 sm:py-4 shrink-0">
+        <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-3">
+          {/* Title */}
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-xl font-display font-700 text-foreground truncate">
               Welcome back, {enrichedProfile.firstName} 👋
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{enrichedProfile.headline}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate hidden sm:block">{enrichedProfile.headline}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right mr-2">
+
+          {/* Avatar + completeness */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Completeness — only on tablet+ */}
+            <div className="text-right mr-1 hidden sm:block">
               <p className="text-xs text-muted-foreground">Profile Completeness</p>
               <p className="text-sm font-semibold text-primary-700">{enrichedProfile.profileCompleteness}% complete</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-100 flex items-center justify-center">
               <span className="text-sm font-semibold text-primary-700">
                 {enrichedProfile.firstName?.[0] || '?'}{enrichedProfile.lastName?.[0] || ''}
               </span>
             </div>
           </div>
         </div>
-        {/* Tab Nav */}
-        <div className="max-w-screen-2xl mx-auto mt-4 flex items-center gap-1">
+
+        {/* ── Desktop/Tablet Tab Nav (hidden on mobile) ── */}
+        <div className="max-w-screen-2xl mx-auto mt-3 hidden sm:flex items-center gap-1">
           {TABS.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const badgeCount = tab.id === 'applications' ? applications.length : undefined;
-
+            const count = tab.id === 'applications' ? badgeCount : 0;
             return (
               <button
                 key={`aptab-${tab.id}`}
@@ -115,9 +116,9 @@ export default function ApplicantPortalClient() {
               >
                 <Icon size={15} />
                 {tab.label}
-                {badgeCount !== undefined && badgeCount > 0 && (
+                {count > 0 && (
                   <span className="text-[10px] font-semibold bg-primary-700 text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
-                    {badgeCount}
+                    {count}
                   </span>
                 )}
               </button>
@@ -126,9 +127,9 @@ export default function ApplicantPortalClient() {
         </div>
       </div>
 
-      {/* Tab Content */}
+      {/* ── Tab Content ─────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto scrollbar-thin bg-background">
-        <div className="max-w-screen-2xl mx-auto px-6 py-6">
+        <div className="max-w-screen-2xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
           {activeTab === 'dashboard' && (
             <ApplicantDashboardTab
               profile={enrichedProfile}
@@ -149,6 +150,41 @@ export default function ApplicantPortalClient() {
           )}
         </div>
       </div>
+
+      {/* ── Mobile Bottom Navigation (visible only on mobile) ──────── */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border shadow-lg">
+        <div className="flex items-stretch h-16">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            const count = tab.id === 'applications' ? badgeCount : 0;
+            return (
+              <button
+                key={`mobnav-${tab.id}`}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-colors
+                  ${isActive ? 'text-primary-700' : 'text-muted-foreground'}`}
+              >
+                {/* Active indicator pill */}
+                {isActive && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary-700 rounded-b-full" />
+                )}
+                <div className="relative">
+                  <Icon size={20} />
+                  {count > 0 && (
+                    <span className="absolute -top-1.5 -right-2 text-[9px] font-bold bg-primary-700 text-white rounded-full px-1 min-w-[14px] text-center leading-tight">
+                      {count}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium leading-none">
+                  {tab.label === 'My Profile' ? 'Profile' : tab.label === 'Browse Jobs' ? 'Jobs' : tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

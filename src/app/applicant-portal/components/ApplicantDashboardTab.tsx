@@ -38,7 +38,7 @@ export default function ApplicantDashboardTab({ profile, applications, recommend
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white rounded-xl border border-border p-5 shadow-card">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Total Applications</p>
           <p className="text-3xl font-display font-700 text-foreground tabular-nums">{applications.length}</p>
@@ -63,7 +63,7 @@ export default function ApplicantDashboardTab({ profile, applications, recommend
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Applications */}
         <div className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -159,7 +159,7 @@ export default function ApplicantDashboardTab({ profile, applications, recommend
             Browse all <ArrowRight size={11} />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-border">
           {activeJobs.map((job: any) => (
             <div key={`recjob-${job.id}`} className="p-5 hover:bg-muted/30 transition-colors">
               <div className="flex items-start justify-between mb-2">

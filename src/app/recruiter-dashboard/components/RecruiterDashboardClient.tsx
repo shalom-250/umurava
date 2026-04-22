@@ -16,7 +16,7 @@ import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
-import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen } from 'lucide-react';
+import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen, Menu, Check, X } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -40,6 +40,7 @@ export default function RecruiterDashboardClient() {
   const [applications, setApplications] = useState<any[]>([]);
   const [draftProfiles, setDraftProfiles] = useState<any[]>([]);
   const [activeView, setActiveView] = useState<'job-dashboard' | 'talent-pool'>('job-dashboard');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const selectedJobId = currentJobId;
   const screeningResults = (selectedJobId && allResults[selectedJobId]) || [];
@@ -412,12 +413,35 @@ export default function RecruiterDashboardClient() {
   if (!mounted) return null;
 
   return (
-    <div className="flex bg-[#F8FAFC] min-h-[calc(100vh-64px)]">
-      {/* Job Selection Sidebar - Optimized to fit in standard dashboard layout */}
-      <aside className="w-80 border-r border-gray-200 bg-white flex flex-col shrink-0 sticky top-0 h-[calc(100vh-64px)]">
+    <div className="flex bg-[#F8FAFC] min-h-[calc(100vh-64px)] relative">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* Job Selection Sidebar - Optimized for responsiveness */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72 sm:w-80 border-r border-gray-200 bg-white flex flex-col shrink-0 
+        transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-[calc(100vh-64px)]
+        ${isMobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        {/* Mobile Sidebar Close Button */}
+        <div className="lg:hidden p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+          <AppLogo />
+          <button onClick={() => setIsMobileSidebarOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-500">
+            <X size={20} />
+          </button>
+        </div>
+
         <div className="p-4 border-b border-gray-100 flex flex-col gap-2">
           <button
-            onClick={() => setActiveView('talent-pool')}
+            onClick={() => {
+              setActiveView('talent-pool');
+              setIsMobileSidebarOpen(false);
+            }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeView === 'talent-pool'
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-transparent'
@@ -432,7 +456,10 @@ export default function RecruiterDashboardClient() {
           <div className="flex items-center justify-between px-1">
             <h3 className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">Active Jobs</h3>
             <button
-              onClick={() => setShowCreateJob(true)}
+              onClick={() => {
+                setShowCreateJob(true);
+                setIsMobileSidebarOpen(false);
+              }}
               className="p-1 hover:bg-gray-100 rounded-md text-blue-600 transition-colors"
               title="Create New Job"
             >
@@ -474,6 +501,7 @@ export default function RecruiterDashboardClient() {
                   onClick={() => {
                     setSelectedJobId(jId);
                     setActiveView('job-dashboard');
+                    setIsMobileSidebarOpen(false);
                   }}
                   className={`w-full text-left p-4 transition-all border-b border-gray-50 group relative ${isActive
                     ? 'bg-blue-50/30 border-l-4 border-l-[#00A1FF]'
@@ -493,8 +521,7 @@ export default function RecruiterDashboardClient() {
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-500 font-medium">
                     <span className="truncate">{job.department}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span>{job.applicantCount || 0} applied</span>
+                    {isActive && <Check size={10} className="text-blue-500 ml-auto" />}
                   </div>
                 </button>
               );
@@ -504,31 +531,54 @@ export default function RecruiterDashboardClient() {
       </aside>
 
       {/* Dashboard Main Content */}
-      <div className="flex-1 min-w-0">
-        <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Mobile Navbar Header */}
+        <div className="lg:hidden h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="p-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase text-[#00A1FF] tracking-[.15em] leading-none mb-1">Recruiter</span>
+              <span className="text-xs font-bold text-gray-900 leading-none">
+                {activeView === 'talent-pool' ? 'Talent Pool' : (selectedJob?.title || 'Dashboard')}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowCreateJob(true)} className="p-1.5 bg-blue-600 text-white rounded-lg shadow-sm">
+              <Plus size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full">
           {/* Main Dashboard View */}
           {activeView === 'job-dashboard' ? (
             <>
-              {/* Header Internal - Compact */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-gray-200">
+              {/* Header Internal - Responsive */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-200">
                 {selectedJob ? (
-                  <div>
-                    <div className="flex items-center gap-2 mb-1 text-xs font-bold text-blue-600 uppercase tracking-widest">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-widest">
                       <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
                       Dashboard / {selectedJob.department}
                     </div>
                     <div className="flex items-center gap-3">
-                      <h2 className="text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
+                      <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">{selectedJob.title}</h2>
                       <button
                         onClick={() => setShowEditJob(true)}
-                        className="p-1 text-gray-400 hover:text-[#00A1FF] hover:bg-blue-50 rounded-lg transition-all"
+                        className="p-1.5 text-gray-400 hover:text-[#00A1FF] hover:bg-blue-50 rounded-lg transition-all"
                         title="Edit Job Details"
                       >
                         <Settings size={18} />
                       </button>
                     </div>
-                    <p className="mt-1 text-sm text-gray-500 font-medium">
-                      {selectedJob.location} • {selectedJob.type} • Posted {new Date(selectedJob.postedDate || Date.now()).toLocaleDateString()}
+                    <p className="text-xs sm:text-sm text-gray-500 font-medium">
+                      {selectedJob.location} • {selectedJob.type} • <span className="hidden sm:inline">Posted {new Date(selectedJob.postedDate || Date.now()).toLocaleDateString()}</span>
                     </p>
                   </div>
                 ) : (
@@ -538,7 +588,7 @@ export default function RecruiterDashboardClient() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
                   {selectedJob?.lastScreenedAt && (
                     <div className="hidden xl:flex flex-col items-end mr-2 pr-4 border-r border-gray-200">
                       <span className="text-[9px] uppercase font-bold text-gray-400 tracking-widest leading-none mb-1">
@@ -554,15 +604,16 @@ export default function RecruiterDashboardClient() {
                   <button
                     onClick={() => setShowUploadResume(true)}
                     disabled={selectedJob?.status === 'Closed' || !selectedJob}
-                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm shrink-0"
                   >
                     <UploadCloud size={16} />
-                    Upload CVs
+                    <span className="hidden sm:inline">Upload CVs</span>
+                    <span className="sm:hidden">Upload</span>
                   </button>
                   {selectedJob && (
                     <button
                       onClick={() => setShowStoredFiles(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all shadow-sm"
+                      className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all shadow-sm shrink-0"
                     >
                       <FolderOpen size={16} />
                       Stored CVs
@@ -572,26 +623,29 @@ export default function RecruiterDashboardClient() {
                     <button
                       onClick={() => handleTriggerScreening(true)}
                       disabled={isScreening}
-                      className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                      className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm shrink-0"
                     >
                       <RefreshCw size={16} className={isScreening ? 'animate-spin' : ''} />
-                      Refresh AI
+                      <span className="hidden sm:inline">Refresh AI</span>
+                      <span className="sm:hidden">Refresh</span>
                     </button>
                   )}
                   <button
                     onClick={() => handleTriggerScreening(false)}
                     disabled={isScreening || selectedJob?.status === 'Closed' || !selectedJob}
-                    className="flex items-center gap-2 px-6 py-2 bg-[#00A1FF] text-white rounded-lg text-sm font-bold hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 shadow-md shadow-blue-100"
+                    className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-[#00A1FF] text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-blue-600 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-blue-100 shrink-0"
                   >
                     {isScreening ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        Screening...
+                        <span className="hidden sm:inline">Screening...</span>
+                        <span className="sm:hidden">Wait...</span>
                       </>
                     ) : (
                       <>
                         <Sparkles size={16} />
-                        {screeningResults.length > 0 ? 'Re-run Screening' : 'Run AI Screening'}
+                        <span className="hidden sm:inline">{screeningResults.length > 0 ? 'Re-run Screening' : 'Run AI Screening'}</span>
+                        <span className="sm:hidden">Run AI</span>
                       </>
                     )}
                   </button>

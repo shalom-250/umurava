@@ -30,10 +30,17 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
     // Filter logic
     const filtered = useMemo(() => {
         return profiles.filter(p => {
+            const firstName = p.firstName || '';
+            const lastName = p.lastName || '';
+            const email = p.email || '';
+            const headline = p.headline || '';
+            const searchLower = search.toLowerCase();
+
             const matchesSearch =
-                `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-                p.email.toLowerCase().includes(search.toLowerCase()) ||
-                p.skills.some(s => s.name.toLowerCase().includes(search.toLowerCase()));
+                `${firstName} ${lastName}`.toLowerCase().includes(searchLower) ||
+                email.toLowerCase().includes(searchLower) ||
+                headline.toLowerCase().includes(searchLower) ||
+                (p.skills && p.skills.some(s => s.name?.toLowerCase().includes(searchLower)));
 
             const matchesLocation = locationFilter === 'All' || p.location === locationFilter;
 
@@ -54,8 +61,8 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
     return (
         <div className="space-y-6">
             {/* Toolbar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="relative flex-1 lg:max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
                         type="text"
@@ -66,20 +73,22 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
                     />
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl">
-                        <Filter size={14} className="text-gray-400" />
-                        <select
-                            value={locationFilter}
-                            onChange={(e) => { setLocationFilter(e.target.value); setCurrentPage(1); }}
-                            className="bg-transparent text-xs font-bold text-gray-700 focus:outline-none cursor-pointer"
-                        >
-                            {locations.map(loc => (
-                                <option key={loc} value={loc}>{loc}</option>
-                            ))}
-                        </select>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl flex-1 lg:flex-initial justify-between sm:justify-start">
+                        <div className="flex items-center gap-2">
+                            <Filter size={14} className="text-gray-400" />
+                            <select
+                                value={locationFilter}
+                                onChange={(e) => { setLocationFilter(e.target.value); setCurrentPage(1); }}
+                                className="bg-transparent text-xs font-bold text-gray-700 focus:outline-none cursor-pointer"
+                            >
+                                {locations.map(loc => (
+                                    <option key={loc} value={loc}>{loc}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2 border-l border-gray-200">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-2 border-l border-gray-200 hidden sm:block">
                         {filtered.length} Profiles Found
                     </div>
                 </div>
@@ -121,13 +130,13 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center font-bold text-blue-600 text-sm shadow-sm ring-2 ring-white">
-                                                    {profile.firstName[0]}{profile.lastName[0]}
+                                                    {(profile.firstName?.[0] || '')}{(profile.lastName?.[0] || profile.firstName?.[1] || '?')}
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                                                        {profile.firstName} {profile.lastName}
+                                                        {profile.firstName || 'Unknown'} {profile.lastName || ''}
                                                     </p>
-                                                    <p className="text-[11px] text-gray-500 font-medium">{profile.email}</p>
+                                                    <p className="text-[11px] text-gray-500 font-medium">{profile.email || 'No email'}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -145,12 +154,12 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex flex-wrap gap-1.5 max-w-[240px]">
-                                                {profile.skills.slice(0, 3).map((s, i) => (
+                                                {(profile.skills || []).slice(0, 3).map((s, i) => (
                                                     <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-bold">
                                                         {s.name}
                                                     </span>
                                                 ))}
-                                                {profile.skills.length > 3 && (
+                                                {(profile.skills?.length || 0) > 3 && (
                                                     <span className="text-[9px] font-bold text-gray-400">+{profile.skills.length - 3} more</span>
                                                 )}
                                             </div>
@@ -197,20 +206,20 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-gray-500 font-medium">
-                            Showing <span className="font-bold text-gray-900">{((currentPage - 1) * PAGE_SIZE) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * PAGE_SIZE, filtered.length)}</span> of {filtered.length} candidates
+                    <div className="px-4 sm:px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p className="text-[11px] sm:text-xs text-gray-500 font-medium">
+                            Showing <span className="font-bold text-gray-900">{((currentPage - 1) * PAGE_SIZE) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * PAGE_SIZE, filtered.length)}</span> of {filtered.length}
                         </p>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
-                                className="p-1.5 border border-gray-200 rounded-lg bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-all"
+                                className="p-1.5 border border-gray-200 rounded-lg bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-all shadow-sm"
                             >
                                 <ChevronLeft size={16} />
                             </button>
                             <div className="flex items-center gap-1">
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).slice(Math.max(0, currentPage - 2), Math.min(totalPages, currentPage + 1)).map(p => (
                                     <button
                                         key={p}
                                         onClick={() => setCurrentPage(p)}
@@ -226,7 +235,7 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages}
-                                className="p-1.5 border border-gray-200 rounded-lg bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-all"
+                                className="p-1.5 border border-gray-200 rounded-lg bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-all shadow-sm"
                             >
                                 <ChevronRight size={16} />
                             </button>

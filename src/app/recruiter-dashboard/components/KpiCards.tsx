@@ -76,23 +76,23 @@ export default function KpiCards({ job, screeningResults }: KpiCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map(card => {
         const Icon = card.icon;
         return (
           <div
             key={card.id}
             suppressHydrationWarning
-            className={`${card.bgClass} rounded-xl p-5 border border-transparent hover:shadow-elevated transition-shadow`}
+            className={`${card.bgClass} rounded-xl p-4 sm:p-5 border border-transparent hover:shadow-elevated transition-shadow`}
           >
-            <div className="flex items-start justify-between mb-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
-              <div className={`p-1.5 rounded-lg bg-white/60`}>
-                <Icon size={16} className={card.iconClass} />
+            <div className="flex items-start justify-between mb-2">
+              <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
+              <div className={`p-1.5 rounded-lg bg-white/60 shrink-0`}>
+                <Icon size={14} className={card.iconClass} />
               </div>
             </div>
-            <p className={`text-3xl font-display font-700 tabular-nums ${card.valueClass}`}>{card.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+            <p className={`text-2xl sm:text-3xl font-display font-700 tabular-nums ${card.valueClass}`}>{card.value}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 line-clamp-1">{card.sub}</p>
           </div>
         );
       })}

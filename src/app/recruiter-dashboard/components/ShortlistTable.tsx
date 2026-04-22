@@ -275,27 +275,27 @@ export default function ShortlistTable({ results, profiles, onViewCandidate, onU
       </table>
 
       {/* Pagination Footer */}
-      <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500">Show:</span>
+      <div className="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+            <span className="text-[11px] font-medium text-gray-500">Show:</span>
             <div className="relative">
               <select
                 value={pageSize}
                 onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-[11px] font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00A1FF]/20 focus:border-[#00A1FF] transition-all cursor-pointer"
+                className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-[10px] font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00A1FF]/20 focus:border-[#00A1FF] transition-all cursor-pointer"
               >
                 {PAGE_SIZE_OPTIONS.map(size => (
-                  <option key={size} value={size}>{size} per page</option>
+                  <option key={size} value={size}>{size}</option>
                 ))}
               </select>
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <ChevronDown size={14} />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <ChevronDown size={12} />
               </div>
             </div>
           </div>
-          <p className="text-[11px] font-medium text-gray-500">
-            Showing <span className="text-gray-900 font-bold">{startIndex + 1}</span> to <span className="text-gray-900 font-bold">{Math.min(startIndex + pageSize, totalItems)}</span> of <span className="text-gray-900 font-bold">{totalItems}</span> candidates
+          <p className="text-[10px] sm:text-[11px] font-medium text-gray-500">
+            Showing <span className="text-gray-900 font-bold">{startIndex + 1}</span> to <span className="text-gray-900 font-bold">{Math.min(startIndex + pageSize, totalItems)}</span> of <span className="text-gray-900 font-bold">{totalItems}</span>
           </p>
         </div>
 
@@ -311,15 +311,15 @@ export default function ShortlistTable({ results, profiles, onViewCandidate, onU
           <div className="flex items-center gap-1 mx-1">
             {[...Array(totalPages)].map((_, i) => {
               const pageNum = i + 1;
-              if (totalPages > 5 && pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
-                if (pageNum === 2 || pageNum === totalPages - 1) return <span key={`dots-${pageNum}`} className="px-1 text-gray-400 text-xs text-center min-w-[20px]">...</span>;
+              if (totalPages > 3 && pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
+                if (pageNum === 2 || pageNum === totalPages - 1) return <span key={`dots-${pageNum}`} className="px-0.5 text-gray-400 text-[10px]">...</span>;
                 return null;
               }
               return (
                 <button
                   key={`page-${pageNum}`}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === pageNum
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition-all ${currentPage === pageNum
                     ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-sm'
                     : 'text-gray-500 hover:bg-gray-100'
                     }`}

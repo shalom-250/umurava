@@ -16,7 +16,7 @@ import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
-import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen, Menu, Check, X } from 'lucide-react';
+import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen, Menu, Check, X, ArrowLeft } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -777,7 +777,15 @@ export default function RecruiterDashboardClient() {
             </>
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-200">
+              <button
+                onClick={() => setActiveView('job-dashboard')}
+                className="flex items-center gap-2 px-3 py-1.5 mb-4 text-xs font-bold text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all w-fit"
+              >
+                <ArrowLeft size={16} />
+                Back to Dashboard
+              </button>
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-6 border-b border-gray-200 gap-4">
                 <div>
                   <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
                     <Users className="text-blue-600" size={28} />

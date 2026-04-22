@@ -40,45 +40,38 @@ export default function ProfileBuilderTab({ profile }: ProfileBuilderTabProps) {
 
   const handleAIConfirm = async (data: any) => {
     try {
-      // First, update backend
-      const updated = await api.put('/candidates/me', {
-        name: data.name,
-        phone: data.phone,
-        skills: data.skills,
-        experience: data.experience,
-        education: data.education
-      });
+      // First, update backend with all 17+ categories
+      const updated = await api.put('/candidates/me', data);
 
-      // Update local state (mapping backend names to frontend naming conventions)
+      // Update local state with rich data mapping
       setLocalProfile({
         ...localProfile,
-        firstName: data.name.split(' ')[0],
-        lastName: data.name.split(' ').slice(1).join(' '),
-        email: data.email,
-        phone: data.phone,
-        skills: data.skills.map((s: string) => ({ name: s, level: 'Intermediate', yearsOfExperience: 1 })),
-        experience: [{
-          company: 'Extracted Experience',
-          role: 'See Summary',
-          startDate: '',
-          endDate: '',
-          description: data.experience,
-          technologies: [],
-          isCurrent: false
-        }],
-        education: [{
-          institution: 'Extracted Education',
-          degree: data.education,
-          fieldOfStudy: '',
-          startYear: 2020,
-          endYear: null
-        }]
+        ...updated, // Prefer backend returned data
+        firstName: data.name?.split(' ')[0] || localProfile.firstName,
+        lastName: data.name?.split(' ').slice(1).join(' ') || localProfile.lastName,
+        email: data.email || localProfile.email,
+        phone: data.phone || localProfile.phone,
+        location: data.location || localProfile.location,
+        bio: data.personalStatement || localProfile.bio,
+        skills: Array.isArray(data.skills) && data.skills.length > 0
+          ? data.skills
+          : (data.skillsRaw ? data.skillsRaw.split(',').map((s: string) => ({ name: s.trim(), level: 'Intermediate', yearsOfExperience: 1 })) : localProfile.skills),
+        experience: Array.isArray(data.experience) && data.experience.length > 0 ? data.experience : localProfile.experience,
+        education: Array.isArray(data.education) && data.education.length > 0 ? data.education : localProfile.education,
+        projects: Array.isArray(data.projects) && data.projects.length > 0 ? data.projects : localProfile.projects,
+        socialLinks: {
+          ...localProfile.socialLinks,
+          linkedin: data.onlinePresence?.linkedin || localProfile.socialLinks?.linkedin,
+          github: data.onlinePresence?.github || localProfile.socialLinks?.github,
+          portfolio: data.onlinePresence?.portfolio || localProfile.socialLinks?.portfolio,
+        }
       });
 
       setShowAIUploader(false);
-      toast.success('Profile updated with AI-extracted information!');
+      toast.success('Your profile has been updated with detailed information from your resume!');
     } catch (err) {
-      toast.error('Failed to sync profile. Please save manually.');
+      console.error('AI Sync Error:', err);
+      toast.error('Failed to sync some profile details. Please review manually.');
     }
   };
 

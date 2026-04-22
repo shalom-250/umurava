@@ -1,5 +1,11 @@
 import { Request, Response } from 'express';
 import Job from '../models/Job';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { extractTextFromPdf } from '../services/pdf.service';
+import { extractTextFromDocx } from '../services/doc.service';
+import { extractJobInfoFromFile, extractJobInfoFromText } from '../services/gemini.service';
 
 export const createJob = async (req: any, res: Response): Promise<void> => {
     const {
@@ -41,6 +47,68 @@ export const createJob = async (req: any, res: Response): Promise<void> => {
 };
 
 import Application from '../models/Application';
+
+// Setup Multer for Job Extraction
+const uploadDir = 'uploads/jobs/';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => cb(null, `job-extract-${Date.now()}${path.extname(file.originalname)}`),
+});
+
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const filetypes = /pdf|doc|docx/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        if (extname) return cb(null, true);
+        cb(new Error('Only PDF and DOCX files are allowed'));
+    },
+}).single('file');
+
+export const extractJobRequirements = (req: any, res: Response) => {
+    upload(req, res, async (err: any) => {
+        if (err) return res.status(400).json({ message: err.message });
+        if (!req.file) return res.status(400).json({ message: 'Please upload a file' });
+
+        const filePath = req.file.path;
+        const fileExtension = path.extname(req.file.originalname).toLowerCase();
+
+        try {
+            let extractedData: any = null;
+
+            if (fileExtension === '.pdf') {
+                try {
+                    // Try direct AI processing (Gemini direct file upload support)
+                    extractedData = await extractJobInfoFromFile(filePath, 'application/pdf');
+                } catch (pdfError) {
+                    console.warn("Direct PDF extraction failed, trying local text extraction fallback...");
+                    const text = await extractTextFromPdf(filePath);
+                    extractedData = await extractJobInfoFromText(text);
+                }
+            } else if (fileExtension === '.doc' || fileExtension === '.docx') {
+                const text = await extractTextFromDocx(filePath);
+                extractedData = await extractJobInfoFromText(text);
+            }
+
+            // Cleanup
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+            if (extractedData) {
+                res.status(200).json(extractedData);
+            } else {
+                res.status(400).json({ message: 'Could not extract requirements from this document.' });
+            }
+        } catch (error: any) {
+            console.error("Job Extraction Error:", error);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            res.status(500).json({ message: 'Failed to process file: ' + error.message });
+        }
+    });
+};
 
 export const getJobs = async (req: Request, res: Response): Promise<void> => {
     try {

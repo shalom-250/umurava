@@ -23,7 +23,7 @@
  */
 
 import express from 'express';
-import { createJob, getJobs, getJobById, updateJob } from '../controllers/job.controller';
+import { createJob, getJobs, getJobById, updateJob, extractJobRequirements } from '../controllers/job.controller';
 import { protect } from '../middleware/auth.middleware';
 
 const router = express.Router();
@@ -55,6 +55,8 @@ const router = express.Router();
 router.route('/')
     .post(protect, createJob)
     .get(getJobs);
+
+router.post('/extract', protect, extractJobRequirements);
 
 router.route('/:id')
     .get(getJobById)

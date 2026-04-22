@@ -241,6 +241,84 @@ export const extractCandidateInfoFromFile = async (filePath: string, mimeType: s
     }
 };
 
+export const extractJobInfoFromText = async (text: string): Promise<any> => {
+    const prompt = `
+    Extract job posting information from the following text:
+    - title (e.g. Senior AI/ML Engineer)
+    - description (Detailed description of the role)
+    - requirements (list of what the candidate needs to have)
+    - skills (list of specific technical or soft skills)
+    - mustHaveSkills (subset of skills that are absolutely required)
+    - department (e.g. Engineering, Sales, HR)
+    - location (e.g. Kigali, Rwanda OR Remote)
+    - type ("Full-time", "Part-time", or "Contract")
+    - experienceLevel ("Junior", "Mid-level", "Senior", or "Lead")
+    - salaryRange (e.g. 1,000,000 - 1,500,000 RWF)
+    - deadline (Estimated date if found, otherwise null)
+    
+    Text:
+    ${text.substring(0, 8000)}
+    
+    Return ONLY a valid JSON object. Do not include markdown formatting.
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const cleanJson = response.text().replace(/```json|```/g, "").trim();
+        return JSON.parse(cleanJson);
+    } catch (error: any) {
+        console.error("Job Extraction Error:", error);
+        throw error;
+    }
+};
+
+export const extractJobInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+    if (mimeType !== 'application/pdf') {
+        throw new Error("Direct file processing only supported for PDF.");
+    }
+
+    try {
+        const fileBuffer = fs.readFileSync(filePath);
+        const base64Data = fileBuffer.toString('base64');
+
+        const prompt = `
+            Extract job posting information from this document.
+            Return a JSON object with: 
+            - title
+            - description
+            - requirements (array)
+            - skills (array)
+            - mustHaveSkills (array)
+            - department
+            - location
+            - type ("Full-time" | "Part-time" | "Contract")
+            - experienceLevel ("Junior" | "Mid-level" | "Senior" | "Lead")
+            - salaryRange
+            - deadline (formatted as YYYY-MM-DD if possible)
+            
+            Be as accurate as possible. If a field is missing, use null.
+        `;
+
+        const result = await model.generateContent([
+            {
+                inlineData: {
+                    data: base64Data,
+                    mimeType: "application/pdf",
+                },
+            },
+            prompt,
+        ]);
+
+        const response = await result.response;
+        const cleanJson = response.text().replace(/```json|```/g, "").trim();
+        return JSON.parse(cleanJson);
+    } catch (error: any) {
+        console.warn("⚠️ Job File Extraction Error:", error.message);
+        throw error;
+    }
+};
+
 /**
  * Normalizes keys (phone vs phoneNumber) and performs aggressive regex fallback if AI missed it.
  */

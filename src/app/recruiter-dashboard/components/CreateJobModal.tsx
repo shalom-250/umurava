@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { X, Plus, Loader2, Briefcase } from 'lucide-react';
+import { X, Plus, Loader2, Briefcase, Sparkles, FileUp } from 'lucide-react';
 import { api } from '@/lib/api';
 
 const schema = z.object({
@@ -29,7 +29,10 @@ interface CreateJobModalProps {
 
 export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const [isExtracting, setIsExtracting] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
@@ -57,6 +60,61 @@ export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalPro
     }
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.includes('pdf') && !file.name.endsWith('.docx') && !file.name.endsWith('.doc')) {
+      toast.error('Only PDF and Word documents are supported');
+      return;
+    }
+
+    setIsExtracting(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await api.postForm('/jobs/extract', formData);
+      const data = response;
+
+      // Auto-fill form
+      if (data.title) setValue('title', data.title);
+      if (data.department) setValue('department', data.department);
+      if (data.location) setValue('location', data.location);
+      if (data.type) setValue('type', data.type);
+      if (data.experienceLevel) setValue('experienceLevel', data.experienceLevel);
+      if (data.salaryRange) setValue('salaryRange', data.salaryRange);
+      if (data.description) setValue('description', data.description);
+
+      if (data.requirements && Array.isArray(data.requirements)) {
+        setValue('requirements', data.requirements.join('\n'));
+      }
+
+      if (data.skills && Array.isArray(data.skills)) {
+        setValue('requiredSkills', data.skills.join(', '));
+      }
+
+      if (data.deadline) {
+        // Try to format date for input[type="date"]
+        try {
+          const d = new Date(data.deadline);
+          if (!isNaN(d.getTime())) {
+            setValue('deadline', d.toISOString().split('T')[0]);
+          }
+        } catch (e) { }
+      }
+
+      toast.success('AI extracted job requirements successfully!');
+    } catch (error: any) {
+      console.error(error);
+      toast.error('AI extraction failed. Please fill manual.');
+    } finally {
+      setIsExtracting(false);
+      // Reset input so same file can be selected again
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
@@ -69,9 +127,30 @@ export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalPro
               </div>
               <h2 className="text-base font-display font-600 text-foreground">Create New Job</h2>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-md hover:bg-muted transition-colors">
-              <X size={16} />
-            </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".pdf,.doc,.docx"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isExtracting}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-100 rounded-lg text-xs font-semibold hover:bg-purple-100 transition-colors disabled:opacity-50"
+              >
+                {isExtracting ? (
+                  <><Loader2 size={12} className="animate-spin" /> Extracting...</>
+                ) : (
+                  <><Sparkles size={12} /> Auto-fill from Document</>
+                )}
+              </button>
+              <button onClick={onClose} className="p-1.5 rounded-md hover:bg-muted transition-colors">
+                <X size={16} />
+              </button>
+            </div>
           </div>
         </div>
 

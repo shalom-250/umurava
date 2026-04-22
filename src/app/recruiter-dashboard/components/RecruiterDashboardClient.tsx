@@ -212,7 +212,9 @@ export default function RecruiterDashboardClient() {
     try {
       if (!selectedJobId) throw new Error('No job selected');
       const jobIdToUse = (selectedJob as any)._id || (selectedJob as any).id;
-      const response = await api.post(`/screening/test-gemini/${jobIdToUse}`, {});
+
+      // PRODUCTION ENDPOINT: Analyze real applicants in DB
+      const response = await api.post(`/screening/${jobIdToUse}`, {});
 
       const resultsData = response.results || response;
 
@@ -227,11 +229,11 @@ export default function RecruiterDashboardClient() {
           { skill: 'Experience', score: r.weightedScore?.experience || 0, required: true },
           { skill: 'Education', score: r.weightedScore?.education || 0, required: true }
         ],
-        strengths: Array.isArray(r.strengths) ? r.strengths : [r.strengths],
-        gaps: Array.isArray(r.gaps) ? r.gaps : [r.gaps],
+        strengths: Array.isArray(r.strengths) ? r.strengths : r.strengths ? [r.strengths] : [],
+        gaps: Array.isArray(r.gaps) ? r.gaps : r.gaps ? [r.gaps] : [],
         aiReasoning: r.aiReasoning,
-        interviewQuestions: r.interviewQuestions,
-        documentStatus: r.documentStatus
+        interviewQuestions: r.interviewQuestions || [],
+        documentStatus: r.documentStatus || []
       }));
 
       if (selectedJobId) {

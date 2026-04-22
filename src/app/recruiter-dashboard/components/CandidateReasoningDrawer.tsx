@@ -89,7 +89,7 @@ export default function CandidateReasoningDrawer({ profile, result, application,
                 <p className="text-xs font-semibold text-green-700">Strengths</p>
               </div>
               <ul className="space-y-1.5">
-                {result.strengths.map((s, i) => (
+                {(Array.isArray(result.strengths) ? result.strengths : [result.strengths].filter(Boolean)).map((s, i) => (
                   <li key={`str-${i}`} className="text-xs text-foreground bg-green-50 rounded-md px-2.5 py-1.5 border border-green-100">
                     {s}
                   </li>
@@ -102,7 +102,7 @@ export default function CandidateReasoningDrawer({ profile, result, application,
                 <p className="text-xs font-semibold text-amber-700">Gaps / Risks</p>
               </div>
               <ul className="space-y-1.5">
-                {result.gaps.map((g, i) => (
+                {(Array.isArray(result.gaps) ? result.gaps : [result.gaps].filter(Boolean)).map((g, i) => (
                   <li key={`gap-${i}`} className="text-xs text-foreground bg-amber-50 rounded-md px-2.5 py-1.5 border border-amber-100">
                     {g}
                   </li>

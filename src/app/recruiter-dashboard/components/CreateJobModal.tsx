@@ -18,6 +18,7 @@ const schema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters'),
   requirements: z.string().min(10, 'Add at least one requirement'),
   requiredSkills: z.string().min(3, 'Add at least one required skill'),
+  requiredDocuments: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -42,12 +43,14 @@ export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalPro
       // Process strings into arrays
       const requirementsArray = data.requirements.split('\n').filter(r => r.trim().length > 0);
       const skillsArray = data.requiredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      const docsArray = data.requiredDocuments ? data.requiredDocuments.split(',').map(d => d.trim()).filter(d => d.length > 0) : [];
 
       await api.post('/jobs', {
         ...data,
         requirements: requirementsArray,
         skills: skillsArray,
         mustHaveSkills: skillsArray, // Defaulting for now
+        requiredDocuments: docsArray,
       });
 
       toast.success(`Job "${data.title}" created successfully`);
@@ -92,6 +95,13 @@ export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalPro
 
       if (data.skills && Array.isArray(data.skills)) {
         setValue('requiredSkills', data.skills.join(', '));
+      }
+
+      if (data.requiredDocuments && Array.isArray(data.requiredDocuments)) {
+        setValue('requiredDocuments', data.requiredDocuments.join(', '));
+      } else if (data.documents && Array.isArray(data.documents)) {
+        // Fallback for AI extraction keys
+        setValue('requiredDocuments', data.documents.join(', '));
       }
 
       if (data.deadline) {
@@ -222,8 +232,14 @@ export default function CreateJobModal({ onClose, onSuccess }: CreateJobModalPro
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-foreground mb-1.5">Required Skills</label>
               <p className="text-[11px] text-muted-foreground mb-1">Comma-separated (e.g. Python, TensorFlow, Gemini API)</p>
-              <input {...register('requiredSkills')} type="text" placeholder="Python, TensorFlow, Gemini API, Node.js, TypeScript" className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700" />
+              <input {...register('requiredSkills')} type="text" placeholder="Python, TensorFlow, Gemini API, Node.js, TypeScript" className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 font-mono" />
               {errors.requiredSkills && <p className="text-xs text-red-500 mt-1">{errors.requiredSkills.message}</p>}
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-foreground mb-1.5">Required Documents</label>
+              <p className="text-[11px] text-muted-foreground mb-1">Comma-separated (e.g. Resume, ID, Degree)</p>
+              <input {...register('requiredDocuments')} type="text" placeholder="Resume, Identity Document, Degree Certificate, Portfolio" className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 font-mono" />
             </div>
           </div>
 

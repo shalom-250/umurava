@@ -18,6 +18,7 @@ const schema = z.object({
     description: z.string().min(20, 'Description must be at least 20 characters'),
     requirements: z.string().min(10, 'Add at least one requirement'),
     requiredSkills: z.string().min(3, 'Add at least one required skill'),
+    requiredDocuments: z.string().optional(),
     status: z.enum(['Active', 'Draft', 'Screening', 'Closed']),
 });
 
@@ -31,8 +32,7 @@ interface EditJobModalProps {
 
 export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             title: job?.title || '',
@@ -45,9 +45,12 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
             description: job?.description || '',
             requirements: Array.isArray(job?.requirements) ? job.requirements.join('\n') : job?.requirements || '',
             requiredSkills: Array.isArray(job?.skills) ? job.skills.join(', ') : job?.skills || '',
+            requiredDocuments: Array.isArray(job?.requiredDocuments) ? job.requiredDocuments.join(', ') : job?.requiredDocuments || '',
             status: job?.status || 'Active',
         }
     });
+
+    const currentStatus = watch('status');
 
     useEffect(() => {
         if (job) {
@@ -62,6 +65,7 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
                 description: job.description,
                 requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : job.requirements,
                 requiredSkills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills,
+                requiredDocuments: Array.isArray(job.requiredDocuments) ? job.requiredDocuments.join(', ') : job.requiredDocuments,
                 status: job.status,
             });
         }
@@ -72,6 +76,7 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
         try {
             const requirementsArray = data.requirements.split('\n').filter(r => r.trim().length > 0);
             const skillsArray = data.requiredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            const docsArray = data.requiredDocuments ? data.requiredDocuments.split(',').map(d => d.trim()).filter(d => d.length > 0) : [];
 
             const jobId = job._id || job.id;
             await api.put(`/jobs/${jobId}`, {
@@ -79,6 +84,7 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
                 requirements: requirementsArray,
                 skills: skillsArray,
                 mustHaveSkills: skillsArray,
+                requiredDocuments: docsArray,
             });
 
             toast.success(`Job "${data.title}" updated successfully`);
@@ -114,17 +120,17 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="md:col-span-2">
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Job Status</label>
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 {['Active', 'Draft', 'Screening', 'Closed'].map((status) => (
                                     <label key={status} className={`
-                    flex items-center justify-center py-2 border rounded-lg cursor-pointer transition-all text-[11px] font-bold
-                    ${(errors.status ? '' : '')}
-                    ${job?.status === status ? 'bg-primary-50 border-primary-200' : ''}
+                    flex items-center justify-center py-2.5 border rounded-xl cursor-pointer transition-all text-[11px] font-bold
+                    ${currentStatus === status
+                                            ? 'bg-blue-50 border-blue-500 ring-4 ring-blue-500/10 text-blue-700'
+                                            : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50'
+                                        }
                   `}>
                                         <input {...register('status')} type="radio" value={status} className="hidden" />
-                                        <span className={status === 'Closed' ? 'text-red-600' : status === 'Active' ? 'text-green-600' : 'text-gray-600'}>
-                                            {status}
-                                        </span>
+                                        <span>{status}</span>
                                     </label>
                                 ))}
                             </div>
@@ -189,7 +195,12 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
 
                         <div className="md:col-span-2">
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Required Skills (comma separated)</label>
-                            <input {...register('requiredSkills')} type="text" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                            <input {...register('requiredSkills')} type="text" placeholder="e.g. Python, TensorFlow, React" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono" />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Required Documents (comma separated)</label>
+                            <input {...register('requiredDocuments')} type="text" placeholder="e.g. Resume, Degree Certificate, Portfolio" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono" />
                         </div>
                     </div>
 

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
@@ -9,6 +9,7 @@ import {
   Search, CheckCircle, Sparkles, Trophy
 } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
+import { api } from '@/lib/api';
 
 
 interface NavItem {
@@ -45,6 +46,12 @@ interface SidebarProps {
 
 export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    setUser(api.getUser());
+  }, []);
+
   const pathname = usePathname();
   const navItems = role === 'recruiter' ? recruiterNav : applicantNav;
 
@@ -86,7 +93,7 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
                     href={item.href}
                     title={collapsed ? item.label : undefined}
                     className={`group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${isActive
-                        ? 'bg-primary-50 text-primary-700' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      ? 'bg-primary-50 text-primary-700' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       } ${collapsed ? 'justify-center' : ''}`}
                   >
                     <Icon size={18} className={isActive ? 'text-primary-700' : ''} />
@@ -121,10 +128,10 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-foreground truncate">
-                {role === 'recruiter' ? 'Aline Uwimana' : 'Nzinga Mwamba'}
+                {user?.name || (role === 'recruiter' ? 'Aline Uwimana' : 'Nzinga Mwamba')}
               </p>
               <p className="text-[10px] text-muted-foreground truncate">
-                {role === 'recruiter' ? 'Talent Acquisition Lead' : 'AI Engineer'}
+                {user?.role === 'recruiter' ? 'Talent Acquisition Lead' : user?.role === 'applicant' ? 'Job Seeker' : (role === 'recruiter' ? 'Talent Acquisition Lead' : 'AI Engineer')}
               </p>
             </div>
             <Bell size={14} className="text-muted-foreground shrink-0" />
@@ -133,6 +140,7 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
         <div className="flex items-center gap-2">
           <Link
             href="/sign-up-login-screen"
+            onClick={() => api.logout()}
             className={`flex items-center gap-2 px-2 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors ${collapsed ? 'justify-center w-full' : ''}`}
             title={collapsed ? 'Sign Out' : undefined}
           >

@@ -16,7 +16,7 @@ import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
-import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, FolderOpen, Menu, Check, X, ArrowLeft } from 'lucide-react';
+import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, Edit2, FolderOpen, Menu, Check, X, ArrowLeft } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -574,7 +574,7 @@ export default function RecruiterDashboardClient() {
                         className="p-1.5 text-gray-400 hover:text-[#00A1FF] hover:bg-blue-50 rounded-lg transition-all"
                         title="Edit Job Details"
                       >
-                        <Settings size={18} />
+                        <Edit2 size={18} />
                       </button>
                     </div>
                     <p className="text-xs sm:text-sm text-gray-500 font-medium">

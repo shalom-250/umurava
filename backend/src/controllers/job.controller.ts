@@ -47,6 +47,7 @@ export const createJob = async (req: any, res: Response): Promise<void> => {
 };
 
 import Application from '../models/Application';
+import Screening from '../models/Screening';
 
 // Setup Multer for Job Extraction
 const uploadDir = 'uploads/jobs/';
@@ -205,6 +206,7 @@ export const getJobFiles = async (req: Request, res: Response): Promise<void> =>
         }
 
         const applications = await Application.find({ jobId: job._id }).populate('candidateId', 'name email');
+        const screenings = await Screening.find({ jobId: job._id });
 
         const fileDetails: any[] = [];
         for (const app of applications) {
@@ -213,13 +215,20 @@ export const getJobFiles = async (req: Request, res: Response): Promise<void> =>
                     const cand = app.candidateId as any;
                     const applicantName = cand && cand.name ? cand.name : 'Candidate';
 
-                    // Simple extraction of file name from url
-                    const rawName = path.basename(att.url);
+                    let aiScore = null;
+                    if (cand && cand._id) {
+                        const match = screenings.find(s => s.candidateId.toString() === cand._id.toString());
+                        if (match) aiScore = match.score;
+                    }
+
                     // Provide a cleaner presentation name
                     const presentationName = `${applicantName.replace(/\s+/g, '_')}_${att.name || 'CV'}`;
 
                     fileDetails.push({
                         name: presentationName,
+                        candidateName: applicantName,
+                        originalName: att.name || 'CV',
+                        aiScore: aiScore,
                         path: att.url,
                         size: 250000, // Dummy approximate size payload for cloud files
                         createdAt: (app as any).createdAt || new Date()

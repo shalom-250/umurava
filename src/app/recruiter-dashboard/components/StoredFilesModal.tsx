@@ -6,6 +6,9 @@ import { toast } from 'sonner';
 
 interface JobFile {
     name: string;
+    candidateName?: string;
+    originalName?: string;
+    aiScore?: number;
     path: string;
     size: number;
     createdAt: string;
@@ -96,8 +99,18 @@ export default function StoredFilesModal({ jobId, jobTitle, onClose }: StoredFil
                                             <FileText size={20} className="text-gray-400 group-hover:text-blue-500" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-900 truncate max-w-[300px]">{file.name}</p>
-                                            <div className="flex items-center gap-3 mt-0.5 text-[10px] text-gray-500 font-medium">
+                                            <p className="text-sm font-bold text-gray-900 truncate max-w-[300px]">
+                                                {file.candidateName ? `${file.candidateName} - ${file.originalName}` : file.name}
+                                            </p>
+                                            <div className="flex items-center gap-3 mt-0.5 text-[10px] text-gray-500 font-medium h-4">
+                                                {file.aiScore != null && (
+                                                    <>
+                                                        <span className="px-1.5 py-[2px] bg-green-100 text-green-700 rounded font-bold">
+                                                            AI Match: {file.aiScore}%
+                                                        </span>
+                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                    </>
+                                                )}
                                                 <span>{formatSize(file.size)}</span>
                                                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                                 <span>Added {new Date(file.createdAt).toLocaleDateString()}</span>

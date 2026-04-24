@@ -192,9 +192,22 @@ export default function ApplicantPortalClient() {
           )}
         </div>
 
-        {/* Sign Out (Mobile Drawer) */}
+        {/* User Profile Info & Sign Out (Mobile Drawer) */}
         {sidebarOpen && (
-          <div className="p-3 border-t border-border shrink-0">
+          <div className="p-3 border-t border-border shrink-0 flex flex-col gap-2">
+            <div className="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-muted/50 border border-border/50">
+              <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xs shrink-0">
+                {enrichedProfile.firstName ? `${enrichedProfile.firstName[0]}` : <User size={14} />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">
+                  {enrichedProfile.firstName ? `${enrichedProfile.firstName} ${enrichedProfile.lastName || ''}` : 'Applicant'}
+                </p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold truncate">
+                  Job Seeker
+                </p>
+              </div>
+            </div>
             <Link
               href="/sign-up-login-screen"
               onClick={() => api.logout()}

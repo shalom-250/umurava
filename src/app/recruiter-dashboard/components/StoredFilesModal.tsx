@@ -45,6 +45,12 @@ export default function StoredFilesModal({ jobId, jobTitle, onClose }: StoredFil
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
+    const getFileUrl = (pathStr: string) => {
+        if (pathStr.startsWith('http')) return pathStr;
+        const cleanPath = pathStr.startsWith('/') ? pathStr : `/${pathStr}`;
+        return `${API_BASE_URL.replace('/api', '')}${cleanPath}`;
+    };
+
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
@@ -100,14 +106,14 @@ export default function StoredFilesModal({ jobId, jobTitle, onClose }: StoredFil
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => window.open(`${API_BASE_URL.replace('/api', '')}/${file.path}`, '_blank')}
+                                            onClick={() => window.open(getFileUrl(file.path), '_blank')}
                                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                             title="View CV"
                                         >
                                             <ExternalLink size={16} />
                                         </button>
                                         <a
-                                            href={`${API_BASE_URL.replace('/api', '')}/${file.path}`}
+                                            href={getFileUrl(file.path)}
                                             download={file.name}
                                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                             title="Download CV"

@@ -1,7 +1,9 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import AppLogo from '@/components/ui/AppLogo';
 import { api } from '@/lib/api';
-import { User, Briefcase, FileText, LayoutDashboard, Loader2, ChevronRight, X, Menu } from 'lucide-react';
+import { User, Briefcase, FileText, LayoutDashboard, Loader2, ChevronRight, X, Menu, LogOut } from 'lucide-react';
 import ApplicantDashboardTab from './ApplicantDashboardTab';
 import ProfileBuilderTab from './ProfileBuilderTab';
 import JobBrowserTab from './JobBrowserTab';
@@ -111,20 +113,17 @@ export default function ApplicantPortalClient() {
         `}
       >
         {/* Header toggle button */}
-        <div className="flex items-center justify-end h-14 px-3 border-b border-border shrink-0">
+        <div className="flex items-center justify-between h-16 border-b border-border px-4 shrink-0 bg-white">
+          <div className="flex items-center gap-2">
+            <AppLogo size={24} />
+            <span className="font-display font-700 text-primary-700 text-sm">UmuravaAI</span>
+          </div>
           {sidebarOpen ? (
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground"
-            >
-              <X size={14} />
+            <button onClick={() => setSidebarOpen(false)} className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground">
+              <X size={16} />
             </button>
           ) : (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="mx-auto p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-              title="Open navigation"
-            >
+            <button onClick={() => setSidebarOpen(true)} className="p-1 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
               <ChevronRight size={16} />
             </button>
           )}
@@ -192,6 +191,20 @@ export default function ApplicantPortalClient() {
             </div>
           )}
         </div>
+
+        {/* Sign Out (Mobile Drawer) */}
+        {sidebarOpen && (
+          <div className="p-3 border-t border-border shrink-0">
+            <Link
+              href="/sign-up-login-screen"
+              onClick={() => api.logout()}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors w-full"
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </Link>
+          </div>
+        )}
       </aside>
 
       {/* ── Main Content Area ───────────────────────────────────────── */}
@@ -210,9 +223,10 @@ export default function ApplicantPortalClient() {
                 <Menu size={22} />
               </button>
 
-              <div className="hidden sm:block shrink-0">
-                <h1 className="text-sm font-display font-700 text-foreground truncate">
-                  Welcome, {enrichedProfile.firstName} 👋
+              <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+                <AppLogo size={26} />
+                <h1 className="text-sm font-display font-700 text-foreground truncate hidden md:block border-l border-border pl-2.5">
+                  Applicant Portal
                 </h1>
               </div>
 
@@ -252,10 +266,24 @@ export default function ApplicantPortalClient() {
                 <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-1">Completeness</p>
                 <p className="text-xs font-extra-bold text-primary-700 leading-none">{realCompleteness}%</p>
               </div>
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-50 border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary-100 transition-all">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-50 border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary-100 transition-all group relative">
                 <span className="text-xs font-bold text-primary-700">
                   {enrichedProfile.firstName?.[0] || '?'}{enrichedProfile.lastName?.[0] || ''}
                 </span>
+
+                <div className="absolute top-10 right-0 mt-2 bg-white rounded-lg shadow-elevated border border-border py-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 min-w-[120px]">
+                  <p className="block px-3 py-1.5 text-xs font-semibold text-foreground border-b border-border mb-1">
+                    {enrichedProfile.firstName} {enrichedProfile.lastName}
+                  </p>
+                  <Link
+                    href="/sign-up-login-screen"
+                    onClick={() => api.logout()}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut size={14} />
+                    Sign Out
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

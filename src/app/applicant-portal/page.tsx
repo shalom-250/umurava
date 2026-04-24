@@ -1,11 +1,10 @@
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
 import ApplicantPortalClient from './components/ApplicantPortalClient';
 
 export default function ApplicantPortalPage() {
   return (
-    <AppLayout role="applicant">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
       <ApplicantPortalClient />
-    </AppLayout>
+    </div>
   );
 }

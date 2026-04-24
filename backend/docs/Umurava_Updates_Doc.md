@@ -52,7 +52,43 @@ A flawless Export engine! Click either the **Export PDF** or **Export Excel** bu
 
 ## 5. Hydrating Secure Identities
 ### Technical Analysis
-The Recruiter Dashboard's primary `Sidebar.tsx` was plagued by an initial load sequence prioritizing a hardcoded string ("Aline Uwimana"). We injected a secure React `useEffect` hydration barrier (`mounted`), guaranteeing the component securely waits for the `/api/user` query to unpack the validated user object securely from internal storage.
+The Recruiter Dashboard's primary `Sidebar.tsx` was plagued by an initial load sequence prioritizing a hardcoded string ("Aline Uwimana"). We injected a secure React `useEffect` hydration barrier (`mounted`), guaranteeing the component securely waits for the `/api/user` query to unpack the validated user object securely from internal storage. Furthermore, the `ApplicantPortalClient` and `RecruiterDashboardClient` now pull directly from the `api.getUser()` method to ensure session-based names (like "Olivier") are used as fallbacks for un-filled profiles.
 
 ### End User Flow
 No more ghostly placeholders! The instant you securely log into your recruiter or applicant profile, your real name, identity, and access-specific role appear prominently across the entire sidebar navigation precisely mapping to your true identity seamlessly.
+
+---
+
+## 6. Full-Portal Responsive Overhaul
+### Technical Analysis
+We unified the mobile navigation experience across both Applicant and Recruiter dashboards. 
+*   **Media Queries**: Swapped `md:flex` for `lg:flex` breakpoints in the global `Sidebar.tsx` to ensure all iPad/Tablet and Mobile views utilize the space-efficient hamburger menu.
+*   **Contextual Drawer**: The mobile navigation drawer now includes a fixed **Identity Card** at the base (showing Name, Role, and a red Sign Out button) to accommodate touch-screen users who cannot use "hover" menus.
+*   **Mobile Branding**: Injected "UmuravaAI" branding into the mobile-specific header to maintain institutional trust on small screens.
+
+### End User Flow
+The system is now 100% mobile-ready. Whether you are browsing jobs on your phone or screening candidates on an iPad, the interface "breathes" correctly. The main desktop sidebar hides away, and a simple tap of the menu icon gives you access to everything including your profile info and a clear logout button.
+
+---
+
+## 7. Cloud-Hosted Profile Avatars (Cloudinary)
+### Technical Analysis
+Following the CV cloud migration, we extended Cloudinary support to personal branding.
+*   **Backend**: Added a `photoUrl` field to the `Candidate` schema and built a multipart `/me/photo` endpoint.
+*   **Transformation**: The backend uses the Cloudinary SDK to apply a **500x500 center-crop** transformation automatically ensuring all avatars are perfectly square and high-resolution.
+*   **Frontend**: Replaced the "Upload Photo" dummy button with a functional `api.postForm` trigger that provides live `toast.loading` feedback while the image is being optimized in the cloud.
+
+### End User Flow
+Your profile can now have a face! Click **"Upload Photo"** on your profile, and your selected image is instantly optimized and stored in the cloud. Your initials are replaced by your real photo across the entire portal immediately.
+
+---
+
+## 8. Competitive Shortlisted Leaderboard
+### Technical Analysis
+To improve transparency and user engagement, we built a secure candidate roster visibility layer within `MyApplicationsTab.tsx`.
+*   **Gated Access**: The leaderboard is programmatically locked unless the applicant reaches a status of **Shortlisted** or **Hired**.
+*   **Dynamic Highlighting**: The component fetches the job's candidate pool, sorts them by AI match score, and uses a `(You)` tag and primary-color highlight to clearly anchor the user's relative standing in the vetting process.
+
+### End User Flow
+Motivation through transparency! Once you are shortlisted for a job, you can expand your application to see the "Candidate Leaderboard". You’ll see exactly where you rank among your peers, helping you understand your competitive edge in the UmuravaAI ecosystem.
+

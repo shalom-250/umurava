@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { Application, Job, applicantStatusColors, recommendationColors } from '@/lib/mockData';
-import { Sparkles, Clock, CheckCircle, XCircle, FileText, ChevronDown, ChevronUp, AlertCircle, Briefcase } from 'lucide-react';
+import { Sparkles, Clock, CheckCircle, XCircle, FileText, ChevronDown, ChevronUp, AlertCircle, Briefcase, Loader2, Users } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface MyApplicationsTabProps {
   applications: Application[];
@@ -54,7 +55,69 @@ function StatusTimeline({ status }: { status: string }) {
   );
 }
 
-export default function MyApplicationsTab({ applications, jobs }: MyApplicationsTabProps) {
+function ShortlistedLeaderboard({ jobId, currentCandidateId }: { jobId: string, currentCandidateId: string }) {
+  const [candidates, setCandidates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    let active = true;
+    const fetchLeaderboard = async () => {
+       try {
+         const res = await api.get('/screening/' + jobId);
+         if (active && Array.isArray(res)) {
+            const sorted = res.sort((a, b) => b.score - a.score).filter(c => ['Shortlist', 'Waitlist', 'Hired'].includes(c.recommendation));
+            setCandidates(sorted);
+         }
+       } catch (err) {
+         console.error('Failed to fetch leaderboard');
+       } finally {
+         if (active) setLoading(false);
+       }
+    };
+    fetchLeaderboard();
+    return () => { active = false; };
+  }, [jobId]);
+
+  if (loading) return <div className="p-4 text-xs text-muted-foreground flex items-center gap-2 animate-pulse"><Loader2 size={12} className="animate-spin" /> Fetching candidate leaderboard...</div>;
+  if (!candidates.length) return null;
+
+  return (
+    <div className="border border-border/80 rounded-xl bg-gray-50/50 overflow-hidden mt-6">
+      <div className="bg-primary-50 border-b border-border/50 px-4 py-2 flex items-center justify-between">
+        <h4 className="text-xs font-bold text-primary-900 flex items-center gap-2"><Users size={14} className="text-primary-600" /> Complete Shortlisted Candidate Ranking</h4>
+        <span className="text-[10px] text-primary-600 font-semibold bg-white px-2 py-0.5 rounded-full border border-primary-200">Classified Vetting Visibility</span>
+      </div>
+      <div className="divide-y divide-border/50">
+        {candidates.map((cand, idx) => {
+          const candId = cand.candidateId?._id || cand.candidateId;
+          const isMe = candId === currentCandidateId;
+          const name = cand.candidateId?.firstName 
+             ? `${cand.candidateId.firstName} ${cand.candidateId.lastName || ''}`.trim() 
+             : (cand.candidateId?.name || `Candidate #${idx + 1}`);
+             
+          return (
+             <div key={`lead-${idx}`} className={`flex items-center justify-between px-4 py-2.5 transition-colors ${isMe ? 'bg-primary-50/70 border-l-2 border-primary-500' : 'hover:bg-muted/30'}`}>
+                <div className="flex items-center gap-3 w-full">
+                   <div className="w-6 h-6 rounded bg-white shadow-sm border border-border flex items-center justify-center shrink-0">
+                      <span className={`text-[10px] font-bold ${isMe ? 'text-primary-700' : 'text-muted-foreground'}`}>{cand.rank || idx + 1}</span>
+                   </div>
+                   <div className="flex-1 min-w-0 flex items-center gap-2">
+                     <p className={`text-xs font-semibold truncate ${isMe ? 'text-primary-800' : 'text-foreground/80'}`}>{name}</p>
+                     {isMe && <span className="inline-flex bg-primary-100 text-primary-700 uppercase tracking-widest font-black shrink-0 px-1.5 py-0.5 rounded text-[8px] border border-primary-200">(You)</span>}
+                   </div>
+                   <div className="shrink-0 text-[10px] font-mono-data bg-white px-2 py-0.5 rounded border border-border shadow-sm text-muted-foreground">
+                      {cand.score}% Match
+                   </div>
+                </div>
+             </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default function MyApplicationsTab({ applications, jobs, profile }: MyApplicationsTabProps) {
   const [expandedApp, setExpandedApp] = useState<string | null>(applications.find(a => a.status === 'Shortlisted')?.id || null);
 
   if (applications.length === 0) {
@@ -220,6 +283,13 @@ export default function MyApplicationsTab({ applications, jobs }: MyApplications
                       ))}
                     </div>
                   </div>
+                )}
+                
+                {/* Live Candidate Roster - Unlocked for Shortlisted/Hired */}
+                {['Shortlisted', 'Hired', 'Interviewing'].includes(app.status) && (
+                   <div className="border-t border-border pt-4 animate-fade-in">
+                       <ShortlistedLeaderboard jobId={app.jobId} currentCandidateId={profile?.id} />
+                   </div>
                 )}
               </div>
             )}

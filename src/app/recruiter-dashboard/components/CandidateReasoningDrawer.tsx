@@ -2,6 +2,7 @@
 import React from 'react';
 import { TalentProfile, ScreeningResult, recommendationColors } from '@/lib/mockData';
 import { X, MapPin, ExternalLink, CheckCircle, AlertTriangle, Star, Globe, Award, Download } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api';
 
 interface CandidateReasoningDrawerProps {
   profile: TalentProfile;
@@ -21,6 +22,14 @@ const skillLevelColors: Record<string, string> = {
 export default function CandidateReasoningDrawer({ profile, result, application, onUpdateStatus, onClose }: CandidateReasoningDrawerProps) {
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`;
   const currentRole = profile.experience.find(e => e.isCurrent);
+
+  const getFileUrl = (url?: string) => {
+    if (!url) return '#';
+    if (url.startsWith('http')) return url;
+    const baseUrl = API_BASE_URL.replace(/\/api$/, '');
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    return `${baseUrl}${cleanUrl}`;
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -254,7 +263,7 @@ export default function CandidateReasoningDrawer({ profile, result, application,
               {/* Primary Resume */}
               {profile.resumeUrl ? (
                 <a
-                  href={profile.resumeUrl}
+                  href={getFileUrl(profile.resumeUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all group"
@@ -276,7 +285,7 @@ export default function CandidateReasoningDrawer({ profile, result, application,
               {application?.attachments?.map((file: any, idx: number) => (
                 <a
                   key={`att-${idx}`}
-                  href={file.url}
+                  href={getFileUrl(file.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all group"

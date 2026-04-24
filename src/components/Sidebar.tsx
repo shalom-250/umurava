@@ -47,9 +47,11 @@ interface SidebarProps {
 export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setUser(api.getUser());
+    setMounted(true);
   }, []);
 
   const pathname = usePathname();
@@ -128,10 +130,10 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-foreground truncate">
-                {user?.name || (role === 'recruiter' ? 'Aline Uwimana' : 'Nzinga Mwamba')}
+                {mounted ? (user?.name || 'Recruiter') : '...'}
               </p>
               <p className="text-[10px] text-muted-foreground truncate">
-                {user?.role === 'recruiter' ? 'Talent Acquisition Lead' : user?.role === 'applicant' ? 'Job Seeker' : (role === 'recruiter' ? 'Talent Acquisition Lead' : 'AI Engineer')}
+                {mounted ? (user?.role === 'applicant' ? 'Job Seeker' : 'Talent Acquisition') : '...'}
               </p>
             </div>
             <Bell size={14} className="text-muted-foreground shrink-0" />

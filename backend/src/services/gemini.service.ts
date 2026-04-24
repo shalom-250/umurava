@@ -10,7 +10,7 @@ if (!apiKey || apiKey === "GEMINI_API_KEY") {
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export interface IRankingResult {
     candidateId: string;
@@ -214,14 +214,13 @@ export const extractJobInfoFromText = async (text: string): Promise<any> => {
     }
 };
 
-export const extractJobInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+export const extractJobInfoFromBuffer = async (buffer: Buffer, mimeType: string): Promise<any> => {
     if (mimeType !== 'application/pdf') {
         throw new Error("Direct file processing for jobs only supported for PDF.");
     }
 
     try {
-        const fileBuffer = fs.readFileSync(filePath);
-        const base64Data = fileBuffer.toString('base64');
+        const base64Data = buffer.toString('base64');
 
         const prompt = `
             Extract job information from this PDF.
@@ -248,14 +247,18 @@ export const extractJobInfoFromFile = async (filePath: string, mimeType: string)
     }
 };
 
-export const extractCandidateInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+export const extractJobInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+    const buffer = fs.readFileSync(filePath);
+    return extractJobInfoFromBuffer(buffer, mimeType);
+};
+
+export const extractCandidateInfoFromBuffer = async (buffer: Buffer, mimeType: string): Promise<any> => {
     if (mimeType !== 'application/pdf') {
         throw new Error("Direct file processing only supported for PDF.");
     }
 
     try {
-        const fileBuffer = fs.readFileSync(filePath);
-        const base64Data = fileBuffer.toString('base64');
+        const base64Data = buffer.toString('base64');
 
         const prompt = `
             Extract ALL candidate information from this resume PDF.
@@ -307,6 +310,11 @@ export const extractCandidateInfoFromFile = async (filePath: string, mimeType: s
         console.warn("⚠️ Gemini Direct PDF Error:", error.message);
         throw error;
     }
+};
+
+export const extractCandidateInfoFromFile = async (filePath: string, mimeType: string): Promise<any> => {
+    const buffer = fs.readFileSync(filePath);
+    return extractCandidateInfoFromBuffer(buffer, mimeType);
 };
 
 const normalizeParsedData = (data: any, originalText: string): any => {

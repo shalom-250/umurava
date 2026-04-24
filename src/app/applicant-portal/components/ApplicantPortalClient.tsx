@@ -223,10 +223,16 @@ export default function ApplicantPortalClient() {
                 <Menu size={22} />
               </button>
 
+              {/* Mobile Branding (Small Screen Only) */}
+              <div className="flex sm:hidden items-center gap-2 shrink-0">
+                <AppLogo size={22} />
+                <span className="font-display font-700 text-primary-700 text-sm">UmuravaAI</span>
+              </div>
+
               <div className="hidden sm:flex items-center gap-2.5 shrink-0">
                 <AppLogo size={26} />
                 <h1 className="text-sm font-display font-700 text-foreground truncate hidden md:block border-l border-border pl-2.5">
-                  UmuravaAI
+                  Applicant Portal
                 </h1>
               </div>
 

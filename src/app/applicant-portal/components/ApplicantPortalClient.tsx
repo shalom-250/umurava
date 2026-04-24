@@ -99,7 +99,7 @@ export default function ApplicantPortalClient() {
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
-          className="sm:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm transition-opacity"
+          className="lg:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -107,7 +107,7 @@ export default function ApplicantPortalClient() {
       <aside
         ref={sidebarRef}
         className={`
-          fixed inset-y-0 left-0 z-[60] sm:hidden flex flex-col shrink-0 bg-white border-r border-border
+          fixed inset-y-0 left-0 z-[60] lg:hidden flex flex-col shrink-0 bg-white border-r border-border
           transition-all duration-300 ease-in-out overflow-hidden w-64
           ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
         `}

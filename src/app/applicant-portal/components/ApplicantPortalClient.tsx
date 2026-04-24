@@ -92,6 +92,13 @@ export default function ApplicantPortalClient() {
   const enrichedProfile = { ...profile, profileCompleteness: realCompleteness };
   const badgeCount = applications.length;
 
+  const authUser = api.getUser();
+  const rawFirstName = enrichedProfile.firstName;
+  const finalName = rawFirstName
+    ? `${rawFirstName} ${enrichedProfile.lastName || ''}`.trim()
+    : (authUser?.name || 'Applicant');
+  const finalInitial = finalName.charAt(0).toUpperCase() || 'U';
+
   return (
     <div className="flex h-full overflow-hidden">
 
@@ -197,11 +204,11 @@ export default function ApplicantPortalClient() {
           <div className="p-3 border-t border-border shrink-0 flex flex-col gap-2">
             <div className="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-muted/50 border border-border/50">
               <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xs shrink-0">
-                {enrichedProfile.firstName ? `${enrichedProfile.firstName[0]}` : <User size={14} />}
+                {finalInitial}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-foreground truncate">
-                  {enrichedProfile.firstName ? `${enrichedProfile.firstName} ${enrichedProfile.lastName || ''}` : 'Applicant'}
+                  {finalName}
                 </p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold truncate">
                   Job Seeker
@@ -287,12 +294,12 @@ export default function ApplicantPortalClient() {
               </div>
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-50 border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary-100 transition-all group relative">
                 <div className="text-xs font-bold text-primary-700 flex items-center justify-center w-full h-full">
-                  {enrichedProfile.firstName ? `${enrichedProfile.firstName[0]}${enrichedProfile.lastName?.[0] || ''}` : <User size={18} />}
+                  {finalInitial}
                 </div>
 
                 <div className="absolute top-10 right-0 mt-2 bg-white rounded-lg shadow-elevated border border-border py-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 min-w-[140px] whitespace-nowrap">
                   <p className="block px-3 py-2 text-sm font-bold text-foreground border-b border-border mb-1 truncate">
-                    {enrichedProfile.firstName ? `${enrichedProfile.firstName} ${enrichedProfile.lastName || ''}` : 'Applicant'}
+                    {finalName}
                   </p>
                   <Link
                     href="/sign-up-login-screen"

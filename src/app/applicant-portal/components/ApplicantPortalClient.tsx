@@ -224,14 +224,14 @@ export default function ApplicantPortalClient() {
               </button>
 
               {/* Mobile Branding (Small Screen Only) */}
-              <div className="flex sm:hidden items-center gap-2 shrink-0">
+              <div className="flex lg:hidden items-center gap-2 shrink-0">
                 <AppLogo size={22} />
                 <span className="font-display font-700 text-primary-700 text-sm">UmuravaAI</span>
               </div>
 
-              <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+              <div className="hidden lg:flex items-center gap-2.5 shrink-0">
                 <AppLogo size={26} />
-                <h1 className="text-sm font-display font-700 text-foreground truncate hidden md:block border-l border-border pl-2.5">
+                <h1 className="text-sm font-display font-700 text-foreground truncate hidden lg:block border-l border-border pl-2.5">
                   Applicant Portal
                 </h1>
               </div>
@@ -277,16 +277,16 @@ export default function ApplicantPortalClient() {
                   {enrichedProfile.firstName ? `${enrichedProfile.firstName[0]}${enrichedProfile.lastName?.[0] || ''}` : <User size={18} />}
                 </div>
 
-                <div className="absolute top-10 right-0 mt-2 bg-white rounded-lg shadow-elevated border border-border py-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 min-w-[120px]">
-                  <p className="block px-3 py-1.5 text-xs font-semibold text-foreground border-b border-border mb-1">
-                    {enrichedProfile.firstName} {enrichedProfile.lastName}
+                <div className="absolute top-10 right-0 mt-2 bg-white rounded-lg shadow-elevated border border-border py-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 min-w-[140px] whitespace-nowrap">
+                  <p className="block px-3 py-2 text-sm font-bold text-foreground border-b border-border mb-1 truncate">
+                    {enrichedProfile.firstName ? `${enrichedProfile.firstName} ${enrichedProfile.lastName || ''}` : 'Applicant'}
                   </p>
                   <Link
                     href="/sign-up-login-screen"
                     onClick={() => api.logout()}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                   >
-                    <LogOut size={14} />
+                    <LogOut size={15} />
                     Sign Out
                   </Link>
                 </div>

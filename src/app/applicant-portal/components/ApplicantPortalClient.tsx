@@ -267,9 +267,9 @@ export default function ApplicantPortalClient() {
                 <p className="text-xs font-extra-bold text-primary-700 leading-none">{realCompleteness}%</p>
               </div>
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary-50 border-2 border-white shadow-sm flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary-100 transition-all group relative">
-                <span className="text-xs font-bold text-primary-700">
-                  {enrichedProfile.firstName?.[0] || '?'}{enrichedProfile.lastName?.[0] || ''}
-                </span>
+                <div className="text-xs font-bold text-primary-700 flex items-center justify-center w-full h-full">
+                  {enrichedProfile.firstName ? `${enrichedProfile.firstName[0]}${enrichedProfile.lastName?.[0] || ''}` : <User size={18} />}
+                </div>
 
                 <div className="absolute top-10 right-0 mt-2 bg-white rounded-lg shadow-elevated border border-border py-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50 min-w-[120px]">
                   <p className="block px-3 py-1.5 text-xs font-semibold text-foreground border-b border-border mb-1">

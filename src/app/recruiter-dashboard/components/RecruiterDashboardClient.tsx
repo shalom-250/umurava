@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useMemo } from 'react'; // Bump to fix chunk load error
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import DraftProfilesTable from './DraftProfilesTable';
 import StoredFilesModal from './StoredFilesModal';
 import TalentPoolTable from './TalentPoolTable';
@@ -394,6 +397,85 @@ export default function RecruiterDashboardClient() {
     }
   };
 
+  const handleExportExcel = () => {
+    const exportData = filteredResults.filter(r => {
+      const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
+      const isHired = app && app.status === 'Hired';
+      const isShortlisted = r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend' || (app && app.status === 'Interview');
+      return isHired || isShortlisted;
+    }).map(r => {
+      const profile = talentProfiles.find(p => p.id === r.candidateId);
+      const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
+      return {
+        'Job Title': selectedJob?.title || 'Unknown',
+        'Department': selectedJob?.department || 'Unknown',
+        'Candidate Name': profile ? `${profile.firstName} ${profile.lastName}` : 'Unknown',
+        'Email': profile?.email || 'N/A',
+        'Match Score': r.matchScore,
+        'Recommendation': r.recommendation,
+        'Status': app?.status || 'Applied',
+        'Key Skills': profile?.skills?.map((s: any) => s.name).join(', ') || 'None',
+        'AI Reasoning': r.aiReasoning || ''
+      };
+    });
+
+    if (exportData.length === 0) {
+      toast.error('No shortlisted or hired candidates found to export.');
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Candidates");
+    XLSX.writeFile(workbook, `Shortlisted_Candidates_${selectedJob?.title?.replace(/\s+/g, '_') || 'Job'}.xlsx`);
+  };
+
+  const handleExportPdf = () => {
+    const exportData = filteredResults.filter(r => {
+      const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
+      const isHired = app && app.status === 'Hired';
+      const isShortlisted = r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend' || (app && app.status === 'Interview');
+      return isHired || isShortlisted;
+    }).map(r => {
+      const profile = talentProfiles.find(p => p.id === r.candidateId);
+      const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
+      return [
+        profile ? `${profile.firstName} ${profile.lastName}` : 'Unknown',
+        profile?.email || 'N/A',
+        r.matchScore.toString(),
+        r.recommendation,
+        app?.status || 'Applied',
+        profile?.skills?.slice(0, 3).map((s: any) => s.name).join(', ') || 'None'
+      ];
+    });
+
+    if (exportData.length === 0) {
+      toast.error('No shortlisted or hired candidates found to export.');
+      return;
+    }
+
+    const doc = new jsPDF('landscape');
+
+    // Add Job Info Header
+    doc.setFontSize(18);
+    doc.text(`Shortlisted & Hired Candidates`, 14, 22);
+
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Job Title: ${selectedJob?.title || 'Unknown'}`, 14, 30);
+    doc.text(`Department: ${selectedJob?.department || 'Unknown'} | Location: ${selectedJob?.location || 'Unknown'}`, 14, 36);
+
+    (doc as any).autoTable({
+      startY: 45,
+      head: [['Candidate Name', 'Email', 'Score', 'Recommendation', 'Status', 'Top Skills']],
+      body: exportData,
+      theme: 'grid',
+      headStyles: { fillColor: [0, 161, 255] }
+    });
+
+    doc.save(`Shortlisted_Candidates_${selectedJob?.title?.replace(/\s+/g, '_') || 'Job'}.pdf`);
+  };
+
   // Generate mock trend data for charts
   const trendData = useMemo(() => {
     if (!selectedJob) return [];
@@ -691,19 +773,29 @@ export default function RecruiterDashboardClient() {
                     <h3 className="text-lg font-bold text-gray-900">AI-Shortlisted Candidates</h3>
                     <p className="text-xs text-gray-500 font-medium mt-1">Ranked based on multi-dimensional skill & experience analysis</p>
                   </div>
-                  <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
-                    {(['all', 'recommended', 'consider', 'not-recommended'] as const).map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setShortlistFilter(filter)}
-                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold capitalize transition-all ${shortlistFilter === filter
-                          ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
-                          : 'text-gray-500 hover:text-gray-700'
-                          }`}
-                      >
-                        {filter.replace('-', ' ')}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <button onClick={handleExportExcel} className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors shadow-sm">
+                        <Download size={12} /> Excel
                       </button>
-                    ))}
+                      <button onClick={handleExportPdf} className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors shadow-sm">
+                        <Download size={12} /> PDF
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-lg">
+                      {(['all', 'recommended', 'consider', 'not-recommended'] as const).map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setShortlistFilter(filter)}
+                          className={`px-3 py-1.5 rounded-md text-[10px] font-bold capitalize transition-all ${shortlistFilter === filter
+                            ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
+                            : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                          {filter.replace('-', ' ')}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

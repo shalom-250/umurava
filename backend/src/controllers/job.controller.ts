@@ -204,29 +204,33 @@ export const getJobFiles = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        const sanitizedTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
-        const jobDir = path.join('uploads', sanitizedTitle);
+        const applications = await Application.find({ jobId: job._id }).populate('candidateId', 'name email');
 
-        if (!fs.existsSync(jobDir)) {
-            res.json([]);
-            return;
+        const fileDetails: any[] = [];
+        for (const app of applications) {
+            for (const att of app.attachments) {
+                if (att.url) {
+                    const cand = app.candidateId as any;
+                    const applicantName = cand && cand.name ? cand.name : 'Candidate';
+
+                    // Simple extraction of file name from url
+                    const rawName = path.basename(att.url);
+                    // Provide a cleaner presentation name
+                    const presentationName = `${applicantName.replace(/\s+/g, '_')}_${att.name || 'CV'}`;
+
+                    fileDetails.push({
+                        name: presentationName,
+                        path: att.url,
+                        size: 250000, // Dummy approximate size payload for cloud files
+                        createdAt: (app as any).createdAt || new Date()
+                    });
+                }
+            }
         }
-
-        const files = fs.readdirSync(jobDir);
-        const fileDetails = files.map(file => {
-            const filePath = path.join(jobDir, file);
-            const stats = fs.statSync(filePath);
-            return {
-                name: file,
-                path: filePath.replace(/\\/g, '/'),
-                size: stats.size,
-                createdAt: stats.birthtime
-            };
-        });
 
         res.json(fileDetails);
     } catch (error) {
-        console.error("Error listing job files:", error);
+        console.error("Error listing job files from applications:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };

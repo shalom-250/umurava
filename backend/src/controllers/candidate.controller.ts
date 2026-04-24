@@ -403,12 +403,33 @@ export const applyForJob = async (req: any, res: Response): Promise<void> => {
         // Job-specific CV storage: copy candidate's resume to job folder if it exists
         if (candidate.resumeUrl) {
             if (candidate.resumeUrl.startsWith('http')) {
-                application.attachments.push({
-                    name: 'Resume',
-                    url: candidate.resumeUrl
-                });
-                await application.save();
+                const sanitizedJobTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
+                const candName = candidate.firstName || (candidate as any).name || 'Candidate';
+
+                try {
+                    // Tell Cloudinary to download the existing cloud CV and re-upload it neatly organized into the job's folder
+                    const uploadResult = await cloudinary.uploader.upload(candidate.resumeUrl, {
+                        resource_type: "raw",
+                        folder: `umurava_jobs/${sanitizedJobTitle}`,
+                        public_id: `${candName.replace(/[^a-z0-9]/gi, '_')}_CV_${Date.now()}`
+                    });
+
+                    application.attachments.push({
+                        name: `${candName} - Resume`,
+                        url: uploadResult.secure_url
+                    });
+                    await application.save();
+                } catch (cloudCopyErr: any) {
+                    console.error("Failed to mirror CV into job cloud folder:", cloudCopyErr.message);
+                    // Fallback to storing the original generic reference
+                    application.attachments.push({
+                        name: `${candName} - Resume`,
+                        url: candidate.resumeUrl
+                    });
+                    await application.save();
+                }
             } else if (fs.existsSync(candidate.resumeUrl)) {
+                // (Legacy fallback)
                 const sanitizedJobTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
                 const jobDir = path.join('uploads', sanitizedJobTitle);
 
@@ -423,7 +444,7 @@ export const applyForJob = async (req: any, res: Response): Promise<void> => {
                     try {
                         fs.copyFileSync(candidate.resumeUrl, newPath);
                         application.attachments.push({
-                            name: 'Resume',
+                            name: `${candidate.firstName || (candidate as any).name || 'Candidate'} - Resume`,
                             url: newPath
                         });
                         await application.save();

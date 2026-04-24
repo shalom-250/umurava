@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { extractTextFromPdf } from '../services/pdf.service';
@@ -460,4 +460,56 @@ export const applyForJob = async (req: any, res: Response): Promise<void> => {
         console.error('Error applying for job:', error);
         res.status(500).json({ message: 'Server error while submitting application: ' + error.message });
     }
+};
+
+const uploadAvatarMulter = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|webp/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        if (extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Only JPG, PNG and WEBP files are allowed'));
+    },
+}).single('photo');
+
+export const uploadAvatar = (req: Request, res: Response): void => {
+    uploadAvatarMulter(req, res, async (err) => {
+        if (err) {
+            res.status(400).json({ message: err.message });
+            return;
+        }
+
+        const file = req.file;
+        if (!file) {
+            res.status(400).json({ message: 'Please upload a photo' });
+            return;
+        }
+
+        try {
+            const user = (req as any).user;
+            const filePath = file.path;
+
+            const uploadResult = await cloudinary.uploader.upload(filePath, {
+                folder: "umurava_avatars",
+                transformation: [{ width: 500, height: 500, crop: "fill" }]
+            });
+
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            const candidate = await Candidate.findOneAndUpdate(
+                { email: user.email },
+                { $set: { photoUrl: uploadResult.secure_url, email: user.email, source: 'structured' } },
+                { new: true, upsert: true, runValidators: false }
+            );
+
+            res.status(200).json({ photoUrl: uploadResult.secure_url, candidate });
+        } catch (error: any) {
+            console.error("Avatar Upload Error:", error);
+            res.status(500).json({ message: 'Failed to upload photo: ' + (error.message || 'Unknown error') });
+        }
+    });
 };

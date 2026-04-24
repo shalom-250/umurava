@@ -93,6 +93,7 @@ export interface ICandidate extends Document {
         website?: string;
     };
     resumeUrl?: string;
+    photoUrl?: string;
     extractedText?: string;
     additionalInformation?: string;
     rawAIOutput?: any;
@@ -205,6 +206,7 @@ const CandidateSchema: Schema = new Schema({
         website: String
     },
     resumeUrl: { type: String },
+    photoUrl: { type: String },
     extractedText: { type: String },
     additionalInformation: { type: String },
     rawAIOutput: { type: Schema.Types.Mixed },

@@ -287,13 +287,38 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
       </div>
 
       <div className="flex items-center gap-4 mb-2">
-        <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-xl font-semibold text-primary-700">
-          {(profile.firstName || 'U')[0]}{(profile.lastName || 'C')[0]}
-        </div>
+        {(profile as any).photoUrl ? (
+          <img src={(profile as any).photoUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover border-2 border-primary-100 shadow-sm" />
+        ) : (
+          <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-xl font-semibold text-primary-700 shadow-sm">
+            {(profile.firstName || 'U')[0]}{(profile.lastName || 'C')[0]}
+          </div>
+        )}
         <div>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border rounded-md hover:bg-muted transition-colors">
-            <Upload size={12} /> Upload Photo
-          </button>
+          <input
+            type="file"
+            id="avatar-upload"
+            className="hidden"
+            accept="image/png, image/jpeg, image/jpg"
+            onChange={async (e) => {
+              if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                const loader = toast.loading('Uploading to Cloudinary...');
+                try {
+                  const formData = new FormData();
+                  formData.append('photo', file);
+                  const response = await api.postForm('/candidates/me/photo', formData);
+                  handleFieldChange('photoUrl' as any, response.photoUrl);
+                  toast.success('Profile photo uploaded securely!', { id: loader });
+                } catch (err: any) {
+                  toast.error(err.message || 'Failed to upload photo to cloud', { id: loader });
+                }
+              }
+            }}
+          />
+          <label htmlFor="avatar-upload" className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border rounded-md hover:bg-muted transition-colors cursor-pointer w-fit text-foreground font-medium">
+            <Upload size={12} /> {(profile as any).photoUrl ? 'Change Photo' : 'Upload Photo'}
+          </label>
           <p className="text-[10px] text-muted-foreground mt-1">JPG, PNG up to 2MB</p>
         </div>
       </div>

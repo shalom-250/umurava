@@ -226,7 +226,7 @@ export default function ApplicantPortalClient() {
               <div className="hidden sm:flex items-center gap-2.5 shrink-0">
                 <AppLogo size={26} />
                 <h1 className="text-sm font-display font-700 text-foreground truncate hidden md:block border-l border-border pl-2.5">
-                  Applicant Portal
+                  UmuravaAI
                 </h1>
               </div>
 

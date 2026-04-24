@@ -1,11 +1,12 @@
 'use client';
 import React, { useState } from 'react';
 import { TalentProfile, ScreeningResult, recommendationColors } from '@/lib/mockData';
-import { Eye, ExternalLink, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Clock } from 'lucide-react';
+import { Eye, ExternalLink, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Clock, Calendar, CheckCircle, XCircle } from 'lucide-react';
 
 interface ShortlistTableProps {
   results: ScreeningResult[];
   profiles: TalentProfile[];
+  applications?: any[];
   onViewCandidate: (result: ScreeningResult) => void;
   onUpdateStatus: (candidateId: string, newStatus: string) => void;
 }
@@ -27,7 +28,7 @@ function ScoreBar({ score }: { score: number }) {
   );
 }
 
-export default function ShortlistTable({ results, profiles, onViewCandidate, onUpdateStatus }: ShortlistTableProps) {
+export default function ShortlistTable({ results, profiles, applications, onViewCandidate, onUpdateStatus }: ShortlistTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('rank');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
@@ -140,6 +141,9 @@ export default function ShortlistTable({ results, profiles, onViewCandidate, onU
             const initialsBg = isPending ? 'bg-gray-100' : 'bg-primary-100';
             const initialsText = isPending ? 'text-gray-500' : 'text-primary-700';
 
+            const currApp = applications?.find(a => (a.candidateId?._id || a.candidateId) === result.candidateId);
+            const appStatus = currApp?.status || 'Applied';
+
             return (
               <tr
                 key={`shortlist-row-${result.candidateId}`}
@@ -221,28 +225,30 @@ export default function ShortlistTable({ results, profiles, onViewCandidate, onU
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
-                    {!isPending && (
+                    {!isPending && appStatus !== 'Hired' && appStatus !== 'Rejected' && (
                       <div className="flex items-center gap-1.5 border-r pr-2 mr-1">
-                        <button
-                          onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Interview'); }}
-                          className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
-                          title="Move to Interview"
-                        >
-                          <Clock size={16} />
-                        </button>
+                        {appStatus !== 'Interview' && (
+                          <button
+                            onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Interview'); }}
+                            className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                            title="Move to Interview"
+                          >
+                            <Calendar size={16} />
+                          </button>
+                        )}
                         <button
                           onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Hired'); }}
                           className="p-1.5 text-green-600 hover:bg-green-100 rounded-lg transition-all"
                           title="Hire Candidate"
                         >
-                          <UserCheck size={16} />
+                          <CheckCircle size={16} />
                         </button>
                         <button
                           onClick={e => { e.stopPropagation(); onUpdateStatus(result.candidateId, 'Rejected'); }}
                           className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-all"
                           title="Reject Candidate"
                         >
-                          <UserX size={16} />
+                          <XCircle size={16} />
                         </button>
                       </div>
                     )}

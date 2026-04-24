@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import DraftProfilesTable from './DraftProfilesTable';
 import StoredFilesModal from './StoredFilesModal';
 import TalentPoolTable from './TalentPoolTable';
@@ -398,12 +398,7 @@ export default function RecruiterDashboardClient() {
   };
 
   const handleExportExcel = () => {
-    const exportData = filteredResults.filter(r => {
-      const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
-      const isHired = app && app.status === 'Hired';
-      const isShortlisted = r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend' || (app && app.status === 'Interview');
-      return isHired || isShortlisted;
-    }).map(r => {
+    const exportData = filteredResults.map(r => {
       const profile = talentProfiles.find(p => p.id === r.candidateId);
       const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
       return {
@@ -420,7 +415,7 @@ export default function RecruiterDashboardClient() {
     });
 
     if (exportData.length === 0) {
-      toast.error('No shortlisted or hired candidates found to export.');
+      toast.error('No candidates found to export.');
       return;
     }
 
@@ -431,12 +426,7 @@ export default function RecruiterDashboardClient() {
   };
 
   const handleExportPdf = () => {
-    const exportData = filteredResults.filter(r => {
-      const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
-      const isHired = app && app.status === 'Hired';
-      const isShortlisted = r.recommendation === 'Strongly Recommend' || r.recommendation === 'Recommend' || (app && app.status === 'Interview');
-      return isHired || isShortlisted;
-    }).map(r => {
+    const exportData = filteredResults.map(r => {
       const profile = talentProfiles.find(p => p.id === r.candidateId);
       const app = applications.find(a => (a.candidateId?._id || a.candidateId) === r.candidateId);
       return [
@@ -450,7 +440,7 @@ export default function RecruiterDashboardClient() {
     });
 
     if (exportData.length === 0) {
-      toast.error('No shortlisted or hired candidates found to export.');
+      toast.error('No candidates found to export.');
       return;
     }
 
@@ -458,22 +448,21 @@ export default function RecruiterDashboardClient() {
 
     // Add Job Info Header
     doc.setFontSize(18);
-    doc.text(`Shortlisted & Hired Candidates`, 14, 22);
+    doc.text(`Candidates for ${selectedJob?.title || 'Job'}`, 14, 22);
 
     doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`Job Title: ${selectedJob?.title || 'Unknown'}`, 14, 30);
-    doc.text(`Department: ${selectedJob?.department || 'Unknown'} | Location: ${selectedJob?.location || 'Unknown'}`, 14, 36);
+    doc.text(`Department: ${selectedJob?.department || 'Unknown'} | Location: ${selectedJob?.location || 'Unknown'}`, 14, 30);
 
-    (doc as any).autoTable({
-      startY: 45,
+    autoTable(doc, {
+      startY: 40,
       head: [['Candidate Name', 'Email', 'Score', 'Recommendation', 'Status', 'Top Skills']],
       body: exportData,
       theme: 'grid',
       headStyles: { fillColor: [0, 161, 255] }
     });
 
-    doc.save(`Shortlisted_Candidates_${selectedJob?.title?.replace(/\s+/g, '_') || 'Job'}.pdf`);
+    doc.save(`Candidates_${selectedJob?.title?.replace(/\s+/g, '_') || 'Job'}.pdf`);
   };
 
   // Generate mock trend data for charts
@@ -833,6 +822,7 @@ export default function RecruiterDashboardClient() {
                   <ShortlistTable
                     results={filteredResults}
                     profiles={talentProfiles}
+                    applications={applications}
                     onUpdateStatus={handleUpdateApplicationStatus}
                     onViewCandidate={(res) => {
                       const profile = talentProfiles.find(p => p.id === res.candidateId);

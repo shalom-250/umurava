@@ -288,7 +288,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
 
       <div className="flex items-center gap-4 mb-2">
         <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-xl font-semibold text-primary-700">
-          {profile.firstName[0]}{profile.lastName[0]}
+          {(profile.firstName || 'U')[0]}{(profile.lastName || 'C')[0]}
         </div>
         <div>
           <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border rounded-md hover:bg-muted transition-colors">
@@ -300,7 +300,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
       <div className="grid grid-cols-2 gap-4">
         <FieldGroup label="First Name">
           <input
-            value={profile.firstName}
+            value={profile.firstName || ''}
             onChange={(e) => handleFieldChange('firstName', e.target.value)}
             type="text"
             className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700"
@@ -308,7 +308,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
         </FieldGroup>
         <FieldGroup label="Last Name">
           <input
-            value={profile.lastName}
+            value={profile.lastName || ''}
             onChange={(e) => handleFieldChange('lastName', e.target.value)}
             type="text"
             className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700"
@@ -316,7 +316,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
         </FieldGroup>
         <FieldGroup label="Email" hint="Used for application notifications">
           <input
-            value={profile.email}
+            value={profile.email || ''}
             onChange={(e) => handleFieldChange('email', e.target.value)}
             type="email"
             className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700"
@@ -332,7 +332,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
         </FieldGroup>
         <FieldGroup label="Location" hint="City, Country format">
           <input
-            value={profile.location}
+            value={profile.location || ''}
             onChange={(e) => handleFieldChange('location', e.target.value)}
             type="text"
             className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700"
@@ -340,7 +340,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
         </FieldGroup>
         <FieldGroup label="Professional Headline" hint="Short summary shown to recruiters (e.g. Senior AI Engineer — Python & LLMs)">
           <input
-            value={profile.headline}
+            value={profile.headline || ''}
             onChange={(e) => handleFieldChange('headline', e.target.value)}
             type="text"
             className="col-span-2 w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700"
@@ -349,7 +349,7 @@ function BasicInfoSection({ profile, onSave, saving, onStartAI, onChange }: {
       </div>
       <FieldGroup label="Bio" hint="Detailed professional biography — helps AI understand your background">
         <textarea
-          value={profile.bio}
+          value={profile.bio || ''}
           onChange={(e) => handleFieldChange('bio', e.target.value)}
           rows={4}
           className="w-full px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-700/30 focus:border-primary-700 resize-none transition-all"
@@ -698,9 +698,9 @@ function ProjectsSection({ profile, onSave, saving, onChange }: { profile: Talen
 }
 
 function AvailabilitySection({ profile, onSave, saving, onChange }: { profile: TalentProfile; onSave: () => void; saving: boolean; onChange: (p: TalentProfile) => void }) {
-  const [status, setStatus] = useState(profile.availability.status);
-  const [type, setType] = useState(profile.availability.type);
-  const [startDate, setStartDate] = useState(profile.availability.startDate || '');
+  const [status, setStatus] = useState(profile.availability?.status || 'Available');
+  const [type, setType] = useState(profile.availability?.type || 'Full-time');
+  const [startDate, setStartDate] = useState(profile.availability?.startDate || '');
 
   React.useEffect(() => {
     onChange({ ...profile, availability: { status, type, startDate } });

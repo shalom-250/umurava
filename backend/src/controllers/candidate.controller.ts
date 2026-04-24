@@ -9,8 +9,16 @@ import Candidate from '../models/Candidate';
 import Application from '../models/Application';
 import Screening from '../models/Screening';
 import Job from '../models/Job';
+import { v2 as cloudinary } from 'cloudinary';
 
 import fs from 'fs';
+
+// Setup Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'YOUR_CLOUD_NAME',
+    api_key: process.env.CLOUDINARY_API_KEY || 'YOUR_API_KEY',
+    api_secret: process.env.CLOUDINARY_API_SECRET || 'YOUR_API_SECRET',
+});
 
 // Setup Multer
 const uploadDir = 'uploads/';
@@ -75,6 +83,20 @@ export const parseCandidateFile = (req: Request, res: Response) => {
         try {
             for (const file of files) {
                 const filePath = file.path;
+                let finalResumeUrl = filePath.replace(/\\/g, '/');
+
+                // 1. Upload to Cloudinary immediately for permanent storage
+                try {
+                    const uploadResult = await cloudinary.uploader.upload(filePath, {
+                        resource_type: "raw",
+                        public_id: path.parse(file.originalname).name.replace(/[^a-z0-9]/gi, '_') + "_" + Date.now(),
+                        folder: "umurava_resumes"
+                    });
+                    finalResumeUrl = uploadResult.secure_url;
+                } catch (cloudinaryErr: any) {
+                    console.warn("Cloudinary upload failed, falling back to local Path:", cloudinaryErr.message);
+                }
+
                 const fileExtension = path.extname(file.originalname).toLowerCase();
                 let aiInfo: any = null;
                 let text = '';
@@ -148,13 +170,12 @@ export const parseCandidateFile = (req: Request, res: Response) => {
                     allParsedCandidates.push({
                         ...aiInfo,
                         source: 'unstructured',
-                        resumeUrl: filePath.replace(/\\/g, '/') // Ensure URL/Path is preserved
+                        resumeUrl: finalResumeUrl // Ensure Cloudinary URL is returned
                     });
                 }
 
-                // Only unlink if no jobTitle was provided (meaning it's just a temporary parse)
-                const jobTitle = req.query.jobTitle as string;
-                if (!jobTitle && fs.existsSync(filePath)) {
+                // ALWAYS delete local file since we sent it to Cloudinary
+                if (fs.existsSync(filePath)) {
                     fs.unlinkSync(filePath);
                 }
             }
@@ -380,27 +401,35 @@ export const applyForJob = async (req: any, res: Response): Promise<void> => {
         });
 
         // Job-specific CV storage: copy candidate's resume to job folder if it exists
-        if (candidate.resumeUrl && fs.existsSync(candidate.resumeUrl)) {
-            const sanitizedJobTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
-            const jobDir = path.join('uploads', sanitizedJobTitle);
+        if (candidate.resumeUrl) {
+            if (candidate.resumeUrl.startsWith('http')) {
+                application.attachments.push({
+                    name: 'Resume',
+                    url: candidate.resumeUrl
+                });
+                await application.save();
+            } else if (fs.existsSync(candidate.resumeUrl)) {
+                const sanitizedJobTitle = job.title.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-');
+                const jobDir = path.join('uploads', sanitizedJobTitle);
 
-            if (!fs.existsSync(jobDir)) {
-                fs.mkdirSync(jobDir, { recursive: true });
-            }
+                if (!fs.existsSync(jobDir)) {
+                    fs.mkdirSync(jobDir, { recursive: true });
+                }
 
-            const fileName = path.basename(candidate.resumeUrl);
-            const newPath = path.join(jobDir, fileName).replace(/\\/g, '/');
+                const fileName = path.basename(candidate.resumeUrl);
+                const newPath = path.join(jobDir, fileName).replace(/\\/g, '/');
 
-            if (candidate.resumeUrl !== newPath) {
-                try {
-                    fs.copyFileSync(candidate.resumeUrl, newPath);
-                    application.attachments.push({
-                        name: 'Resume',
-                        url: newPath
-                    });
-                    await application.save();
-                } catch (copyErr) {
-                    console.error("Failed to copy resume to job directory:", copyErr);
+                if (candidate.resumeUrl !== newPath) {
+                    try {
+                        fs.copyFileSync(candidate.resumeUrl, newPath);
+                        application.attachments.push({
+                            name: 'Resume',
+                            url: newPath
+                        });
+                        await application.save();
+                    } catch (copyErr) {
+                        console.error("Failed to copy resume to job directory:", copyErr);
+                    }
                 }
             }
         }

@@ -19,7 +19,7 @@ import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
-import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, Edit2, FolderOpen, Menu, Check, X, ArrowLeft } from 'lucide-react';
+import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, Edit2, FolderOpen, Menu, Check, X, ArrowLeft, LogOut, User } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -598,6 +598,30 @@ export default function RecruiterDashboardClient() {
               );
             })
           )}
+        </div>
+
+        {/* User Profile & Sign Out - Mobile Drawer */}
+        <div className="lg:hidden p-4 border-t border-gray-100 bg-gray-50 flex flex-col gap-2 shrink-0">
+          <div className="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg border border-gray-200 bg-white shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
+              {api.getUser()?.name?.[0]?.toUpperCase() || 'R'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-900 truncate">
+                {api.getUser()?.name || 'Recruiter'}
+              </p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold truncate">
+                Talent Acquisition
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => { api.logout(); window.location.href = '/sign-up-login-screen'; }}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors w-full"
+          >
+            <LogOut size={16} />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 

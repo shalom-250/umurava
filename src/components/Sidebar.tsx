@@ -61,7 +61,7 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
 
   return (
     <aside
-      className={`relative flex flex-col bg-white border-r border-border transition-all duration-300 ease-in-out shrink-0 ${collapsed ? 'w-16' : 'w-60'} ${role === 'applicant' ? 'hidden lg:flex' : 'hidden md:flex'}`}
+      className={`relative flex flex-col bg-white border-r border-border transition-all duration-300 ease-in-out shrink-0 ${collapsed ? 'w-16' : 'w-60'} hidden lg:flex`}
       style={{ zIndex: 10 }}
     >
       {/* Logo */}

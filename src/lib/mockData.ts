@@ -120,7 +120,7 @@ export interface Application {
   jobTitle: string;
   company: string;
   appliedDate: string;
-  status: 'Submitted' | 'Under Review' | 'Screened' | 'Shortlisted' | 'Rejected';
+  status: 'Applied' | 'Submitted' | 'Under Review' | 'Screened' | 'Shortlisted' | 'Rejected' | 'Hired' | 'Interview';
   matchScore?: number;
   screeningResult?: ScreeningResult;
 }
@@ -937,11 +937,14 @@ export const mockApplications: Application[] = [
 ];
 
 export const applicantStatusColors: Record<string, string> = {
+  'Applied': 'bg-blue-50 text-blue-700 border-blue-200',
   'Submitted': 'bg-blue-50 text-blue-700 border-blue-200',
   'Under Review': 'bg-amber-50 text-amber-700 border-amber-200',
   'Screened': 'bg-purple-50 text-purple-700 border-purple-200',
   'Shortlisted': 'bg-green-50 text-green-700 border-green-200',
   'Rejected': 'bg-red-50 text-red-700 border-red-200',
+  'Hired': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'Interview': 'bg-indigo-50 text-indigo-700 border-indigo-200',
 };
 
 export const jobStatusColors: Record<string, string> = {

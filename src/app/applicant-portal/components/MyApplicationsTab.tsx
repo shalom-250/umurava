@@ -12,7 +12,8 @@ interface MyApplicationsTabProps {
 
 const STATUS_STEPS = ['Submitted', 'Under Review', 'Screened', 'Shortlisted'];
 
-function StatusTimeline({ status }: { status: string }) {
+function StatusTimeline({ status: rawStatus }: { status: string }) {
+  const status = rawStatus === 'Applied' ? 'Submitted' : rawStatus;
   const currentIdx = STATUS_STEPS.indexOf(status);
   const isRejected = status === 'Rejected';
 
@@ -62,17 +63,17 @@ function ShortlistedLeaderboard({ jobId, currentCandidateId }: { jobId: string, 
   React.useEffect(() => {
     let active = true;
     const fetchLeaderboard = async () => {
-       try {
-         const res = await api.get('/screening/' + jobId);
-         if (active && Array.isArray(res)) {
-            const sorted = res.sort((a, b) => b.score - a.score).filter(c => ['Shortlist', 'Waitlist', 'Hired'].includes(c.recommendation));
-            setCandidates(sorted);
-         }
-       } catch (err) {
-         console.error('Failed to fetch leaderboard');
-       } finally {
-         if (active) setLoading(false);
-       }
+      try {
+        const res = await api.get('/screening/' + jobId);
+        if (active && Array.isArray(res)) {
+          const sorted = res.sort((a, b) => b.score - a.score).filter(c => ['Shortlist', 'Waitlist', 'Hired'].includes(c.recommendation));
+          setCandidates(sorted);
+        }
+      } catch (err) {
+        console.error('Failed to fetch leaderboard');
+      } finally {
+        if (active) setLoading(false);
+      }
     };
     fetchLeaderboard();
     return () => { active = false; };
@@ -91,25 +92,25 @@ function ShortlistedLeaderboard({ jobId, currentCandidateId }: { jobId: string, 
         {candidates.map((cand, idx) => {
           const candId = cand.candidateId?._id || cand.candidateId;
           const isMe = candId === currentCandidateId;
-          const name = cand.candidateId?.firstName 
-             ? `${cand.candidateId.firstName} ${cand.candidateId.lastName || ''}`.trim() 
-             : (cand.candidateId?.name || `Candidate #${idx + 1}`);
-             
+          const name = cand.candidateId?.firstName
+            ? `${cand.candidateId.firstName} ${cand.candidateId.lastName || ''}`.trim()
+            : (cand.candidateId?.name || `Candidate #${idx + 1}`);
+
           return (
-             <div key={`lead-${idx}`} className={`flex items-center justify-between px-4 py-2.5 transition-colors ${isMe ? 'bg-primary-50/70 border-l-2 border-primary-500' : 'hover:bg-muted/30'}`}>
-                <div className="flex items-center gap-3 w-full">
-                   <div className="w-6 h-6 rounded bg-white shadow-sm border border-border flex items-center justify-center shrink-0">
-                      <span className={`text-[10px] font-bold ${isMe ? 'text-primary-700' : 'text-muted-foreground'}`}>{cand.rank || idx + 1}</span>
-                   </div>
-                   <div className="flex-1 min-w-0 flex items-center gap-2">
-                     <p className={`text-xs font-semibold truncate ${isMe ? 'text-primary-800' : 'text-foreground/80'}`}>{name}</p>
-                     {isMe && <span className="inline-flex bg-primary-100 text-primary-700 uppercase tracking-widest font-black shrink-0 px-1.5 py-0.5 rounded text-[8px] border border-primary-200">(You)</span>}
-                   </div>
-                   <div className="shrink-0 text-[10px] font-mono-data bg-white px-2 py-0.5 rounded border border-border shadow-sm text-muted-foreground">
-                      {cand.score}% Match
-                   </div>
+            <div key={`lead-${idx}`} className={`flex items-center justify-between px-4 py-2.5 transition-colors ${isMe ? 'bg-primary-50/70 border-l-2 border-primary-500' : 'hover:bg-muted/30'}`}>
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-6 h-6 rounded bg-white shadow-sm border border-border flex items-center justify-center shrink-0">
+                  <span className={`text-[10px] font-bold ${isMe ? 'text-primary-700' : 'text-muted-foreground'}`}>{cand.rank || idx + 1}</span>
                 </div>
-             </div>
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                  <p className={`text-xs font-semibold truncate ${isMe ? 'text-primary-800' : 'text-foreground/80'}`}>{name}</p>
+                  {isMe && <span className="inline-flex bg-primary-100 text-primary-700 uppercase tracking-widest font-black shrink-0 px-1.5 py-0.5 rounded text-[8px] border border-primary-200">(You)</span>}
+                </div>
+                <div className="shrink-0 text-[10px] font-mono-data bg-white px-2 py-0.5 rounded border border-border shadow-sm text-muted-foreground">
+                  {cand.score}% Match
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -157,8 +158,8 @@ export default function MyApplicationsTab({ applications, jobs, profile }: MyApp
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="text-sm font-semibold text-foreground">{app.jobTitle}</p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${applicantStatusColors[app.status]}`}>
-                      {app.status}
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${applicantStatusColors[app.status === 'Applied' ? 'Submitted' : app.status] || 'bg-gray-50 text-gray-600'}`}>
+                      {app.status === 'Applied' ? 'Submitted' : app.status}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">{app.company} · Applied {app.appliedDate}</p>
@@ -284,12 +285,12 @@ export default function MyApplicationsTab({ applications, jobs, profile }: MyApp
                     </div>
                   </div>
                 )}
-                
+
                 {/* Live Candidate Roster - Unlocked for Shortlisted/Hired */}
                 {['Shortlisted', 'Hired', 'Interviewing'].includes(app.status) && (
-                   <div className="border-t border-border pt-4 animate-fade-in">
-                       <ShortlistedLeaderboard jobId={app.jobId} currentCandidateId={profile?.id} />
-                   </div>
+                  <div className="border-t border-border pt-4 animate-fade-in">
+                    <ShortlistedLeaderboard jobId={app.jobId} currentCandidateId={profile?.id} />
+                  </div>
                 )}
               </div>
             )}

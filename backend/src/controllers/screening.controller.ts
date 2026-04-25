@@ -23,6 +23,9 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
+        // Set all related applications to 'Under Review' status
+        await Application.updateMany({ jobId }, { status: 'Under Review' });
+
         const candidates = applications
             .map(app => app.candidateId)
             .filter(c => c !== null) as any[];
@@ -88,6 +91,12 @@ export const runScreening = async (req: Request, res: Response): Promise<void> =
                     documentStatus: candidateData?.documentChecklist || []
                 },
                 { upsert: true, new: true }
+            );
+
+            // Update the corresponding Application status to 'Screened'
+            await Application.findOneAndUpdate(
+                { jobId, candidateId: result.candidateId },
+                { status: 'Screened' }
             );
         });
 

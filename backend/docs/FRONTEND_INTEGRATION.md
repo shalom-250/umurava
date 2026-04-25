@@ -16,55 +16,45 @@ Use this guide to quickly integrate the backend APIs into your frontend applicat
 
 | URL Path | Method | Payload / Parameters | Goal |
 | :--- | :--- | :--- | :--- |
-| `/api/jobs` | `POST` | `{ "title": "", "description": "", "requirements": [], "skills": [], "mustHaveSkills": [] }` | Post Job |
+| `/api/jobs` | `POST` | `{ "title": "", "description": "", "requirements": [], "skills": [] }` | Post Job |
 | `/api/jobs` | `GET` | None | List Jobs |
 | `/api/jobs/:id` | `GET` | `id` (path) | Job Details |
 
-## 3. Candidate Management
+## 3. Candidate & Profile
 
 | URL Path | Method | Payload / Parameters | Goal |
 | :--- | :--- | :--- | :--- |
-| `/api/candidates` | `POST` | `FormData` (append `file` with PDF/CSV) | Upload Resume |
-| `/api/candidates` | `GET` | Query Parameter: `search` (optional) | Search Talent |
+| `/api/candidates/parse` | `POST` | `FormData` (append `file` with PDF/CSV) | Upload & Parse |
+| `/api/candidates/me/photo` | `POST` | `FormData` (append `photo` with Image) | Update Avatar |
+| `/api/candidates/me/dashboard` | `GET` | None | Leaderboard Stats |
 
 ## 4. AI Screening Engine
 
 | URL Path | Method | Payload / Parameters | Goal |
 | :--- | :--- | :--- | :--- |
 | `/api/screening/:jobId` | `POST` | `jobId` (path) | Run AI Match |
-| `/api/screening/:jobId` | `GET` | `jobId` (path), Query `minScore` (optional) | Get Rankings |
-| `/api/comparison` | `POST` | `{ "jobId": "", "candidateAId": "", "candidateBId": "" }` | Head-Head |
+| `/api/screening/:jobId` | `GET` | `jobId` (path) | Get Rankings |
+| `/api/comparison` | `POST` | `{ "jobId": "", "candidateAId": "", "candidateBId": "" }` | Compare Talent |
 
-## 5. Recruitment Lifecycle
-
-| URL Path | Method | Payload / Parameters | Goal |
-| :--- | :--- | :--- | :--- |
-| `/api/applications` | `POST` | `{ "jobId": "", "candidateId": "", "status": "Applied" }` | Apply |
-| `/api/interviews` | `POST` | `{ "applicationId": "", "interviewerId": "", "scheduledAt": "", "type": "HR" }` | Schedule |
-| `/api/reviews` | `POST` | `{ "applicationId": "", "reviewerId": "", "score": 8, "comments": "", "recommendation": "Pass" }` | Feedback |
-
-## 6. Dashboard & Data
+## 5. Lifecycle Actions
 
 | URL Path | Method | Payload / Parameters | Goal |
-| :--- | :--- | :--- | :--- |
-| `/api/analytics/stats` | `GET` | None | Stats |
-| `/api/companies` | `GET` | None | List Clients |
-| `/api/notifications` | `GET` | None | Get Alerts |
-| `/api/settings` | `GET` | None (Use `PUT` with `{ theme: "Dark" }` to update) | Settings |
+| :--- | :--- | : :--- | :--- |
+| `/api/applications` | `POST` | `{ "jobId": "", "candidateId": "", "status": "Hired" }` | Move Status |
+| `/api/interviews` | `POST` | `{ "applicationId": "", "scheduledAt": "", "type": "Technical" }` | Schedule |
+| `/api/reviews` | `POST` | `{ "applicationId": "", "score": 8, "comments": "" }` | HR Review |
 
 ---
 
-### Example Frontend Call (Axios)
+### File Upload Implementation (React/Next.js)
 ```javascript
-import axios from 'axios';
+const uploadResume = async (file, jobId) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('jobId', jobId);
 
-const API = axios.create({ baseURL: 'http://localhost:5000' });
-
-// Example: Get Rankings
-const getRankings = async (jobId) => {
-  const token = localStorage.getItem('token');
-  const response = await API.get(`/api/screening/${jobId}`, {
-    headers: { Authorization: `Bearer ${token}` }
+  const response = await axios.post('/api/candidates/parse', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
   });
   return response.data;
 };

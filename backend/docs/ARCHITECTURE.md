@@ -4,16 +4,17 @@
 
 ```mermaid
 graph TD
-    A[Frontend: Next.js] -->|API Calls| B[Backend: Node.js + TS]
-    B -->|Query/Save| C[Database: MongoDB]
-    B -->|Orchestration| D[AI Layer: Gemini API]
-    B -->|File Parsing| E[PDF/CSV Parser]
-    D -->|Screening Results| B
-    E -->|Extracted Text| B
+    A[Frontend: Next.js 15] -->|REST API| B[Backend: Node.js + TS]
+    B -->|Mongoose ODM| C[Database: MongoDB Atlas]
+    B -->|Native SDK| D[AI Service: Gemini 1.5 Flash]
+    B -->|Cloudinary SDK| E[Storage: Cloudinary]
+    D -->|Screening JSON| B
+    E -->|Secure URLs| B
 ```
 
-## Layers
-1.  **API Layer**: RESTful endpoints protected by JWT and documented with Swagger.
-2.  **Processing Layer**: Logic for batching candidates and extracting text from multi-format files.
-3.  **AI Orchestration**: Integration with Google Gemini for entity extraction and candidate ranking.
-4.  **Database Layer**: Persistent storage for multi-dimensional screening data.
+## Core Layers
+1.  **API Layer**: RESTful endpoints protected by JWT authentication and documented via Swagger UI for interactive testing.
+2.  **AI Orchestration**: Integration with Google Gemini for entity extraction (Resume Parsing) and multi-dimensional candidate ranking (Batch Screening).
+3.  **Cloud Storage Layer**: Decoupled binary storage. Resumes and profile photos are persisted in Cloudinary, ensuring a stateless and scalable backend.
+4.  **Database Layer**: MongoDB serves as the primary data store for candidate profiles, job specifications, and AI-generated screening results.
+5.  **Processing Layer**: Advanced logic for batching AI requests, handling rate limits via exponential backoff, and normalizing unstructured resume data.

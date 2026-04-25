@@ -39,6 +39,36 @@ graph TD
     Storage --> C
 ```
 
+## 📊 Database Architecture
+
+The platform uses a document-oriented schema optimized for AI-driven relationships.
+
+```mermaid
+erDiagram
+    COMPANY ||--o{ JOB : "posts"
+    USER ||--o{ JOB : "manages"
+    JOB ||--o{ APPLICATION : "receives"
+    CANDIDATE ||--o{ APPLICATION : "submits"
+    JOB ||--o{ SCREENING : "results_for"
+    CANDIDATE ||--o{ SCREENING : "evaluated_in"
+    APPLICATION ||--o{ INTERVIEW : "schedules"
+    APPLICATION ||--o{ REVIEW : "feedback_on"
+```
+
+> [!TIP]
+> Each **Screening** result stores a persistent snapshot of AI reasoning, scores, and interview questions to minimize redundant API calls.
+
+## 📡 Interactive API Documentation (Swagger)
+
+The backend includes a fully interactive Swagger UI for real-time API exploration.
+
+- **URL**: `http://localhost:5000/doc`
+- **Authentication**:
+  1. Login via `/api/auth/login` to get your JWT token.
+  2. Click the **Authorize** button in Swagger (top right).
+  3. Enter `Bearer <your_token>` and click **Authorize**.
+- **Usage**: You can execute requests directly from the browser to test screening triggers, candidate parsing, and analytics endpoints.
+
 ## 🚀 Current Features
 
 - **Gemini-Powered Candidate Ranking**: Automated 1-100 scoring based on Skills (40%), experience (30%), Education (20%), and Documents (10%).
@@ -57,20 +87,19 @@ To understand the system in depth, please refer to the following documentation f
 ### ⚙️ Core Technical Docs (Root `docs/`)
 - **[DEEP_SCREENING_ANALYSIS.md](file:///d:/umurava/docs/DEEP_SCREENING_ANALYSIS.md)**: Algorithmic breakdown of how Gemini scores and ranks candidates.
 - **[TECHNICAL_DOCUMENTATION.md](file:///d:/umurava/docs/TECHNICAL_DOCUMENTATION.md)**: Full-stack codebase overview and system capabilities.
-- **[RESUME_INGESTION_FLOW.md](file:///d:/umurava/docs/RESUME_INGESTION_FLOW.md)**: Detailed mapping of the file-to-data extraction pipeline.
-- **[FEATURES.md](file:///d:/umurava/docs/FEATURES.md)**: Comprehensive guide to all platform features.
-- **[AI_DECISION_FLOW.md](file:///d:/umurava/docs/AI_DECISION_FLOW.md)**: High-level overview of AI logic.
-- **[AUTHENTICATION.md](file:///d:/umurava/docs/AUTHENTICATION.md)**: Security protocols (JWT, Bcrypt) and session management.
-- **[SCHEMA_OVERVIEW.md](file:///d:/umurava/docs/SCHEMA_OVERVIEW.md)**: Unified view of MongoDB data models.
-- **[SETUP.md](file:///d:/umurava/docs/SETUP.md)**: Step-by-step developer environment configuration.
-- **[STABILITY.md](file:///d:/umurava/docs/STABILITY.md)**: Error handling, rate limiting, and performance strategies.
+
+### 🏗️ Technical Architecture
+- **[SYSTEM_ARCHITECTURE.md](file:///d:/umurava/docs/SYSTEM_ARCHITECTURE.md)**: High-level architectural overview and component interactions.
+- **[ARCHITECTURE.md](file:///d:/umurava/backend/docs/ARCHITECTURE.md)**: Full-stack codebase overview and system capabilities.
+- **[DATABASE.md](file:///d:/umurava/backend/docs/DATABASE.md)**: Definition of core MongoDB schemas and ER diagrams.
+- **[STABILITY.md](file:///d:/umurava/backend/docs/STABILITY.md)**: Error handling, rate limiting, and performance strategies.
 
 ### 🗄️ Backend & Operational Docs (`backend/docs/`)
-- **[Umurava_Updates_Doc.md](file:///d:/umurava/backend/docs/Umurava_Updates_Doc.md)**: Narrative of recent technical migrations and interface upgrades.
-- **[DATABASE.md](file:///d:/umurava/backend/docs/DATABASE.md)**: Definition of the 15 primary MongoDB schemas.
-- **[API_REFERENCE.md](file:///d:/umurava/backend/docs/API_REFERENCE.md)**: Documentation for REST API endpoints.
+- **[API_REFERENCE.md](file:///d:/umurava/backend/docs/API_REFERENCE.md)**: Documentation for REST API endpoints and testing credentials.
 - **[FRONTEND_INTEGRATION.md](file:///d:/umurava/backend/docs/FRONTEND_INTEGRATION.md)**: Guide on API consumption and data flow to the UI.
-- **[ARCHITECTURE.md](file:///d:/umurava/backend/docs/ARCHITECTURE.md)**: Backend-specific architecture notes.
+- **[AI_DECISION_FLOW.md](file:///d:/umurava/backend/docs/AI_DECISION_FLOW.md)**: High-level overview of AI logic with flow diagrams.
+- **[JOB_PROCESS.md](file:///d:/umurava/backend/docs/JOB_PROCESS.md)**: End-to-end flow from job posting to hiring.
+- **[Umurava_Updates_Doc.md](file:///d:/umurava/backend/docs/Umurava_Updates_Doc.md)**: Narrative of recent technical migrations and interface upgrades.
 
 ---
 

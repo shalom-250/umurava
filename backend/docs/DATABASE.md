@@ -1,6 +1,18 @@
 # Database Documentation - UMURAVA SCREENING AI
 
-The system uses **MongoDB** as its primary database. Below are the 15 documented schemas used in the platform.
+The system uses **MongoDB Atlas** as its primary database. Below is the ER diagram and the core schemas used in the platform.
+
+## 📐 Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    COMPANY ||--o{ JOB : "posts"
+    USER ||--o{ JOB : "manages"
+    JOB ||--o{ APPLICATION : "receives"
+    CANDIDATE ||--o{ APPLICATION : "submits"
+    JOB ||--o{ SCREENING : "results_for"
+    CANDIDATE ||--o{ SCREENING : "evaluated_in"
+```
 
 ## 1. User
 Manages recruiters and administrators.
@@ -10,61 +22,46 @@ Manages recruiters and administrators.
 - **role**: Enum ['recruiter', 'admin']
 
 ## 2. Job
-Stores job openings and specs.
+Stores job openings and specifications.
 - **title**: String
 - **description**: String
 - **requirements**: String[]
 - **skills**: String[]
-- **mustHaveSkills**: String[]
 
 ## 3. Candidate
-Stores talent profiles and parsed text.
-- **name**: String
-- **email**: String
-- **skills**: String[]
-- **extractedText**: String
+Stores talent profiles and parsed data extracted via Gemini.
+- **firstName**, **lastName**: Strings
+- **email**: String (Unique)
+- **resumeUrl**: String (Cloudinary link)
+- **photoUrl**: String (Cloudinary avatar link)
+- **skills**: Array of `{ name, level, type }`
+- **extractedText**: Raw text used for AI analysis
 
 ## 4. Screening
-AI-generated ranking results.
-- **jobId**, **candidateId**: Refs
-- **score**, **rank**: Numbers
-- **weightedScore**: { skills, experience, education }
-- **interviewQuestions**: String[]
+AI-generated ranking results produced by Gemini 1.5 Flash.
+- **jobId**, **candidateId**: References
+- **score**, **rank**: Matching metrics
+- **weightedScore**: `{ skills (40%), experience (30%), education (20%), documents (10%) }`
+- **aiReasoning**: Narrative explanation of the score.
+- **strengths**, **gaps**: Qualitative analysis points.
+- **interviewQuestions**: AI-curated questions.
 
 ## 5. Application
 Tracks the hiring lifecycle.
-- **status**: Enum ['Applied' to 'Hired']
+- **status**: Enum ['Applied', 'Shortlisted', 'Interview', 'Hired', 'Rejected']
 
 ## 6. Interview
-Scheduling and logistics for meetings.
+Scheduling and logistics for specific candidates.
 - **type**: Enum ['Technical', 'Behavioral', 'HR']
 - **scheduledAt**: Date
 
 ## 7. Review
-Detailed recruiter feedback on applications.
-- **score**: 0-10
+Detailed recruiter feedback and scorecards.
+- **score**: 0-10 scale
 - **recommendation**: Enum ['Pass', 'Fail', 'Strong Pass']
 
-## 8. Company
-Corporate profiles for hiring entities.
+## 8. AuditLog
+Security logs tracking critical system actions for compliance.
 
-## 9. Department
-Internal organizational units.
-
-## 10. Notification
-Real-time sys alerts for users.
-
-## 11. Skill
-Master taxonomy of standardized skills.
-
-## 12. Message
-Internal chat logs between system users.
-
-## 13. AuditLog
-Security logs tracking system actions.
-
-## 14. Settings
-User-specific preferences (Theme, Language).
-
-## 15. Subscription
-SaaS tier management for companies.
+## 9. Settings
+User-specific preferences (Theme, UI settings).

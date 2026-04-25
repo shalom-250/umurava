@@ -236,25 +236,27 @@ export default function AuthClient() {
             </p>
           </div>
 
-          {/* Role Selector */}
-          <div className="flex items-center gap-2 bg-muted p-1 rounded-lg mb-6">
-            <button
-              onClick={() => setRole('recruiter')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${role === 'recruiter' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
-                }`}
-            >
-              <Briefcase size={14} />
-              I'm a Recruiter
-            </button>
-            <button
-              onClick={() => setRole('applicant')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${role === 'applicant' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
-                }`}
-            >
-              <User size={14} />
-              I'm a Candidate
-            </button>
-          </div>
+          {/* Role Selector — only shown on Sign Up */}
+          {mode === 'signup' && (
+            <div className="flex items-center gap-2 bg-muted p-1 rounded-lg mb-6">
+              <button
+                onClick={() => setRole('recruiter')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${role === 'recruiter' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                <Briefcase size={14} />
+                I'm a Recruiter
+              </button>
+              <button
+                onClick={() => setRole('applicant')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-all ${role === 'applicant' ? 'bg-white text-primary-700 shadow-card' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                <User size={14} />
+                I'm a Candidate
+              </button>
+            </div>
+          )}
 
           {/* Login Form */}
           {mode === 'login' && (

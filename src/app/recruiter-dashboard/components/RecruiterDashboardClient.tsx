@@ -644,8 +644,11 @@ export default function RecruiterDashboardClient() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowCreateJob(true)} className="p-1.5 bg-blue-600 text-white rounded-lg shadow-sm">
-              <Plus size={18} />
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="w-9 h-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shadow-sm active:scale-95 transition-transform"
+            >
+              {api.getUser()?.name?.[0]?.toUpperCase() || 'R'}
             </button>
           </div>
         </div>

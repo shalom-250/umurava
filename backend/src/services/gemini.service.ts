@@ -350,15 +350,16 @@ const normalizeParsedData = (data: any, originalText: string): any => {
     let email = data.email || data.emailAddress || null;
     let phone = data.phone || data.phoneNumber || data.contact || null;
 
-    // Fallback for names/emails/phones if AI missed them but they exist in text
-    if (!email && originalText) {
-        const emailMatch = originalText.match(/[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/);
-        if (emailMatch) email = emailMatch[0];
-    }
-    if (!phone && originalText) {
-        const phoneMatch = originalText.match(/(?:\+?\d{1,4}[\s.-]?)?\(?\d{2,5}\)?[\s.-]?\d{2,4}[\s.-]?\d{2,4}[\s.-]?\d{2,6}/);
-        if (phoneMatch) phone = phoneMatch[0];
-    }
+    // Helper to ensure we get a string from potentially complex AI output
+    const toString = (val: any) => {
+        if (!val) return null;
+        if (typeof val === 'string') return val;
+        // If it's an object, try to find a name/title or just stringify a key property
+        if (typeof val === 'object') {
+            return val.name || val.location || val.title || val.text || JSON.stringify(val).substring(0, 100);
+        }
+        return String(val);
+    };
 
     return {
         firstName: name ? name.split(' ')[0] : null,
@@ -366,11 +367,12 @@ const normalizeParsedData = (data: any, originalText: string): any => {
         name: name,
         email: email,
         phone: phone,
-        location: data.location || null,
-        nationality: data.nationality || null,
-        dob: data.dob || null,
-        personalStatement: data.personalStatement || null,
-        bio: data.personalStatement || null,
+        location: toString(data.location),
+        nationality: toString(data.nationality),
+        dob: toString(data.dob),
+        headline: toString(data.headline) || (data.experience?.[0] ? `${data.experience[0].jobTitle || data.experience[0].role} at ${data.experience[0].company}` : 'Job Seeker'),
+        personalStatement: toString(data.personalStatement),
+        bio: toString(data.personalStatement),
         socialLinks: {
             linkedin: data.linkedin || data.socialLinks?.linkedin || null,
             github: data.github || data.socialLinks?.github || null,

@@ -38,9 +38,9 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
 
             const matchesSearch =
                 `${firstName} ${lastName}`.toLowerCase().includes(searchLower) ||
-                email.toLowerCase().includes(searchLower) ||
-                headline.toLowerCase().includes(searchLower) ||
-                (p.skills && p.skills.some(s => s.name?.toLowerCase().includes(searchLower)));
+                String(email || '').toLowerCase().includes(searchLower) ||
+                String(headline || '').toLowerCase().includes(searchLower) ||
+                (p.skills && p.skills.some(s => String(s.name || '').toLowerCase().includes(searchLower)));
 
             const matchesLocation = locationFilter === 'All' || p.location === locationFilter;
 
@@ -50,7 +50,13 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
 
     // Locations for filter
     const locations = useMemo(() => {
-        const locs = new Set(profiles.map(p => p.location));
+        const locs = new Set(profiles.map(p => {
+            if (typeof p.location === 'string') return p.location;
+            if (typeof p.location === 'object' && p.location !== null) {
+                return (p.location as any).name || (p.location as any).location || 'Unknown';
+            }
+            return 'Unknown';
+        }));
         return ['All', ...Array.from(locs)].filter(Boolean);
     }, [profiles]);
 
@@ -144,11 +150,11 @@ export default function TalentPoolTable({ profiles, onViewCandidate }: TalentPoo
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
                                                     <Briefcase size={12} className="text-gray-400" />
-                                                    {profile.headline}
+                                                    {typeof profile.headline === 'string' ? profile.headline : 'Candidate'}
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
                                                     <MapPin size={11} />
-                                                    {profile.location}
+                                                    {typeof profile.location === 'string' ? profile.location : 'Unknown Location'}
                                                 </div>
                                             </div>
                                         </td>

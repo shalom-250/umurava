@@ -41,6 +41,7 @@ export default function RecruiterDashboardClient() {
   const [loading, setLoading] = useState(true);
   const [talentProfiles, setTalentProfiles] = useState<TalentProfile[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
+  const [allApplications, setAllApplications] = useState<any[]>([]);
   const [draftProfiles, setDraftProfiles] = useState<any[]>([]);
   const [activeView, setActiveView] = useState<'job-dashboard' | 'talent-pool'>('job-dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -153,6 +154,7 @@ export default function RecruiterDashboardClient() {
     setMounted(true);
     fetchJobs();
     fetchCandidates();
+    fetchApplications(); // Fetch all apps initially for global pool context
   }, []);
 
   useEffect(() => {
@@ -208,13 +210,15 @@ export default function RecruiterDashboardClient() {
   }, [screeningResults, applications, shortlistFilter]);
 
   const fetchApplications = async () => {
-    if (!selectedJobId) return;
     try {
       const data = await api.get('/applications');
-      const jobApplications = data.filter((app: any) =>
-        (app.jobId?._id || app.jobId) === selectedJobId
-      );
-      setApplications(jobApplications);
+      setAllApplications(data || []);
+      if (selectedJobId) {
+        const jobApplications = data.filter((app: any) =>
+          (app.jobId?._id || app.jobId) === selectedJobId
+        );
+        setApplications(jobApplications);
+      }
     } catch (error) {
       console.error('Failed to fetch applications:', error);
     }
@@ -918,19 +922,34 @@ export default function RecruiterDashboardClient() {
               <TalentPoolTable
                 profiles={talentProfiles}
                 onViewCandidate={(profile) => {
-                  // Create a dummy screening result for the drawer to work
-                  const dummyResult: ScreeningResult = {
+                  // 1. Try to find if this candidate has a result in the current job context
+                  let result = screeningResults.find(r => r.candidateId === profile.id);
+
+                  // 2. If not found in current job, look in any other job screen results we have in Redux
+                  if (!result) {
+                    for (const jobId in allResults) {
+                      const found = allResults[jobId]?.find(r => r.candidateId === profile.id);
+                      if (found) {
+                        result = found;
+                        break;
+                      }
+                    }
+                  }
+
+                  // 3. Fallback to a better dummy if still no result found
+                  const finalResult: ScreeningResult = result || {
                     candidateId: profile.id,
                     rank: 0,
                     matchScore: 0,
                     recommendation: 'Awaiting AI Analysis' as any,
                     skillBreakdown: [],
                     strengths: ['Global Talent Profile'],
-                    gaps: ['Not evaluated for a specific job'],
+                    gaps: ['Not evaluated for a specific job yet'],
                     aiReasoning: 'This candidate is part of the global talent pool. Run AI screening for a specific job to see match analytics.',
                     documentStatus: []
                   };
-                  setSelectedCandidate({ profile, result: dummyResult });
+
+                  setSelectedCandidate({ profile, result: finalResult });
                 }}
               />
             </div>
@@ -943,7 +962,7 @@ export default function RecruiterDashboardClient() {
         <CandidateReasoningDrawer
           profile={selectedCandidate.profile}
           result={selectedCandidate.result}
-          application={applications.find(a => (a.candidateId?._id || a.candidateId) === selectedCandidate.result.candidateId)}
+          application={allApplications.find(a => (a.candidateId?._id || a.candidateId) === selectedCandidate.result.candidateId)}
           onUpdateStatus={(status) => handleUpdateApplicationStatus(selectedCandidate.result.candidateId, status)}
           onClose={() => setSelectedCandidate(null)}
         />

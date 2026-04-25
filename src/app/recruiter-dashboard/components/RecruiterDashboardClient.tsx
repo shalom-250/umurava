@@ -23,8 +23,10 @@ import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 
 export default function RecruiterDashboardClient() {
+  useRoleGuard('recruiter'); // Redirect candidates who try to access this page
   const dispatch = useDispatch<AppDispatch>();
   const { currentJobId, results: allResults, isScreening } = useSelector((state: RootState) => state.screening);
 

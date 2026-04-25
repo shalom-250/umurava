@@ -8,6 +8,7 @@ import ApplicantDashboardTab from './ApplicantDashboardTab';
 import ProfileBuilderTab from './ProfileBuilderTab';
 import JobBrowserTab from './JobBrowserTab';
 import MyApplicationsTab from './MyApplicationsTab';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 
 type Tab = 'dashboard' | 'profile' | 'jobs' | 'applications';
 
@@ -19,6 +20,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType; description: stri
 ];
 
 export default function ApplicantPortalClient() {
+  useRoleGuard('applicant'); // Redirect recruiters who try to access this page
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);

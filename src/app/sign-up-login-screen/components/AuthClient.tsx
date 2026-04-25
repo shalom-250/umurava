@@ -101,6 +101,16 @@ export default function AuthClient() {
         password: data.password,
       });
 
+      // Role guard: check that the user is logging in on the correct portal
+      if (result.role !== role) {
+        const expected = role === 'recruiter' ? 'Recruiter' : 'Candidate';
+        const actual = result.role === 'recruiter' ? 'Recruiter' : 'Candidate';
+        const correctPortal = result.role === 'recruiter' ? '"I\'m a Recruiter"' : '"I\'m a Candidate"';
+        toast.error(`This account is registered as a ${actual}, not a ${expected}. Please select ${correctPortal} above.`);
+        setIsSubmitting(false);
+        return;
+      }
+
       api.setToken(result.token);
       api.setUser({
         _id: result._id,

@@ -29,7 +29,7 @@ export default function RecruiterDashboardClient() {
   const { currentJobId, results: allResults, isScreening } = useSelector((state: RootState) => state.screening);
 
   const [screeningDone, setScreeningDone] = useState(true);
-  const [selectedCandidate, setSelectedCandidate] = useState<{ profile: TalentProfile; result: ScreeningResult } | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<{ profile: TalentProfile; result: ScreeningResult; fromTalentPool?: boolean } | null>(null);
   const [showCreateJob, setShowCreateJob] = useState(false);
   const [showEditJob, setShowEditJob] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
@@ -986,7 +986,7 @@ export default function RecruiterDashboardClient() {
                     documentStatus: []
                   };
 
-                  setSelectedCandidate({ profile, result: finalResult });
+                  setSelectedCandidate({ profile, result: finalResult, fromTalentPool: true });
                 }}
               />
             </div>
@@ -1002,6 +1002,7 @@ export default function RecruiterDashboardClient() {
           application={allApplications.find(a => (a.candidateId?._id || a.candidateId) === selectedCandidate.result.candidateId)}
           onUpdateStatus={(status) => handleUpdateApplicationStatus(selectedCandidate.result.candidateId, status)}
           onClose={() => setSelectedCandidate(null)}
+          readOnly={!!selectedCandidate.fromTalentPool}
         />
       )}
 

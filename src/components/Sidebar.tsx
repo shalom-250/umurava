@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
-const STORAGE_KEY = 'globalSidebarCollapsed';
+const STORAGE_KEY = 'globalSidebarStateV4'; // Changed to force reset the default to true
 
 interface NavItem {
   label: string;
@@ -33,7 +33,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
-  // Default to collapsed (hidden) — will be overridden by localStorage
+  // Default to collapsed (hidden text, only icons)
   const [collapsed, setCollapsed] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
@@ -80,11 +80,21 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
         /* ── Expanded state: full sidebar ── */
         <>
           {/* Logo */}
-          <div className="flex items-center h-16 border-b border-border gap-2 px-4">
-            <AppLogo size={32} />
-            <span className="font-display font-700 text-base text-primary-700 leading-tight">
-              UmuravaAI
-            </span>
+          <div className="flex items-center justify-between h-16 border-b border-border pl-4 pr-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <AppLogo size={32} />
+              <span className="font-display font-700 text-base text-primary-700 leading-tight">
+                UmuravaAI
+              </span>
+            </div>
+            <button
+              onClick={toggle}
+              suppressHydrationWarning
+              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors"
+              title="Collapse sidebar"
+            >
+              <ChevronLeft size={16} />
+            </button>
           </div>
 
           {/* Nav */}
@@ -93,7 +103,7 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
               const items = navItems.filter(i => i.group === group);
               return (
                 <div key={`group-${group}`} className="mb-4">
-                  <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  <p className="px-4 mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     {group}
                   </p>
                   {items.map(item => {
@@ -103,15 +113,15 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
                       <Link
                         key={`nav-${item.label}`}
                         href={item.href}
-                        className={`group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${isActive
+                        className={`group relative flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 ${isActive
                             ? 'bg-primary-50 text-primary-700'
                             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                           }`}
                       >
-                        <Icon size={18} className={isActive ? 'text-primary-700' : ''} />
+                        <Icon size={18} className={isActive ? 'text-primary-700' : 'text-muted-foreground/70'} />
                         <span className="flex-1">{item.label}</span>
                         {item.badge !== undefined && (
-                          <span className="ml-auto text-[10px] font-semibold bg-primary-100 text-primary-700 rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                          <span className="ml-auto text-[10px] font-bold bg-primary-100 text-primary-700 rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
                             {item.badge > 99 ? '99+' : item.badge}
                           </span>
                         )}
@@ -124,40 +134,30 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
           </nav>
 
           {/* Bottom */}
-          <div className="border-t border-border p-3">
+          <div className="border-t border-border p-3 shrink-0 bg-muted/20">
             {/* User profile */}
-            <div className="flex items-center gap-2 px-2 py-2 rounded-md mb-2">
-              <div className="w-7 h-7 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
-                <User size={14} className="text-primary-700" />
+            <div className="flex items-center gap-2 px-2 py-2.5 bg-white border border-border shadow-sm rounded-xl mb-3">
+              <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
+                <User size={16} className="text-primary-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-foreground truncate">
+                <p className="text-sm font-bold text-foreground truncate leading-none mb-1">
                   {mounted ? (user?.name || 'Recruiter') : '...'}
                 </p>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-[10px] font-semibold text-muted-foreground truncate uppercase tracking-wider leading-none">
                   {mounted ? (user?.role === 'applicant' ? 'Job Seeker' : 'Talent Acquisition') : '...'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Link
-                href="/sign-up-login-screen"
-                onClick={() => api.logout()}
-                className="flex items-center gap-2 px-2 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              >
-                <LogOut size={16} />
-                <span>Sign Out</span>
-              </Link>
-              <button
-                onClick={toggle}
-                suppressHydrationWarning
-                className="ml-auto p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors"
-                title="Collapse sidebar"
-              >
-                <ChevronLeft size={16} />
-              </button>
-            </div>
+            <Link
+              href="/sign-up-login-screen"
+              onClick={() => api.logout()}
+              className="flex items-center justify-center gap-2 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </Link>
           </div>
         </>
       )}

@@ -1,106 +1,132 @@
-# Next.js
+# Umurava AI - Intelligent Recruitment & Screening Platform
 
-A modern Next.js 15 application built with TypeScript and Tailwind CSS.
+Umurava AI is a state-of-the-art recruitment ecosystem designed to streamline the hiring process using Generative AI. It automates candidate screening, job description extraction, and talent pool management, providing recruiters with data-driven insights and a seamless workflow.
 
-## 🚀 Features
+## 🔗 Live Deployment
+- **URL**: [https://umurava-41e9.vercel.app/](https://umurava-41e9.vercel.app/)
 
-- **Next.js 15** - Latest version with improved performance and features
-- **React 19** - Latest React version with enhanced capabilities
-- **Tailwind CSS** - Utility-first CSS framework for rapid UI development
+## 🏗️ System Architecture
 
-## 🛠️ Installation
+The platform follows a decoupled architecture with a high-performance Next.js frontend and a robust Node.js/Express backend, integrated with Google Gemini AI for intelligent processing.
 
-1. Install dependencies:
-  ```bash
-  npm install
-  # or
-  yarn install
-  ```
+```mermaid
+graph TD
+    subgraph "Frontend (Next.js 15)"
+        R[Recruiter Dashboard]
+        A[Applicant Portal]
+        S[Shared Components - Tailwind/Lucide]
+    end
 
-2. Start the development server:
-  ```bash
-  npm run dev
-  # or
-  yarn dev
-  ```
-3. Open [http://localhost:4028](http://localhost:4028) with your browser to see the result.
+    subgraph "Backend (Node.js/Express)"
+        API[REST API Layer]
+        AI[AI Service - Gemini 1.5 Flash]
+        DB[Database Service - Mongoose]
+        Storage[Cloudinary Service]
+    end
 
-## 📁 Project Structure
+    subgraph "External Services"
+        G[Google Gemini API]
+        C[Cloudinary CMS]
+        M[MongoDB Atlas]
+    end
 
-```
-nextjs/
-├── public/             # Static assets
-├── src/
-│   ├── app/            # App router components
-│   │   ├── layout.tsx  # Root layout component
-│   │   └── page.tsx    # Main page component
-│   ├── components/     # Reusable UI components
-│   ├── styles/         # Global styles and Tailwind configuration
-├── next.config.mjs     # Next.js configuration
-├── package.json        # Project dependencies and scripts
-├── postcss.config.js   # PostCSS configuration
-└── tailwind.config.js  # Tailwind CSS configuration
-
+    R & A --> API
+    API --> AI
+    AI --> G
+    API --> DB
+    DB --> M
+    API --> Storage
+    Storage --> C
 ```
 
-## 🧩 Page Editing
+## 🚀 Current Features
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+- **Gemini-Powered Candidate Ranking**: Automated 1-100 scoring based on Skills (40%), experience (30%), Education (20%), and Documents (10%).
+- **AI-Driven Job Extraction**: Instantly populate job specs by uploading PDF/DOCX files.
+- **Cloudinary Integration**: Permanent and secure cloud storage for all resumes and profile photos.
+- **Recruiter Decision Suite**: Dynamic actions for Interviewing, Hiring, or Rejecting with visual state feedback.
+- **Applicant Leaderboard**: Transparent ranking visibility for shortlisted talent to encourage engagement.
+- **Export Engine**: boardroom-ready PDF and Excel reports of candidate rankings and talent pools.
+- **Identity Hydration**: Session-based profile management for a personalized experience.
+- **Mobile-Responsive UI**: Fully optimized experience across all modern device screen sizes.
 
-## 🎨 Styling
+## 🗺️ Documentation Map
 
-This project uses Tailwind CSS for styling with the following features:
-- Utility-first approach for rapid development
-- Custom theme configuration
-- Responsive design utilities
-- PostCSS and Autoprefixer integration
+To understand the system in depth, please refer to the following documentation files:
 
-## 📦 Available Scripts
+### ⚙️ Core Technical Docs (Root `docs/`)
+- **[DEEP_SCREENING_ANALYSIS.md](file:///d:/umurava/docs/DEEP_SCREENING_ANALYSIS.md)**: Algorithmic breakdown of how Gemini scores and ranks candidates.
+- **[TECHNICAL_DOCUMENTATION.md](file:///d:/umurava/docs/TECHNICAL_DOCUMENTATION.md)**: Full-stack codebase overview and system capabilities.
+- **[RESUME_INGESTION_FLOW.md](file:///d:/umurava/docs/RESUME_INGESTION_FLOW.md)**: Detailed mapping of the file-to-data extraction pipeline.
+- **[FEATURES.md](file:///d:/umurava/docs/FEATURES.md)**: Comprehensive guide to all platform features.
+- **[AI_DECISION_FLOW.md](file:///d:/umurava/docs/AI_DECISION_FLOW.md)**: High-level overview of AI logic.
+- **[AUTHENTICATION.md](file:///d:/umurava/docs/AUTHENTICATION.md)**: Security protocols (JWT, Bcrypt) and session management.
+- **[SCHEMA_OVERVIEW.md](file:///d:/umurava/docs/SCHEMA_OVERVIEW.md)**: Unified view of MongoDB data models.
+- **[SETUP.md](file:///d:/umurava/docs/SETUP.md)**: Step-by-step developer environment configuration.
+- **[STABILITY.md](file:///d:/umurava/docs/STABILITY.md)**: Error handling, rate limiting, and performance strategies.
 
-- `npm run dev` - Start development server on port 4028
-- `npm run build` - Build the application for production
-- `npm run start` - Start the development server
-- `npm run serve` - Start the production server
-- `npm run lint` - Run ESLint to check code quality
-- `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run format` - Format code with Prettier
+### 🗄️ Backend & Operational Docs (`backend/docs/`)
+- **[Umurava_Updates_Doc.md](file:///d:/umurava/backend/docs/Umurava_Updates_Doc.md)**: Narrative of recent technical migrations and interface upgrades.
+- **[DATABASE.md](file:///d:/umurava/backend/docs/DATABASE.md)**: Definition of the 15 primary MongoDB schemas.
+- **[API_REFERENCE.md](file:///d:/umurava/backend/docs/API_REFERENCE.md)**: Documentation for REST API endpoints.
+- **[FRONTEND_INTEGRATION.md](file:///d:/umurava/backend/docs/FRONTEND_INTEGRATION.md)**: Guide on API consumption and data flow to the UI.
+- **[ARCHITECTURE.md](file:///d:/umurava/backend/docs/ARCHITECTURE.md)**: Backend-specific architecture notes.
 
-## 📱 Deployment
+---
 
-Build the application for production:
+## 🛠️ Setup Instructions
 
-  ```bash
-  npm run build
-  ```
-
-## 🗄️ Restoring the Database
-
-If you have just cloned this repository, you should restore the MongoDB database state from the exported seed files to ensure you start with the exact same data.
-
-1. Ensure your local MongoDB is running (`mongodb://localhost:27017`).
-2. Navigate into the backend directory:
+### 1. Backend Setup
+1. Navigate to the backend directory:
    ```bash
    cd backend
    ```
-3. Run the database import script:
+2. Install dependencies:
    ```bash
-   npx ts-node import_db.ts
+   npm install
+   ```
+3. Start the server:
+   ```bash
+   npm run dev
    ```
 
-*This will read all the `.json` files from the `database_seed` folder and automatically populate your local MongoDB collections with the baseline mock data.*
+### 2. Frontend Setup
+1. Return to the root directory:
+   ```bash
+   cd ..
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Access the app at `http://localhost:4028`.
 
-## 📚 Learn More
+## 🔑 Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+### Backend (`backend/.env`)
+| Variable | Description |
+| --- | --- |
+| `PORT` | Server port (default: 5000) |
+| `MONGODB_URI` | MongoDB connection string |
+| `GEMINI_API_KEY` | Your Google Gemini API Key |
+| `CLOUDINARY_URL` | Cloudinary connection string |
+| `JWT_SECRET` | Secret key for JWT authentication |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+### Frontend (`.env`)
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | URL of the backend API |
 
-You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ⚠️ Assumptions and Limitations
 
-## 🙏 Acknowledgments
+- **File Types**: AI direct processing is optimized for PDF. DOCX files use a text-extraction fallback.
+- **Rate Limits**: The system implements batching and exponential backoff to handle Gemini API quotas.
+- **Language**: Optimization is focused on English; accuracy may vary for other languages.
 
-- Built with [Rocket.new](https://rocket.new)
-- Powered by Next.js and React
-- Styled with Tailwind CSS
+## 📄 License
+Internal Development - Umurava AI.
 

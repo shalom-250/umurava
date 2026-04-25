@@ -1,6 +1,9 @@
 # API Reference for Frontend Integration - UMURAVA SCREENING AI
 
-Base URL: `http://localhost:5000`
+Base URL: `http://localhost:5000` (Local) / `https://umurava-backend-fdkp.onrender.com` (Live)
+
+> [!TIP]
+> Use the **[SWAGGER_TESTING_GUIDE.md](file:///d:/umurava/docs/SWAGGER_TESTING_GUIDE.md)** for detailed instructions on testing these endpoints live.
 
 > [!NOTE]
 > All endpoints except Authentication require a `Bearer <token>` in the `Authorization` header.

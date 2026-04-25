@@ -87,6 +87,7 @@ To understand the system in depth, please refer to the following documentation f
 ### ⚙️ Core Technical Docs (Root `docs/`)
 - **[DEEP_SCREENING_ANALYSIS.md](file:///d:/umurava/docs/DEEP_SCREENING_ANALYSIS.md)**: Algorithmic breakdown of how Gemini scores and ranks candidates.
 - **[STATUS_FLOW.md](file:///d:/umurava/docs/STATUS_FLOW.md)**: Lifecycle of application statuses from submission to hiring.
+- **[SWAGGER_TESTING_GUIDE.md](file:///d:/umurava/docs/SWAGGER_TESTING_GUIDE.md)**: Step-by-step instructions for live API testing.
 - **[TECHNICAL_DOCUMENTATION.md](file:///d:/umurava/docs/TECHNICAL_DOCUMENTATION.md)**: Full-stack codebase overview and system capabilities.
 
 ### 🏗️ Technical Architecture

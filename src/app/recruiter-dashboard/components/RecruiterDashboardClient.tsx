@@ -993,34 +993,30 @@ export default function RecruiterDashboardClient() {
         />
       )}
 
-      {/* Mobile Quick Action FAB - Specifically for Android/Small Devices */}
-      <div className="fixed bottom-6 right-6 lg:hidden z-40 flex flex-col items-end gap-3 pointer-events-none">
-        {/* Expanded Actions - only shown when "state" would allow, let's keep it simple with just one primary action or a small menu */}
-        <button
-          onClick={() => setShowCreateJob(true)}
-          className="pointer-events-auto flex items-center justify-center w-14 h-14 bg-[#00A1FF] text-white rounded-full shadow-[0_8px_25px_rgba(0,161,255,0.4)] hover:scale-110 active:scale-95 transition-all duration-300"
-          title="Create New Job"
-        >
-          <Plus size={28} />
-        </button>
-      </div>
-
-      {/* Optional: Bottom Navigation Bar for Mobile Parity */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-t border-gray-100 px-6 flex items-center justify-around z-30">
+      {/* Mobile Quick Action - Centered in Bottom Nav for Android/Small Devices */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-md border-t border-gray-100 px-4 flex items-center justify-between z-40">
         <button
           onClick={() => setActiveView('job-dashboard')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeView === 'job-dashboard' ? 'text-blue-600' : 'text-gray-400'}`}
+          className={`flex-1 flex flex-col items-center gap-1 transition-colors ${activeView === 'job-dashboard' ? 'text-blue-600' : 'text-gray-400'}`}
         >
           <LayoutDashboard size={20} />
           <span className="text-[10px] font-bold">Dashboard</span>
         </button>
 
-        {/* Placeholder for FAB Space */}
-        <div className="w-12"></div>
+        {/* Primary Action: Centered Create Job */}
+        <div className="relative -top-5 flex-shrink-0 px-2">
+          <button
+            onClick={() => setShowCreateJob(true)}
+            className="flex items-center justify-center w-14 h-14 bg-[#00A1FF] text-white rounded-full shadow-[0_8px_20px_rgba(0,161,255,0.4)] ring-4 ring-white active:scale-90 transition-all duration-300"
+            title="Create New Job"
+          >
+            <Plus size={28} />
+          </button>
+        </div>
 
         <button
           onClick={() => setActiveView('talent-pool')}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeView === 'talent-pool' ? 'text-blue-600' : 'text-gray-400'}`}
+          className={`flex-1 flex flex-col items-center gap-1 transition-colors ${activeView === 'talent-pool' ? 'text-blue-600' : 'text-gray-400'}`}
         >
           <Users size={20} />
           <span className="text-[10px] font-bold">Talent Pool</span>

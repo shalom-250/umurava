@@ -6,11 +6,14 @@ dotenv.config();
 
 const apiKey = process.env.GEMINI_API_KEY || "";
 if (!apiKey || apiKey === "GEMINI_API_KEY") {
-    console.warn(" GEMINI_API_KEY is missing or using default placeholder in .env");
+    console.warn("⚠️ GEMINI_API_KEY is missing or using default placeholder in .env");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+export const genAI = new GoogleGenerativeAI(apiKey);
+// Using gemini-1.5-flash as the primary, reliable model
+export const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+console.log(`[Gemini] Model initialized using key: ${apiKey.substring(0, 5)}...`);
 
 export interface IRankingResult {
     candidateId: string;

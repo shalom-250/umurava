@@ -19,7 +19,7 @@ import CreateJobModal from './CreateJobModal';
 import EditJobModal from './EditJobModal';
 import UploadResumeModal from './UploadResumeModal';
 import { Job, ScreeningResult, TalentProfile } from '@/lib/mockData';
-import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, Edit2, FolderOpen, Menu, Check, X, ArrowLeft, LogOut, User } from 'lucide-react';
+import { Users, LayoutDashboard, Sparkles, Plus, Search, Download, AlertTriangle, Loader2, RefreshCw, UploadCloud, Settings, Edit2, FolderOpen, Menu, Check, X, ArrowLeft, LogOut, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { setCurrentJobId, setScreeningResults, setScreeningLoading, clearResults } from '@/store/screeningSlice';
@@ -45,6 +45,7 @@ export default function RecruiterDashboardClient() {
   const [draftProfiles, setDraftProfiles] = useState<any[]>([]);
   const [activeView, setActiveView] = useState<'job-dashboard' | 'talent-pool'>('job-dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isJobSidebarCollapsed, setIsJobSidebarCollapsed] = useState(false);
 
   const selectedJobId = currentJobId;
   const screeningResults = (selectedJobId && allResults[selectedJobId]) || [];
@@ -155,7 +156,19 @@ export default function RecruiterDashboardClient() {
     fetchJobs();
     fetchCandidates();
     fetchApplications(); // Fetch all apps initially for global pool context
+
+    // Load sidebar state from localStorage
+    const saved = localStorage.getItem('isJobSidebarCollapsed');
+    if (saved !== null) {
+      setIsJobSidebarCollapsed(saved === 'true');
+    }
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('isJobSidebarCollapsed', String(isJobSidebarCollapsed));
+    }
+  }, [isJobSidebarCollapsed, mounted]);
 
   useEffect(() => {
     if (selectedJobId) {
@@ -499,9 +512,10 @@ export default function RecruiterDashboardClient() {
 
       {/* Job Selection Sidebar - Optimized for responsiveness */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 sm:w-80 border-r border-gray-200 bg-white flex flex-col shrink-0 
-        transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-[calc(100vh-64px)]
-        ${isMobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
+        fixed inset-y-0 left-0 z-50 border-r border-gray-200 bg-white flex flex-col shrink-0 
+        transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-[calc(100vh-64px)]
+        ${isMobileSidebarOpen ? 'translate-x-0 shadow-2xl w-72 sm:w-80' : '-translate-x-full lg:translate-x-0'}
+        ${isJobSidebarCollapsed ? 'lg:w-[72px]' : 'lg:w-80'}
       `}>
         {/* Mobile Sidebar Close Button */}
         <div className="lg:hidden p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
@@ -511,31 +525,32 @@ export default function RecruiterDashboardClient() {
           </button>
         </div>
 
-        <div className="p-4 border-b border-gray-100 flex flex-col gap-2">
+        <div className={`p-4 border-b border-gray-100 flex flex-col gap-2 ${isJobSidebarCollapsed ? 'items-center' : ''}`}>
           <button
             onClick={() => {
               setActiveView('talent-pool');
               setIsMobileSidebarOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeView === 'talent-pool'
+            title={isJobSidebarCollapsed ? 'Shared Talent Pool' : undefined}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${isJobSidebarCollapsed ? 'w-10 h-10 justify-center px-0' : 'w-full'} ${activeView === 'talent-pool'
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-transparent'
               }`}
           >
             <Users size={18} />
-            Shared Talent Pool
+            {!isJobSidebarCollapsed && <span>Shared Talent Pool</span>}
           </button>
 
-          <div className="h-px bg-gray-100 my-1" />
+          <div className="h-px bg-gray-100 my-1 w-full" />
 
-          <div className="flex items-center justify-between px-1">
-            <h3 className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">Active Jobs</h3>
+          <div className={`flex items-center justify-between px-1 ${isJobSidebarCollapsed ? 'flex-col gap-2' : ''}`}>
+            {!isJobSidebarCollapsed && <h3 className="font-bold text-[10px] text-gray-400 uppercase tracking-widest">Active Jobs</h3>}
             <button
               onClick={() => {
                 setShowCreateJob(true);
                 setIsMobileSidebarOpen(false);
               }}
-              className="p-1 hover:bg-gray-100 rounded-md text-blue-600 transition-colors"
+              className={`p-1 hover:bg-gray-100 rounded-md text-blue-600 transition-colors ${isJobSidebarCollapsed ? 'w-8 h-8 flex items-center justify-center' : ''}`}
               title="Create New Job"
             >
               <Plus size={16} />
@@ -543,28 +558,30 @@ export default function RecruiterDashboardClient() {
           </div>
         </div>
 
-        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/30">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-            <input
-              type="text"
-              placeholder="Filter jobs..."
-              value={jobSearch}
-              onChange={(e) => setJobSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 bg-white border border-gray-100 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
-            />
+        {!isJobSidebarCollapsed && (
+          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/30">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+              <input
+                type="text"
+                placeholder="Filter jobs..."
+                value={jobSearch}
+                onChange={(e) => setJobSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-1.5 bg-white border border-gray-100 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
           {loading ? (
             <div className="flex flex-col items-center justify-center p-8 text-gray-400 gap-3">
               <Loader2 className="animate-spin" size={20} />
-              <span className="text-xs">Loading jobs...</span>
+              {!isJobSidebarCollapsed && <span className="text-xs">Loading...</span>}
             </div>
           ) : filteredJobs.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <p className="text-sm font-medium">No results</p>
+            <div className={`p-8 text-center text-gray-500 ${isJobSidebarCollapsed ? 'px-2' : ''}`}>
+              {!isJobSidebarCollapsed ? <p className="text-sm font-medium">No results</p> : <Search size={16} className="mx-auto" />}
             </div>
           ) : (
             filteredJobs.map((job) => {
@@ -578,30 +595,50 @@ export default function RecruiterDashboardClient() {
                     setActiveView('job-dashboard');
                     setIsMobileSidebarOpen(false);
                   }}
-                  className={`w-full text-left p-4 transition-all border-b border-gray-50 group relative ${isActive
+                  title={isJobSidebarCollapsed ? job.title : undefined}
+                  className={`w-full text-left p-4 transition-all border-b border-gray-50 group relative ${isJobSidebarCollapsed ? 'px-0 flex justify-center h-16' : ''} ${isActive
                     ? 'bg-blue-50/30 border-l-4 border-l-[#00A1FF]'
                     : 'hover:bg-gray-50 border-l-4 border-l-transparent'
                     }`}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className={`font-bold text-xs leading-tight transition-colors pr-2 ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
-                      {job.title}
-                    </h4>
-                    <span className={`px-1.5 py-0.5 whitespace-nowrap rounded-[4px] text-[9px] font-bold uppercase tracking-wider ${job.status === 'Active' ? 'bg-green-100 text-green-700' :
-                      job.status === 'Closed' ? 'bg-red-100 text-red-700' :
-                        'bg-gray-200 text-gray-700'
-                      }`}>
-                      {job.status || 'Draft'}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-500 font-medium">
-                    <span className="truncate">{job.department}</span>
-                    {isActive && <Check size={10} className="text-blue-500 ml-auto" />}
-                  </div>
+                  {isJobSidebarCollapsed ? (
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-sm transition-all ${isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'}`}>
+                      {job.title.charAt(0).toUpperCase()}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className={`font-bold text-xs leading-tight transition-colors pr-2 ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
+                          {job.title}
+                        </h4>
+                        <span className={`px-1.5 py-0.5 whitespace-nowrap rounded-[4px] text-[9px] font-bold uppercase tracking-wider ${job.status === 'Active' ? 'bg-green-100 text-green-700' :
+                          job.status === 'Closed' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-200 text-gray-700'
+                          }`}>
+                          {job.status || 'Draft'}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-500 font-medium">
+                        <span className="truncate">{job.department}</span>
+                        {isActive && <Check size={10} className="text-blue-500 ml-auto" />}
+                      </div>
+                    </>
+                  )}
                 </button>
               );
             })
           )}
+        </div>
+
+        {/* Desktop Collapse Toggle */}
+        <div className="hidden lg:flex border-t border-gray-100 p-3 bg-gray-50/50 justify-end">
+          <button
+            onClick={() => setIsJobSidebarCollapsed(!isJobSidebarCollapsed)}
+            className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
+            title={isJobSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isJobSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
         </div>
 
         {/* User Profile & Sign Out - Mobile Drawer */}

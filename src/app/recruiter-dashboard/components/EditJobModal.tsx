@@ -41,7 +41,7 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
             type: job?.type || 'Full-time',
             experienceLevel: job?.experienceLevel || 'Junior',
             salaryRange: job?.salaryRange || '',
-            deadline: job?.deadline || '',
+            deadline: job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
             description: job?.description || '',
             requirements: Array.isArray(job?.requirements) ? job.requirements.join('\n') : job?.requirements || '',
             requiredSkills: Array.isArray(job?.skills) ? job.skills.join(', ') : job?.skills || '',
@@ -61,7 +61,7 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
                 type: job.type,
                 experienceLevel: job.experienceLevel,
                 salaryRange: job.salaryRange,
-                deadline: job.deadline,
+                deadline: job.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
                 description: job.description,
                 requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : job.requirements,
                 requiredSkills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills,
@@ -176,26 +176,31 @@ export default function EditJobModal({ job, onClose, onSuccess }: EditJobModalPr
                         <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Salary Range</label>
                             <input {...register('salaryRange')} type="text" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                            {errors.salaryRange && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.salaryRange.message}</p>}
                         </div>
 
                         <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Application Deadline</label>
                             <input {...register('deadline')} type="date" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                            {errors.deadline && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.deadline.message}</p>}
                         </div>
 
                         <div className="md:col-span-2">
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Job Description</label>
                             <textarea {...register('description')} rows={4} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none" />
+                            {errors.description && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.description.message}</p>}
                         </div>
 
                         <div className="md:col-span-2">
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Requirements (one per line)</label>
                             <textarea {...register('requirements')} rows={4} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none font-mono text-xs" />
+                            {errors.requirements && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.requirements.message}</p>}
                         </div>
 
                         <div className="md:col-span-2">
                             <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Required Skills (comma separated)</label>
                             <input {...register('requiredSkills')} type="text" placeholder="e.g. Python, TensorFlow, React" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono" />
+                            {errors.requiredSkills && <p className="text-[10px] text-red-500 mt-1 font-bold">{errors.requiredSkills.message}</p>}
                         </div>
 
                         <div className="md:col-span-2">

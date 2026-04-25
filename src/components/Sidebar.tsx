@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
 import {
   LayoutDashboard, Briefcase, Users, BarChart3, Settings,
-  ChevronLeft, ChevronRight, LogOut, Bell, User, FileText,
+  ChevronLeft, ChevronRight, LogOut, User, FileText,
   Search, CheckCircle, Sparkles, Trophy
 } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
@@ -123,7 +123,7 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
       {/* Bottom */}
       <div className="border-t border-border p-3">
         {!collapsed && (
-          <div className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-muted cursor-pointer transition-colors mb-2">
+          <div className="flex items-center gap-2 px-2 py-2 rounded-md transition-colors mb-2">
             <div className="w-7 h-7 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
               <User size={14} className="text-primary-700" />
             </div>
@@ -135,7 +135,6 @@ export default function Sidebar({ role = 'recruiter' }: SidebarProps) {
                 {mounted ? (user?.role === 'applicant' ? 'Job Seeker' : 'Talent Acquisition') : '...'}
               </p>
             </div>
-            <Bell size={14} className="text-muted-foreground shrink-0" />
           </div>
         )}
         <div className="flex items-center gap-2">

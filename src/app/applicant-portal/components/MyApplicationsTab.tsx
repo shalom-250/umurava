@@ -119,184 +119,272 @@ function ShortlistedLeaderboard({ jobId, currentCandidateId }: { jobId: string, 
 }
 
 export default function MyApplicationsTab({ applications, jobs, profile }: MyApplicationsTabProps) {
-  const [expandedApp, setExpandedApp] = useState<string | null>(applications.find(a => a.status === 'Shortlisted')?.id || null);
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem('isAppSidebarCollapsed');
+    if (saved !== null) {
+      setIsSidebarCollapsed(saved === 'true');
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('isAppSidebarCollapsed', String(isSidebarCollapsed));
+    }
+  }, [isSidebarCollapsed, mounted]);
+
+  // Set default selection if none
+  React.useEffect(() => {
+    if (applications.length > 0 && !selectedAppId) {
+      // Pick a shortlisted/hired one first if available, else first
+      const defaultApp = applications.find(a => ['Shortlisted', 'Interviewing', 'Hired'].includes(a.status)) || applications[0];
+      setSelectedAppId(defaultApp.id);
+    }
+  }, [applications, selectedAppId]);
 
   if (applications.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <FileText size={32} className="text-muted-foreground mb-3" />
-        <p className="text-base font-semibold text-foreground mb-1">No applications yet</p>
-        <p className="text-sm text-muted-foreground max-w-sm">
+      <div className="flex flex-col items-center justify-center py-20 text-center max-w-md mx-auto">
+        <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+          <FileText size={24} className="text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-display font-700 text-foreground mb-2">No applications yet</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed mb-8">
           Browse open jobs and apply to get started. Your applications and AI screening results will appear here.
         </p>
       </div>
     );
   }
 
+  const selectedApp = applications.find(a => a.id === selectedAppId);
+  const selectedJob = selectedApp ? jobs.find(j => j.id === selectedApp.jobId) : null;
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{applications.length} application{applications.length !== 1 ? 's' : ''} submitted</p>
-      </div>
+    <div className="flex h-[calc(100vh-10rem)] border border-border rounded-xl bg-white overflow-hidden shadow-sm">
+      {/* Sidebar for Applications */}
+      <aside className={`
+        flex flex-col bg-gray-50/50 border-r border-border transition-all duration-300 ease-in-out shrink-0
+        ${isSidebarCollapsed ? 'w-[72px]' : 'w-72 sm:w-80'}
+      `}>
+        <div className={`p-4 border-b border-border flex items-center justify-between ${isSidebarCollapsed ? 'flex-col gap-2' : ''}`}>
+          {!isSidebarCollapsed && (
+            <h3 className="font-bold text-xs uppercase tracking-widest text-muted-foreground">My Applications</h3>
+          )}
+          <div className={`flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold ${isSidebarCollapsed ? 'mt-1 mb-2' : ''}`}>
+            {applications.length}
+          </div>
+        </div>
 
-      {applications.map(app => {
-        const job = jobs.find(j => j.id === app.jobId);
-        const isExpanded = expandedApp === app.id;
-        const hasAI = app.matchScore !== undefined;
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
+          {applications.map(app => {
+            const isSelected = selectedAppId === app.id;
+            const hasAppAI = app.matchScore !== undefined;
 
-        return (
-          <div key={`myapp-${app.id}`} className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
+            return (
+              <button
+                key={`sidebar-app-${app.id}`}
+                onClick={() => setSelectedAppId(app.id)}
+                title={isSidebarCollapsed ? app.jobTitle : undefined}
+                className={`w-full text-left p-4 transition-all border-b border-gray-100 group relative ${isSidebarCollapsed ? 'px-0 flex justify-center h-[72px]' : ''} ${isSelected
+                  ? 'bg-primary-50/50 border-l-4 border-l-primary-600'
+                  : 'hover:bg-gray-100/50 border-l-4 border-l-transparent'
+                  }`}
+              >
+                {isSidebarCollapsed ? (
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-all flex-shrink-0 ${isSelected ? 'bg-primary-600 text-white' : 'bg-white text-gray-500 group-hover:bg-gray-50 border border-gray-200'}`}>
+                    <Briefcase size={16} />
+                  </div>
+                ) : (
+                  <>
+                    <h4 className={`font-bold text-sm leading-tight transition-colors mb-1.5 pr-2 ${isSelected ? 'text-primary-700' : 'text-foreground'}`}>
+                      {app.jobTitle}
+                    </h4>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${applicantStatusColors[app.status === 'Applied' ? 'Submitted' : app.status] || 'bg-gray-50 text-gray-600'}`}>
+                        {app.status === 'Applied' ? 'Submitted' : app.status}
+                      </span>
+                      {hasAppAI && (
+                        <span className="text-[10px] font-medium text-muted-foreground flex items-center gap-1">
+                          <Sparkles size={10} className={isSelected ? 'text-primary-500' : ''} /> Score: {app.matchScore}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop Collapse Toggle */}
+        <div className="border-t border-border p-3 bg-white flex justify-end">
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Details View */}
+      <div className="flex-1 overflow-y-auto bg-white p-6 md:p-8 scrollbar-thin">
+        {selectedApp ? (
+          <div className="max-w-4xl mx-auto space-y-6">
             {/* Header */}
-            <div
-              className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 cursor-pointer hover:bg-muted/30 transition-colors"
-              onClick={() => setExpandedApp(isExpanded ? null : app.id)}
-            >
-              <div className="flex items-start gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                   <Briefcase size={18} className="text-primary-700" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="text-sm font-semibold text-foreground">{app.jobTitle}</p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${applicantStatusColors[app.status === 'Applied' ? 'Submitted' : app.status] || 'bg-gray-50 text-gray-600'}`}>
-                      {app.status === 'Applied' ? 'Submitted' : app.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{app.company} · Applied {app.appliedDate}</p>
+                  <h2 className="text-2xl font-display font-700 text-foreground">{selectedApp.jobTitle}</h2>
+                  <p className="text-sm text-muted-foreground">{selectedApp.company} · Applied on {selectedApp.appliedDate}</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {hasAI && (
-                  <div className="text-right">
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">Match</p>
-                    <p className={`text-base sm:text-lg font-display font-700 tabular-nums ${(app.matchScore ?? 0) >= 80 ? 'text-green-600' : (app.matchScore ?? 0) >= 60 ? 'text-blue-600' : 'text-amber-600'
-                      }`}>{app.matchScore}</p>
-                  </div>
-                )}
-                {isExpanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
               </div>
             </div>
 
             {/* Status Timeline */}
-            <div className="px-4 sm:px-6 pb-4">
-              <StatusTimeline status={app.status} />
+            <div className="bg-gray-50/50 rounded-xl border border-gray-100 p-6">
+              <p className="text-xs font-semibold text-foreground mb-4 uppercase tracking-wider">Application Progress</p>
+              <StatusTimeline status={selectedApp.status} />
             </div>
 
             {/* Expanded AI Feedback */}
-            {isExpanded && (
-              <div className="border-t border-border px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 animate-fade-in">
-                {app.screeningResult ? (
-                  <>
-                    {/* Score breakdown */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                      <div className="bg-green-50 rounded-lg p-3 text-center">
-                        <p className="text-[10px] text-muted-foreground">Match Score</p>
-                        <p className="text-2xl font-display font-700 text-green-700">{app.matchScore}/100</p>
-                      </div>
-                      <div className="bg-primary-50 rounded-lg p-3 text-center">
-                        <p className="text-[10px] text-muted-foreground">Rank</p>
-                        <p className="text-2xl font-display font-700 text-primary-700">#{app.screeningResult.rank}</p>
-                      </div>
-                      <div className="rounded-lg p-3 text-center border border-border">
-                        <p className="text-[10px] text-muted-foreground">Recommendation</p>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${recommendationColors[app.screeningResult.recommendation]}`}>
-                          {app.screeningResult.recommendation}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* AI Reasoning */}
-                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Sparkles size={13} className="text-blue-600" />
-                        <p className="text-xs font-semibold text-blue-800">Gemini AI Reasoning</p>
-                      </div>
-                      <p className="text-sm text-blue-900 leading-relaxed">{app.screeningResult.aiReasoning}</p>
-                    </div>
-
-                    {/* Strengths & Gaps */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <div>
-                        <p className="text-xs font-semibold text-green-700 mb-2">Strengths</p>
-                        <ul className="space-y-1.5">
-                          {app.screeningResult.strengths.map((s, i) => (
-                            <li key={`appstr-${i}`} className="text-xs text-foreground bg-green-50 rounded-md px-2.5 py-1.5 border border-green-100 flex items-start gap-1.5">
-                              <CheckCircle size={10} className="text-green-500 mt-0.5 shrink-0" />
-                              {s}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-amber-700 mb-2">Areas to Improve</p>
-                        <ul className="space-y-1.5">
-                          {app.screeningResult.gaps.map((g, i) => (
-                            <li key={`appgap-${i}`} className="text-xs text-foreground bg-amber-50 rounded-md px-2.5 py-1.5 border border-amber-100 flex items-start gap-1.5">
-                              <AlertCircle size={10} className="text-amber-500 mt-0.5 shrink-0" />
-                              {g}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Skill Scores */}
-                    <div>
-                      <p className="text-xs font-semibold text-foreground mb-3">Your Skill Scores for This Role</p>
-                      <div className="space-y-2">
-                        {app.screeningResult.skillBreakdown.map(sb => (
-                          <div key={`appsb-${sb.skill}`} className="flex items-center gap-3">
-                            <div className="w-28 shrink-0">
-                              <p className="text-xs text-foreground font-medium">{sb.skill}</p>
-                            </div>
-                            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${sb.score >= 80 ? 'bg-green-500' : sb.score >= 60 ? 'bg-blue-500' : sb.score >= 40 ? 'bg-amber-500' : 'bg-red-400'}`}
-                                style={{ width: `${sb.score}%` }}
-                              />
-                            </div>
-                            <span className="font-mono-data text-xs font-semibold w-8 text-right">{sb.score}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-3 p-4 bg-muted/40 rounded-lg">
-                    <Clock size={16} className="text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Awaiting AI Screening</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {app.status === 'Rejected' ? 'Your application was reviewed but not selected for this role.' : 'The recruiter hasn\'t triggered AI screening yet. You\'ll be notified when results are available.'}
-                      </p>
-                    </div>
+            {selectedApp.screeningResult ? (
+              <div className="space-y-6 animate-fade-in">
+                {/* Score breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="bg-green-50 rounded-xl p-4 text-center border border-green-100 flex flex-col justify-center">
+                    <p className="text-[11px] font-bold text-green-800 uppercase tracking-widest mb-1.5">Match Score</p>
+                    <p className="text-4xl font-display font-700 text-green-700">{selectedApp.matchScore}<span className="text-xl text-green-600/60 font-medium">/100</span></p>
                   </div>
-                )}
+                  <div className="bg-primary-50 rounded-xl p-4 text-center border border-primary-100 flex flex-col justify-center">
+                    <p className="text-[11px] font-bold text-primary-800 uppercase tracking-widest mb-1.5">AI Rank</p>
+                    <p className="text-4xl font-display font-700 text-primary-700">#{selectedApp.screeningResult.rank}</p>
+                  </div>
+                  <div className="rounded-xl p-4 text-center border border-border bg-white shadow-sm flex flex-col items-center justify-center">
+                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Recommendation</p>
+                    <span className={`text-[11px] font-bold px-3 py-1.5 rounded-md border shadow-sm ${recommendationColors[selectedApp.screeningResult.recommendation]}`}>
+                      {selectedApp.screeningResult.recommendation}
+                    </span>
+                  </div>
+                </div>
 
-                {/* Job Details */}
-                {job && (
-                  <div className="border-t border-border pt-4">
-                    <p className="text-xs font-semibold text-foreground mb-2">About This Role</p>
-                    <p className="text-xs text-foreground/80 leading-relaxed mb-2">{job.description}</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {job.requiredSkills.map(skill => (
-                        <span key={`apprskill-${skill}`} className="text-[9px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded">{skill}</span>
+                {/* AI Reasoning */}
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles size={16} className="text-blue-600" />
+                    <p className="text-sm font-bold text-blue-900">Gemini AI Feedback</p>
+                  </div>
+                  <p className="text-sm text-blue-900/80 leading-relaxed">{selectedApp.screeningResult.aiReasoning}</p>
+                </div>
+
+                {/* Strengths & Gaps */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white border text-left border-green-100 rounded-xl p-5 shadow-sm">
+                    <p className="text-sm font-bold text-green-800 mb-4 flex items-center gap-2">
+                      <CheckCircle size={16} className="text-green-500" /> Key Strengths
+                    </p>
+                    <ul className="space-y-2.5">
+                      {selectedApp.screeningResult.strengths.map((s, i) => (
+                        <li key={`appstr-${selectedApp.id}-${i}`} className="text-xs text-foreground bg-green-50 rounded-lg px-3 py-2 flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
+                          <span className="leading-snug">{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-white border text-left border-amber-100 rounded-xl p-5 shadow-sm">
+                    <p className="text-sm font-bold text-amber-800 mb-4 flex items-center gap-2">
+                      <AlertCircle size={16} className="text-amber-500" /> Areas to Improve
+                    </p>
+                    <ul className="space-y-2.5">
+                      {selectedApp.screeningResult.gaps.map((g, i) => (
+                        <li key={`appgap-${selectedApp.id}-${i}`} className="text-xs text-foreground bg-amber-50 rounded-lg px-3 py-2 flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                          <span className="leading-snug">{g}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Skill Scores */}
+                <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+                  <p className="text-sm font-bold text-foreground mb-5">Skill Assessment vs Role Requirements</p>
+                  <div className="space-y-4">
+                    {selectedApp.screeningResult.skillBreakdown.map(sb => (
+                      <div key={`appsb-${selectedApp.id}-${sb.skill}`} className="flex items-center gap-4">
+                        <div className="w-32 shrink-0">
+                          <p className="text-xs font-semibold text-foreground truncate" title={sb.skill}>{sb.skill}</p>
+                        </div>
+                        <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className={`h-full rounded-full ${sb.score >= 80 ? 'bg-green-500' : sb.score >= 60 ? 'bg-blue-500' : sb.score >= 40 ? 'bg-amber-500' : 'bg-red-400'}`}
+                            style={{ width: `${sb.score}%` }}
+                          />
+                        </div>
+                        <span className="font-mono-data text-xs font-bold w-12 text-right">{sb.score}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-12 bg-gray-50/50 border border-dashed border-border rounded-xl text-center">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Clock size={24} className="text-muted-foreground" />
+                </div>
+                <p className="text-lg font-bold text-foreground mb-2">Awaiting AI Screening</p>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  {selectedApp.status === 'Rejected'
+                    ? 'Your application was reviewed but not selected for this role.'
+                    : 'The recruiter hasn\'t triggered AI screening yet. You\'ll be notified when results are available.'}
+                </p>
+              </div>
+            )}
+
+            {/* Job Details */}
+            {selectedJob && (
+              <div className="border-t border-border pt-8">
+                <p className="text-xs font-bold text-foreground mb-3 uppercase tracking-wider">About This Role</p>
+                <div className="bg-muted/30 border border-border rounded-xl p-5">
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">{selectedJob.description}</p>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground mb-2">Required Skills</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedJob.requiredSkills.map(skill => (
+                        <span key={`apprskill-${selectedApp.id}-${skill}`} className="text-[11px] font-medium bg-white text-primary-700 px-2.5 py-1 rounded border border-border shadow-sm">{skill}</span>
                       ))}
                     </div>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                {/* Live Candidate Roster - Unlocked for Shortlisted/Hired */}
-                {['Shortlisted', 'Hired', 'Interviewing'].includes(app.status) && (
-                  <div className="border-t border-border pt-4 animate-fade-in">
-                    <ShortlistedLeaderboard jobId={app.jobId} currentCandidateId={profile?.id} />
-                  </div>
-                )}
+            {/* Live Candidate Roster - Unlocked for Shortlisted/Hired */}
+            {['Shortlisted', 'Hired', 'Interviewing'].includes(selectedApp.status) && (
+              <div className="border-t border-border pt-8 animate-fade-in">
+                <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Users size={16} className="text-primary-600" />
+                  Live Selection Roster
+                </h3>
+                <ShortlistedLeaderboard jobId={selectedApp.jobId} currentCandidateId={profile?.id} />
               </div>
             )}
           </div>
-        );
-      })}
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <p className="text-muted-foreground">Select an application from the sidebar to view details</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

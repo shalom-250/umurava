@@ -208,19 +208,25 @@ export default function ShortlistTable({ results, profiles, applications, onView
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    {!isPending ? (
-                      <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? 'bg-green-50 text-green-700 border-green-100' :
-                        result.recommendation === 'Consider' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                          'bg-red-50 text-red-700 border-red-100'
-                        }`}>
-                        {(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? <UserCheck size={12} /> :
-                          result.recommendation === 'Not Recommended' ? <UserX size={12} /> : <Clock size={12} />}
-                        {(result.recommendation === 'Strongly Recommend' || result.recommendation === 'Recommend') ? 'Shortlisted' :
-                          result.recommendation === 'Not Recommended' ? 'Rejected' : 'Under Review'}
-                      </span>
-                    ) : (
+                    {isPending ? (
                       <span className="text-[10px] font-medium text-gray-400 italic">—</span>
-                    )}
+                    ) : (() => {
+                      const statusMap: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
+                        Hired: { label: 'Hired', icon: <UserCheck size={12} />, cls: 'bg-green-50 text-green-700 border-green-100' },
+                        Interview: { label: 'Interview', icon: <Calendar size={12} />, cls: 'bg-blue-50 text-blue-700 border-blue-100' },
+                        Shortlisted: { label: 'Shortlisted', icon: <UserCheck size={12} />, cls: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+                        Screened: { label: 'Screened', icon: <CheckCircle size={12} />, cls: 'bg-purple-50 text-purple-700 border-purple-100' },
+                        'Under Review': { label: 'Under Review', icon: <Clock size={12} />, cls: 'bg-amber-50 text-amber-700 border-amber-100' },
+                        Rejected: { label: 'Rejected', icon: <UserX size={12} />, cls: 'bg-red-50 text-red-700 border-red-100' },
+                        Applied: { label: 'Applied', icon: <Clock size={12} />, cls: 'bg-gray-50 text-gray-600 border-gray-200' },
+                      };
+                      const s = statusMap[appStatus] || { label: appStatus, icon: <Clock size={12} />, cls: 'bg-gray-50 text-gray-600 border-gray-200' };
+                      return (
+                        <span className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-md border shadow-sm ${s.cls}`}>
+                          {s.icon}{s.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </td>
                 <td className="px-4 py-3">

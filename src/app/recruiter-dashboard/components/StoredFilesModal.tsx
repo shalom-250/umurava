@@ -29,8 +29,14 @@ export default function StoredFilesModal({ jobId, jobTitle, onClose }: StoredFil
         try {
             const data = await api.get(`/jobs/${jobId}/files`);
             setFiles(data || []);
-        } catch (err) {
-            toast.error('Failed to load stored files');
+        } catch (err: any) {
+            console.error('Files fetch error:', err);
+            const errorMessage = err.message || 'Failed to load stored files';
+            toast.error(errorMessage);
+            // If it's a connection error, we might want to show a more permanent UI state
+            if (errorMessage.includes('Connection failed')) {
+                setFiles([]);
+            }
         } finally {
             setLoading(false);
         }

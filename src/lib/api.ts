@@ -17,24 +17,31 @@ export const api = {
         };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(data),
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data),
+            });
 
-        if (response.status === 401) {
-            this.logout();
-            window.location.href = '/sign-up-login-screen';
-            return;
-        }
+            if (response.status === 401) {
+                this.logout();
+                window.location.href = '/sign-up-login-screen';
+                return;
+            }
 
-        const result = await response.json();
-        if (!response.ok) {
-            const errorMsg = result.error || result.message || 'Something went wrong';
-            throw new Error(errorMsg);
+            const result = await response.json();
+            if (!response.ok) {
+                const errorMsg = result.error || result.message || 'Something went wrong';
+                throw new Error(errorMsg);
+            }
+            return result;
+        } catch (error: any) {
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                throw new Error(`Connection failed: The backend server at ${API_BASE_URL} could not be reached.`);
+            }
+            throw error;
         }
-        return result;
     },
 
     async put(endpoint: string, data: any) {
@@ -44,24 +51,31 @@ export const api = {
         };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify(data),
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify(data),
+            });
 
-        if (response.status === 401) {
-            this.logout();
-            window.location.href = '/sign-up-login-screen';
-            return;
-        }
+            if (response.status === 401) {
+                this.logout();
+                window.location.href = '/sign-up-login-screen';
+                return;
+            }
 
-        const result = await response.json();
-        if (!response.ok) {
-            const errorMsg = result.error || result.message || 'Something went wrong';
-            throw new Error(errorMsg);
+            const result = await response.json();
+            if (!response.ok) {
+                const errorMsg = result.error || result.message || 'Something went wrong';
+                throw new Error(errorMsg);
+            }
+            return result;
+        } catch (error: any) {
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                throw new Error(`Connection failed: The backend server at ${API_BASE_URL} could not be reached.`);
+            }
+            throw error;
         }
-        return result;
     },
 
     async postForm(endpoint: string, formData: FormData) {
@@ -69,24 +83,31 @@ export const api = {
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            headers,
-            body: formData,
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers,
+                body: formData,
+            });
 
-        if (response.status === 401) {
-            this.logout();
-            window.location.href = '/sign-up-login-screen';
-            return;
-        }
+            if (response.status === 401) {
+                this.logout();
+                window.location.href = '/sign-up-login-screen';
+                return;
+            }
 
-        const result = await response.json();
-        if (!response.ok) {
-            const errorMsg = result.error || result.message || 'Something went wrong';
-            throw new Error(errorMsg);
+            const result = await response.json();
+            if (!response.ok) {
+                const errorMsg = result.error || result.message || 'Something went wrong';
+                throw new Error(errorMsg);
+            }
+            return result;
+        } catch (error: any) {
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                throw new Error(`Connection failed: The backend server at ${API_BASE_URL} could not be reached.`);
+            }
+            throw error;
         }
-        return result;
     },
 
     async get(endpoint: string) {
@@ -96,23 +117,30 @@ export const api = {
         };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'GET',
-            headers,
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'GET',
+                headers,
+            });
 
-        if (response.status === 401) {
-            this.logout();
-            window.location.href = '/sign-up-login-screen';
-            return;
-        }
+            if (response.status === 401) {
+                this.logout();
+                window.location.href = '/sign-up-login-screen';
+                return;
+            }
 
-        const result = await response.json();
-        if (!response.ok) {
-            const errorMsg = result.error || result.message || 'Something went wrong';
-            throw new Error(errorMsg);
+            const result = await response.json();
+            if (!response.ok) {
+                const errorMsg = result.error || result.message || 'Something went wrong';
+                throw new Error(errorMsg);
+            }
+            return result;
+        } catch (error: any) {
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                throw new Error(`Connection failed: The backend server at ${API_BASE_URL} could not be reached. If you are the administrator, please check the NEXT_PUBLIC_API_URL environment variable.`);
+            }
+            throw error;
         }
-        return result;
     },
 
     setToken(token: string) {

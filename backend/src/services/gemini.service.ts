@@ -172,14 +172,38 @@ export const extractCandidateInfoFromText = async (text: string): Promise<any> =
     `;
 
     try {
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        });
         const response = await result.response;
-        const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        const parsed = JSON.parse(cleanJson);
-        return normalizeParsedData(parsed, text);
+        return safeJsonParse(response.text(), (t) => normalizeParsedData(JSON.parse(t), text));
     } catch (error: any) {
         console.warn("⚠️ Gemini Text Extraction Error. Using fallback.", error.message);
         return getFallbackInfo(text);
+    }
+};
+
+const safeJsonParse = (text: string, callback: (json: any) => any) => {
+    try {
+        // Strip out likely markdown fences just in case
+        const clean = text.replace(/```json|```/g, "").trim();
+        const parsed = JSON.parse(clean);
+        return callback(parsed);
+    } catch (e) {
+        // Fallback: search for first { and last }
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        if (start !== -1 && end !== -1) {
+            try {
+                const inner = text.substring(start, end + 1);
+                return callback(JSON.parse(inner));
+            } catch (innerE) {
+                console.error("Failed to parse JSON even after cleaning:", text);
+                throw innerE;
+            }
+        }
+        throw e;
     }
 };
 
@@ -204,10 +228,12 @@ export const extractJobInfoFromText = async (text: string): Promise<any> => {
     `;
 
     try {
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        });
         const response = await result.response;
-        const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
+        return safeJsonParse(response.text(), (j) => j);
     } catch (error: any) {
         console.error("Gemini Job Text Extraction Error:", error);
         return null;
@@ -215,32 +241,31 @@ export const extractJobInfoFromText = async (text: string): Promise<any> => {
 };
 
 export const extractJobInfoFromBuffer = async (buffer: Buffer, mimeType: string): Promise<any> => {
-    if (mimeType !== 'application/pdf') {
-        throw new Error("Direct file processing for jobs only supported for PDF.");
-    }
+    // Some browsers send application/octet-stream for PDFs
+    const safeMime = (mimeType === 'application/octet-stream' || !mimeType) ? 'application/pdf' : mimeType;
 
     try {
         const base64Data = buffer.toString('base64');
 
         const prompt = `
-            Extract job information from this PDF.
-            Return a JSON object with:
-            - title, description, requirements (array), skills (array), mustHaveSkills (array), department, location, type, experienceLevel, salaryRange, deadline.
+            Extract job information from this PDF and return as JSON.
+            Required fields: title, description, requirements (array), skills (array), mustHaveSkills (array), department, location, type, experienceLevel, salaryRange, deadline.
+            Output must be a valid JSON object.
         `;
 
-        const result = await model.generateContent([
-            {
-                inlineData: {
-                    data: base64Data,
-                    mimeType: "application/pdf",
-                },
-            },
-            prompt,
-        ]);
+        const result = await model.generateContent({
+            contents: [{
+                role: "user",
+                parts: [
+                    { inlineData: { data: base64Data, mimeType: "application/pdf" } },
+                    { text: prompt }
+                ]
+            }],
+            generationConfig: { responseMimeType: "application/json" }
+        });
 
         const response = await result.response;
-        const cleanJson = response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(cleanJson);
+        return safeJsonParse(response.text(), (j) => j);
     } catch (error: any) {
         console.error("Gemini Job File Extraction Error:", error);
         throw error;

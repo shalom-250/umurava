@@ -60,7 +60,8 @@ export default function RecruiterDashboardClient() {
       if (data && data.length > 0) {
         setJobs(data);
         const firstId = (data[0] as any).id || (data[0] as any)._id;
-        if (!currentJobId) dispatch(setCurrentJobId(firstId));
+        const savedJobId = localStorage.getItem('recruiter_selected_job_id');
+        if (!currentJobId && !savedJobId) dispatch(setCurrentJobId(firstId));
       }
     } catch (error) {
       console.error('Failed to fetch jobs:', error);

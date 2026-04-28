@@ -22,6 +22,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType; description: stri
 export default function ApplicantPortalClient() {
   useRoleGuard('applicant'); // Redirect recruiters who try to access this page
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [viewJobId, setViewJobId] = useState<string | null>(null);
@@ -51,7 +52,18 @@ export default function ApplicantPortalClient() {
     setSidebarOpen(false); // auto-close sidebar after clicking a link
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setMounted(true);
+    const savedTab = localStorage.getItem('applicant_active_tab');
+    if (savedTab && ['dashboard', 'profile', 'jobs', 'applications'].includes(savedTab)) {
+      setActiveTab(savedTab as Tab);
+    }
+
+    const savedViewJobId = localStorage.getItem('applicant_view_job_id');
+    if (savedViewJobId) {
+      setViewJobId(savedViewJobId);
+    }
+
     const fetchStats = async () => {
       try {
         const data = await api.get('/candidates/me/dashboard');
@@ -65,7 +77,18 @@ export default function ApplicantPortalClient() {
     fetchStats();
   }, []);
 
-  if (isLoading || !stats) {
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('applicant_active_tab', activeTab);
+      if (viewJobId) {
+        localStorage.setItem('applicant_view_job_id', viewJobId);
+      } else {
+        localStorage.removeItem('applicant_view_job_id');
+      }
+    }
+  }, [activeTab, viewJobId, mounted]);
+
+  if (!mounted || isLoading || !stats) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gap-4">
         <Loader2 size={32} className="text-[#00A1FF] animate-spin" />

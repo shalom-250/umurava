@@ -159,18 +159,32 @@ export default function RecruiterDashboardClient() {
     fetchCandidates();
     fetchApplications(); // Fetch all apps initially for global pool context
 
-    // Load sidebar state from localStorage
-    const saved = localStorage.getItem('isJobSidebarCollapsed');
-    if (saved !== null) {
-      setIsJobSidebarCollapsed(saved === 'true');
+    // Load state from localStorage
+    const savedSidebar = localStorage.getItem('isJobSidebarCollapsed');
+    if (savedSidebar !== null) {
+      setIsJobSidebarCollapsed(savedSidebar === 'true');
+    }
+
+    const savedView = localStorage.getItem('recruiter_active_view');
+    if (savedView === 'job-dashboard' || savedView === 'talent-pool') {
+      setActiveView(savedView);
+    }
+
+    const savedJobId = localStorage.getItem('recruiter_selected_job_id');
+    if (savedJobId) {
+      dispatch(setCurrentJobId(savedJobId));
     }
   }, []);
 
   useEffect(() => {
     if (mounted) {
       localStorage.setItem('isJobSidebarCollapsed', String(isJobSidebarCollapsed));
+      localStorage.setItem('recruiter_active_view', activeView);
+      if (currentJobId) {
+        localStorage.setItem('recruiter_selected_job_id', currentJobId);
+      }
     }
-  }, [isJobSidebarCollapsed, mounted]);
+  }, [isJobSidebarCollapsed, activeView, currentJobId, mounted]);
 
   useEffect(() => {
     if (selectedJobId) {
